@@ -311,11 +311,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                     <button type="submit" class="btn-elite stagger">Sign Up</button>
-
-                    <a href="google-callback.php" class="google-auth stagger">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                        Sign up with Google
-                    </a>
                 </form>
 
                 <div class="auth-footer stagger">
