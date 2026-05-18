@@ -42,11 +42,21 @@ class Database
 
         try {
             $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->dbname . ";charset=utf8mb4";
-            self::$connection = new PDO($dsn, $this->username, $this->password, [
+            
+            $options = [
                 PDO::ATTR_PERSISTENT => true, // Keep connection open and reuse pools
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]);
+            ];
+
+            // Automatically enable SSL driver options if connecting to Aiven or TiDB Cloud
+            if (strpos($this->host, 'aivencloud.com') !== false || 
+                strpos($this->host, 'tidbcloud.com') !== false || 
+                getenv('MYSQL_SSL') === 'true') {
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            }
+
+            self::$connection = new PDO($dsn, $this->username, $this->password, $options);
 
             return self::$connection;
         } catch (PDOException $exception) {
