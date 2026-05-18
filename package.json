@@ -1,0 +1,21 @@
+{
+  "name": "nutrideq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "service-worker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhesterrr/nutrideq.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jhesterrr/nutrideq/issues"
+  },
+  "homepage": "https://github.com/jhesterrr/nutrideq#readme"
+}

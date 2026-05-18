@@ -1,0 +1,1292 @@
+/* FCT Library Premium Styles */
+
+/* Base overrides */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+}
+
+.table-container {
+    background: transparent !important;
+    border-radius: 0;
+    padding: 0 5px;
+    box-shadow: none;
+    margin-bottom: 30px;
+    overflow-x: auto;
+    border: none;
+    position: relative;
+    z-index: 1;
+}
+
+.fct-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 16px;
+    margin-top: 0;
+}
+
+.fct-table th {
+    padding: 5px 25px 0px 25px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-align: left;
+    border-bottom: none;
+    opacity: 0.7;
+}
+
+.fct-table td {
+    padding: 22px 25px;
+    vertical-align: middle;
+    border: none !important;
+}
+
+.fct-table tbody tr {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    transition: var(--transition-premium);
+}
+
+.fct-table tbody tr:hover td {
+    background: transparent;
+}
+
+.fct-table tbody tr:hover {
+    transform: translateY(-3px);
+    background: var(--bg-surface);
+    
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+}
+
+.fct-table td:first-child {
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.fct-table td:last-child {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.food-id-tag {
+    background: linear-gradient(135deg, rgba(46, 139, 87, 0.1) 0%, rgba(60, 179, 113, 0.1) 100%);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+    border: 1px solid rgba(46, 139, 87, 0.2);
+}
+
+.fct-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+.page-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.page-btn:hover {
+    background: var(--bg-main);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.page-btn.active {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+}
+
+/* Modals & Forms specific to FCT */
+.fct-form-group {
+    margin-bottom: 20px;
+}
+
+.fct-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.fct-input {
+    width: 100%;
+    padding: 12px 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-main);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.fct-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 4px rgba(46, 139, 87, 0.1);
+}
+
+.nutrient-inputs {
+    background: var(--bg-main);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.nutrient-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.nutrient-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.nutrient-row>div {
+    flex: 1;
+}
+
+.nutrient-row label {
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.nutrient-row .fct-input {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+}
+
+.remove-nutrient {
+    width: 40px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(255, 107, 107, 0.1);
+    color: var(--accent);
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.remove-nutrient:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.2);
+}
+
+/* Scrollbar for nutrient list */
+.nutrient-inputs::-webkit-scrollbar {
+    width: 8px;
+}
+
+.nutrient-inputs::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.nutrient-inputs::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.nutrient-inputs::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+
+/* Base override for header font weight override issues */
+.page-title h1 {
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 700 !important;
+}
+
+@media (max-width: 768px) {
+    .fct-table {
+        text-align: left;
+    }
+
+    .nutrient-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .remove-nutrient {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Ant Design Aesthetic Refinements */
+
+.ant-controls-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.ant-space-compact {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    overflow: visible !important;
+}
+
+/* Base Input styling */
+.ant-space-compact .ant-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border: 1px solid #d9d9d9;
+    border-right: none;
+    /* remove double border */
+    border-radius: 8px 0 0 8px;
+    background: var(--bg-surface);
+    padding-left: 12px;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    position: relative;
+    height: 45px;
+    /* Unified height with the category select */
+    overflow: visible !important;
+}
+
+.ant-space-compact .ant-input-wrapper:focus-within {
+    border-color: #2D8A56;
+    box-shadow: 0 0 0 2px rgba(45, 138, 86, 0.2);
+    z-index: 2;
+    /* Float above select border */
+    border-right: 1px solid #2D8A56;
+}
+
+.ant-space-compact .ant-input-prefix {
+    color: #bfbfbf;
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.ant-space-compact .ant-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    height: 100%;
+    background: transparent;
+    color: #262626;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 0;
+}
+
+.ant-space-compact .ant-input::placeholder {
+    color: #a3a3a3;
+    /* darker placeholder for visibility */
+}
+
+.ant-select {
+    border: none;
+    border-left: 1px solid #d9d9d9;
+    padding: 10px 15px;
+    outline: none;
+    background: #fafafa;
+    color: #595959;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    border-radius: 0;
+}
+
+.ant-select:hover {
+    background: #f0f0f0;
+}
+
+/* Tags */
+.ant-tag {
+    box-sizing: border-box;
+    margin: 0 8px 0 0;
+    color: var(--text-primary)d9;
+    font-size: 12px;
+    line-height: 20px;
+    white-space: nowrap;
+    background: #fafafa;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: 2px 7px;
+    display: inline-block;
+}
+
+.ant-tag-green {
+    color: #389e0d;
+    background: #f6ffed;
+    border-color: #b7eb8f;
+}
+
+/* Ghost / Icon Only Action Buttons */
+.ant-btn-group {
+    display: inline-flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.ant-btn {
+    line-height: 1.5715;
+    position: relative;
+    display: inline-block;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    background-image: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    height: 32px;
+    padding: 4px 15px;
+    font-size: 14px;
+    border-radius: 6px;
+    color: #595959;
+    background: transparent;
+}
+
+.ant-btn-icon-only {
+    width: 32px;
+    padding: 4px 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #8c8c8c;
+}
+
+.ant-btn-icon-only:hover {
+    background: #f5f5f5;
+    color: #262626;
+}
+
+.ant-btn-edit:hover {
+    background: #e6f7ff;
+    color: #1890ff;
+}
+
+.ant-btn-danger:hover {
+    background: var(--bg-surface)1f0;
+    color: #f5222d;
+}
+
+/* Subtle Table adjustments */
+.table-container {
+    border-radius: 12px;
+    /* Tighter radius */
+}
+
+.fct-table tbody tr {
+    border-radius: 8px;
+}
+
+.fct-table td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.fct-table td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+/* Choices.js Ant Design Overrides */
+.choices {
+    margin-bottom: 0;
+}
+
+.choices__inner {
+    background: var(--bg-main);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6.5px 18px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.choices.is-focused .choices__inner {
+    border-color: #2D8A56;
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 2px rgba(45, 138, 86, 0.2);
+}
+
+.choices[data-type*="select-one"] .choices__inner {
+    padding-bottom: 6.5px;
+}
+
+/* Specifically inside the filter header block */
+.ant-space-compact .choices {
+    width: 240px;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+.ant-space-compact .choices__inner {
+    border-radius: 0 8px 8px 0;
+    border: 1px solid #d9d9d9;
+    background: var(--bg-surface);
+    min-height: 45px;
+    height: 45px;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.ant-space-compact .choices.is-focused .choices__inner {
+    border-color: #2D8A56;
+    box-shadow: 0 0 0 2px rgba(45, 138, 86, 0.2);
+    z-index: 2;
+    position: relative;
+}
+
+.searchable-select-modal+.choices .choices__inner {
+    min-height: 44px;
+    padding: 5px 15px;
+    border-width: 1px;
+    border-color: #e2e8f0;
+}
+
+/* Fix Choices.js Stacking Context Bug & Dropdown Styles */
+.card {
+    position: relative;
+    z-index: 100;
+}
+
+.choices__list--dropdown,
+.choices__list[aria-expanded],
+.ant-select-dropdown {
+    z-index: 9999 !important;
+    background: var(--bg-surface) !important;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05) !important;
+    margin-top: 4px;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure no parent clips the dropdown */
+.card,
+.ant-space-compact,
+.ant-input-wrapper {
+    overflow: visible !important;
+}
+
+/* Ant Design Hover States in Choices Dropdown */
+.choices__list--dropdown .choices__item--selectable.is-highlighted,
+.choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+    background-color: rgba(45, 138, 86, 0.1) !important;
+    color: #2D8A56 !important;
+}
+
+/* Base item styling for consistency */
+.choices__list--dropdown .choices__item,
+.choices__list[aria-expanded] .choices__item {
+    padding: 10px 15px;
+    font-size: 14px;
+    color: #262626;
+    transition: background-color 0.3s ease;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS (Ant Design Grid System & Touch Refinements)
+   ========================================================================== */
+
+@media screen and (max-width: 768px) {
+
+    /* Touch Optimization & Spacing */
+    .fct-container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .ant-input,
+    .ant-select,
+    .ant-btn {
+        min-height: 44px !important;
+        /* Expand touch targets */
+    }
+
+    /* Stack Search & Filter vertically */
+    .ant-controls-group .ant-space-compact {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ant-controls-group .ant-space-compact .ant-input-wrapper {
+        border-radius: 8px;
+        border-right: 1px solid #d9d9d9;
+        width: 100%;
+        height: 48px;
+    }
+
+    /* Override Desktop Choices layout for Mobile Stacking */
+    .ant-controls-group .ant-space-compact .choices {
+        width: 100% !important;
+        min-width: 100%;
+    }
+
+    .ant-controls-group .ant-space-compact .choices__inner {
+        border-radius: 8px !important;
+        border: 1px solid #d9d9d9 !important;
+        background: var(--bg-surface) !important;
+        height: 48px;
+    }
+
+    /* FAB for Add New Item */
+    .header-actions .btn-primary {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 6px 16px rgba(45, 138, 86, 0.4);
+        z-index: 999;
+        transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+
+    .header-actions .btn-primary {
+        text-indent: -9999px;
+        /* Hide "Add New Item" text */
+    }
+
+    .header-actions .btn-primary i {
+        text-indent: 0;
+        position: absolute;
+    }
+
+    /* ----------------------------------------------------------------------
+       TABLE TO CARD TRANSFORMATION (Responsive List view)
+       ---------------------------------------------------------------------- */
+    .table-container {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .fct-table,
+    .fct-table thead,
+    .fct-table tbody,
+    .fct-table th,
+    .fct-table td,
+    .fct-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    /* Hide Table Headers */
+    .fct-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    /* Style Rows as Cards */
+    .fct-table tbody tr {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        position: relative;
+    }
+
+    .fct-table td {
+        border: none;
+        padding: 4px 0 !important;
+        text-align: left !important;
+        position: relative;
+    }
+
+    /* Reorder rendering using Flexbox internally */
+    .fct-table td[data-label="Name"] {
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #262626 !important;
+        margin-bottom: 4px;
+        padding-top: 0 !important;
+        padding-right: 80px !important;
+        /* Leave room for ID Badge */
+    }
+
+    .fct-table td[data-label="Food ID"] {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        padding: 0 !important;
+    }
+
+    .fct-table td[data-label="Food ID"] span {
+        background: #f0f0f0;
+        color: #595959 !important;
+        padding: 4px 8px !important;
+        border-radius: 6px;
+        font-size: 0.8rem !important;
+        font-weight: 500;
+    }
+
+    .fct-table td[data-label="Category"] {
+        margin-bottom: 16px;
+    }
+
+    /* Move Actions to Footer of Card */
+    .fct-table td[data-label="Actions"] {
+        border-top: 1px solid #f0f0f0;
+        padding-top: 12px !important;
+        margin-top: 8px;
+        text-align: right !important;
+    }
+
+    .fct-pagination {
+        display: flex !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        margin-top: 30px !important;
+        padding-bottom: env(safe-area-inset-bottom) !important;
+    }
+
+    .page-btn {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1rem !important;
+        background: var(--bg-surface) !important;
+        border: 1px solid #f0f0f0 !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
+    }
+
+    .page-btn.active {
+        background: var(--primary) !important;
+        color: white !important;
+        border-color: var(--primary) !important;
+    }
+}
+
+/* ==========================================================================
+   NUTRIENT DETAIL VIEW REFINEMENTS (MODERN LOOK)
+   ========================================================================== */
+
+.nutrient-card-modern {
+    background: var(--bg-surface);
+    border-radius: 12px;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.nutrient-card-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    border-color: #3c9d6a;
+}
+
+/* Tabs Header (Modern Rounded Tabs) */
+.tabs-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    overflow-x: auto;
+    padding: 5px 0;
+    scrollbar-width: none;
+}
+
+.tabs-header::-webkit-scrollbar { display: none; }
+
+.tab {
+    padding: 8px 18px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: #6b7280;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: 'Poppins', sans-serif;
+}
+
+.tab:hover {
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+.tab.active {
+    background: var(--bg-surface);
+    color: #3c9d6a !important;
+    border-color: #3c9d6a !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(60, 157, 106, 0.1);
+}
+
+/* Modal View Header Refinements */
+.fct-details-header {
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 20px;
+}
+
+#viewTitle {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #1a202c;
+}
+
+/* Close button modernization */
+.modal-footer .btn-outline {
+    border: 2px solid #3c9d6a;
+    color: #3c9d6a;
+    background: transparent;
+    padding: 8px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.modal-footer .btn-outline:hover {
+    background: #3c9d6a;
+    color: white;
+    box-shadow: 0 4px 15px rgba(60, 157, 106, 0.3);
+}
+
+.fct-table tbody tr {
+    background: #ffffff !important;
+    border: 1px solid #f1f5f9 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02) !important;
+    border-radius: 20px !important;
+    transition: var(--transition-premium) !important;
+}
+
+/* FCT Details View Modal Premium Styling */
+.fct-view-header {
+    padding: 24px 30px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.fct-view-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 8px 0 4px;
+    line-height: 1.3;
+}
+
+.fct-macro-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+}
+
+.fct-macro-item {
+    text-align: center;
+}
+
+.fct-macro-item:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
+.fct-macro-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.fct-macro-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+}
+
+.fct-macro-unit {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.fct-view-body {
+    padding: 24px 30px;
+    background: #f8fafc;
+}
+
+.fct-tab-list {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+
+.fct-tab-list::-webkit-scrollbar {
+    display: none;
+}
+
+.fct-nutrients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+@media (max-width: 768px) {
+    .fct-view-header {
+        padding: 20px;
+    }
+    .fct-view-title {
+        font-size: 1.35rem;
+    }
+    .fct-macro-banner {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .fct-macro-item:nth-child(2) {
+        border-right: none !important;
+    }
+    .fct-macro-item {
+        padding: 8px 0;
+    }
+    .fct-macro-item:nth-child(odd) {
+        border-right: 1px solid #e2e8f0 !important;
+    }
+    .fct-macro-item:nth-child(1), .fct-macro-item:nth-child(2) {
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+    .fct-view-body {
+        padding: 20px;
+    }
+    .fct-nutrients-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   FCT LIBRARY MODAL STYLES (No Transparency on Card Top)
+   ========================================================================== */
+
+/* Overrides for modal container and header in FCT page */
+#fctModal.modal-overlay,
+#logModal.modal-overlay,
+#viewModal.modal-overlay {
+    backdrop-filter: blur(8px) !important;
+    background: rgba(15, 23, 42, 0.45) !important; /* Premium semi-dark backdrop */
+}
+
+#fctModal .modal-container,
+#logModal .modal-container,
+#viewModal .modal-container {
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+    overflow: hidden !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+#fctModal .modal-header,
+#logModal .modal-header,
+#viewModal .modal-header {
+    background: #ffffff !important; /* Solid solid white! No transparency at all! */
+    border-bottom: none !important; /* Merge seamlessly with the view header */
+    padding: 24px 30px 10px !important;
+    border-radius: 24px 24px 0 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+#fctModal .modal-header h3,
+#logModal .modal-header h3,
+#viewModal .modal-header h3 {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.45rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin: 0 !important;
+    text-shadow: none !important;
+}
+
+/* Modal Close Button */
+#fctModal .modal-close,
+#logModal .modal-close,
+#viewModal .modal-close {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#fctModal .modal-close:hover,
+#logModal .modal-close:hover,
+#viewModal .modal-close:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    transform: rotate(90deg) !important;
+}
+
+#fctModal .modal-close i,
+#logModal .modal-close i,
+#viewModal .modal-close i {
+    font-size: 14px !important;
+}
+
+/* Ensure modal contents have solid white/slate background */
+#fctModal .modal-content,
+#logModal .modal-content,
+#viewModal .modal-content {
+    background: #ffffff !important;
+}
+
+#fctModal .modal-footer,
+#logModal .modal-footer,
+#viewModal .modal-footer {
+    background: #f8fafc !important; /* Premium light footer tint */
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 18px 30px !important;
+    border-radius: 0 0 24px 24px !important;
+}
+
+/* Merge fct-view-header with the white modal header perfectly */
+#viewModal .fct-view-header {
+    padding: 8px 30px 24px !important; /* Shifted padding so they sit closer */
+    border-bottom: 1px solid #f1f5f9 !important;
+    background: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+    #fctModal .modal-header,
+    #logModal .modal-header,
+    #viewModal .modal-header {
+        padding: 20px 20px 8px !important;
+    }
+    #viewModal .fct-view-header {
+        padding: 8px 20px 20px !important;
+    }
+    #fctModal .modal-footer,
+    #logModal .modal-footer,
+    #viewModal .modal-footer {
+        padding: 16px 20px !important;
+    }
+
+    /* Prevent clipping and fix FCT view modal container on mobile viewports */
+    #viewModal .modal-container {
+        width: 94% !important;
+        max-width: 94% !important;
+        margin: 10px auto !important;
+        height: auto !important;
+        max-height: 85vh !important;
+        border-radius: 20px !important;
+    }
+
+    #viewModal .modal-content {
+        overflow-x: hidden !important; /* Block horizontal scroll spill */
+        width: 100% !important;
+    }
+
+    #viewModal .tab-content {
+        padding: 0 !important; /* Zero out mobile-style's 15px padding for extra room */
+        margin: 0 !important;
+    }
+
+    #viewContent {
+        width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    .fct-view-title {
+        font-size: 1.25rem !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+
+    .fct-view-body {
+        padding: 16px 14px 24px !important; /* Balanced side paddings to maximize card space */
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .fct-tab-list {
+        margin-bottom: 16px !important;
+        padding-bottom: 4px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .fct-nutrients-grid {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important; /* Allow proper shrinking */
+    }
+
+    /* Refined inner spacing and column widths for mobile nutrient cards */
+    .fct-nutrients-grid .nutrient-card-modern {
+        padding: 12px 14px !important; /* Reduced horizontal padding to recover width */
+        gap: 12px !important; /* Narrower column gap */
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important; /* Force children to stay inside, activating min-width: 0 shrink and ellipsis */
+        min-width: 0 !important; /* Allow proper shrinking without spilling */
+    }
+
+    /* Reduce icon size slightly */
+    .fct-nutrients-grid .nutrient-card-modern > div:first-child {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 0.95rem !important;
+        border-radius: 8px !important; /* Tighter radius for smaller icons */
+    }
+
+    /* Middle text column: flex-grow and proper ellipses */
+    .fct-nutrients-grid .nutrient-card-modern > div:nth-child(2) {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    .fct-nutrients-grid .nutrient-card-modern > div:nth-child(2) > div:first-child {
+        font-size: 0.88rem !important;
+    }
+
+    /* Right column: prevent value and unit wrap/clipping */
+    .fct-nutrients-grid .nutrient-card-modern > div:last-child {
+        text-align: right !important;
+        flex-shrink: 0 !important;
+        min-width: 75px !important; /* Set robust min-width to anchor numbers & units */
+    }
+
+    .fct-nutrients-grid .nutrient-card-modern > div:last-child > div:first-child {
+        font-size: 1.05rem !important;
+    }
+}
+
+/* ==========================================================================
+   PREMIUM CARD & MODAL MICRO-ANIMATIONS (Buttery-Smooth UX)
+   ========================================================================== */
+
+/* 1. Modal Overlay & Container Keyframes (Hardware Accelerated) */
+@keyframes premiumBackdropFade {
+    0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
+    }
+    100% {
+        opacity: 1;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+}
+
+@keyframes premiumModalEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0.93) translateY(40px);
+    }
+    70% {
+        transform: scale(1.01) translateY(-2px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+#fctModal.modal-overlay,
+#logModal.modal-overlay,
+#viewModal.modal-overlay {
+    animation: premiumBackdropFade 0.38s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    will-change: opacity, backdrop-filter;
+}
+
+#fctModal .modal-container,
+#logModal .modal-container,
+#viewModal .modal-container {
+    animation: premiumModalEntrance 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both !important; /* Premium elastic spring effect */
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+/* 2. Food Item Card Stagger Entrance Animations */
+@keyframes fctCardStagger {
+    0% {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.activity-feed .activity-item {
+    animation: fctCardStagger 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+}
+
+/* Stagger delay offsets for the first 12 items */
+.activity-feed .activity-item:nth-child(1) { animation-delay: 0.04s; }
+.activity-feed .activity-item:nth-child(2) { animation-delay: 0.08s; }
+.activity-feed .activity-item:nth-child(3) { animation-delay: 0.12s; }
+.activity-feed .activity-item:nth-child(4) { animation-delay: 0.16s; }
+.activity-feed .activity-item:nth-child(5) { animation-delay: 0.20s; }
+.activity-feed .activity-item:nth-child(6) { animation-delay: 0.24s; }
+.activity-feed .activity-item:nth-child(7) { animation-delay: 0.28s; }
+.activity-feed .activity-item:nth-child(8) { animation-delay: 0.32s; }
+.activity-feed .activity-item:nth-child(9) { animation-delay: 0.36s; }
+.activity-feed .activity-item:nth-child(10) { animation-delay: 0.40s; }
+.activity-feed .activity-item:nth-child(11) { animation-delay: 0.44s; }
+.activity-feed .activity-item:nth-child(12) { animation-delay: 0.48s; }
+.activity-feed .activity-item:nth-child(n+13) { animation-delay: 0.52s; }
+
+/* 3. Elevate & Scale on Hover (Clinically Engineered Feel) */
+.activity-feed .activity-item {
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    position: relative;
+    border-radius: 18px !important;
+    margin-bottom: 10px !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01), 0 2px 4px -1px rgba(15, 23, 42, 0.005) !important;
+}
+
+.activity-feed .activity-item:hover {
+    transform: translateY(-3px) scale(1.008) !important;
+    background: #ffffff !important;
+    box-shadow: 
+        0 20px 25px -5px rgba(15, 23, 42, 0.08),
+        0 10px 10px -5px rgba(15, 23, 42, 0.03) !important;
+    border-color: rgba(5, 150, 105, 0.25) !important; /* Premium Emerald Glow border */
+}
+
+/* Pulse indicator on hover of icon */
+.activity-feed .activity-item:hover .activity-icon {
+    transform: scale(1.08) !important;
+    box-shadow: 0 8px 16px rgba(5, 150, 105, 0.15) !important;
+}
+
+.activity-feed .activity-icon {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Action button scales inside cards */
+.activity-feed .ant-btn-group button,
+.fct-item-header .ant-btn-group button {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.activity-feed .ant-btn-group button:hover,
+.fct-item-header .ant-btn-group button:hover {
+    transform: translateY(-2px) scale(1.08) !important;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* 4. Nutrient Card Micro-animations inside Details modal */
+.fct-nutrients-grid .nutrient-card-modern {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fct-nutrients-grid .nutrient-card-modern:hover {
+    transform: translateY(-3px) scale(1.025) !important;
+    box-shadow: 
+        0 12px 20px -8px rgba(15, 23, 42, 0.08),
+        0 4px 8px -3px rgba(15, 23, 42, 0.04) !important;
+    border-color: rgba(5, 150, 105, 0.25) !important; /* Delicate focus outline */
+}
+
+/* 5. Elegant Category Tab Bar Animations */
+#viewModal .fct-tab-list button {
+    background: #f1f5f9 !important;
+    border: none !important;
+    color: #64748b !important;
+    padding: 10px 18px !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    white-space: nowrap !important;
+}
+
+#viewModal .fct-tab-list button:hover {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    transform: translateY(-1px) !important;
+}
+
+#viewModal .fct-tab-list button.active {
+    background: #059669 !important; /* Premium Emerald 600 Active Theme */
+    color: #ffffff !important;
+    box-shadow: 0 6px 14px rgba(5, 150, 105, 0.25) !important;
+    transform: translateY(-1px) scale(1.02) !important;
+}
+
+
+
+

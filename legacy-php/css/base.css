@@ -1,0 +1,201 @@
+/* ============================================================
+   NUTRIDEQ : BASE TOKENS & RESET
+   Premium, Clinical, Not AI-Slop.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Figtree:wght@500;600;700&display=swap');
+
+:root {
+    /* Color Palette */
+    --nd-primary: #059669; /* Emerald 600 */
+    --nd-primary-hover: #047857; /* Emerald 700 */
+    --nd-primary-light: rgba(5, 150, 105, 0.08);
+    
+    --nd-secondary: #3b82f6; /* Blue 500 */
+    --nd-warning: #f59e0b; /* Amber 500 */
+    --nd-danger: #ef4444; /* Red 500 */
+    --nd-success: #10b981; /* Emerald 500 */
+
+    /* Neutrals */
+    --nd-gray-50: #f8fafc;
+    --nd-gray-100: #f1f5f9;
+    --nd-gray-200: #e2e8f0;
+    --nd-gray-300: #cbd5e1;
+    --nd-gray-400: #94a3b8;
+    --nd-gray-500: #64748b;
+    --nd-gray-600: #475569;
+    --nd-gray-700: #334155;
+    --nd-gray-800: #1e293b;
+    --nd-gray-900: #0f172a;
+
+    /* Backgrounds */
+    --nd-bg-page: var(--nd-gray-50);
+    --nd-bg-surface: #ffffff;
+    --nd-bg-surface-hover: var(--nd-gray-50);
+
+    /* Text */
+    --nd-text-heading: var(--nd-gray-900);
+    --nd-text-body: var(--nd-gray-700);
+    --nd-text-muted: var(--nd-gray-500);
+
+    /* Borders */
+    --nd-border-light: var(--nd-gray-200);
+    --nd-border-focus: var(--nd-primary);
+
+    /* Shadows (Clean, non-glass) */
+    --nd-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --nd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --nd-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    --nd-shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+
+    /* Typography */
+    --nd-font-heading: 'Figtree', system-ui, sans-serif;
+    --nd-font-body: 'Inter', system-ui, sans-serif;
+
+    /* Radius */
+    --nd-radius-sm: 6px;
+    --nd-radius-md: 10px;
+    --nd-radius-lg: 16px;
+    --nd-radius-full: 9999px;
+
+    /* Spacing (4px baseline) */
+    --nd-space-1: 4px;
+    --nd-space-2: 8px;
+    --nd-space-3: 12px;
+    --nd-space-4: 16px;
+    --nd-space-5: 20px;
+    --nd-space-6: 24px;
+    --nd-space-8: 32px;
+    --nd-space-10: 40px;
+    --nd-space-12: 48px;
+
+    /* Transitions */
+    --nd-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --nd-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --nd-transition-spring: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --nd-transition-fast: 0s;
+        --nd-transition-normal: 0s;
+        --nd-transition-spring: 0s;
+    }
+}
+
+/* ─── RESET ─── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ─── Global Form Accent (green checkboxes, radios, range sliders) ─── */
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+select {
+    accent-color: var(--nd-primary);
+}
+
+/* ─── Native Select Option Highlight ─── */
+select option:checked,
+select option:hover {
+    background: rgba(5, 150, 105, 0.12);
+    color: #059669;
+}
+
+/* ─── Choices.js Global Green Highlight ─── */
+.choices__item--choice.is-highlighted,
+.choices__list--dropdown .choices__item--selectable.is-highlighted,
+.choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+    background-color: rgba(5, 150, 105, 0.1) !important;
+    color: #059669 !important;
+}
+
+.choices__list--dropdown .choices__item--selectable,
+.choices__list[aria-expanded] .choices__item--selectable {
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    font-family: var(--nd-font-body);
+    background: var(--nd-bg-page);
+    color: var(--nd-text-body);
+    line-height: 1.5;
+}
+
+body {
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* Global Layout Shell */
+.main-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1 1 0%;
+    min-width: 0;
+    width: auto !important;
+    max-width: 100%;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--nd-font-heading);
+    color: var(--nd-text-heading);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+p {
+    margin-bottom: var(--nd-space-4);
+}
+
+a {
+    color: var(--nd-primary);
+    text-decoration: none;
+    transition: color var(--nd-transition-fast);
+}
+
+a:hover {
+    color: var(--nd-primary-hover);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* ─── UTILITIES ─── */
+.nd-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

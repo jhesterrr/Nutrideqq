@@ -1,0 +1,8 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon: Stylized Emerald Symbol -->
+  <path d="M40 15C40 15 35 15 30 15C25 15 20 19 20 25C20 31 25 35 30 35C35 35 40 39 40 45C40 51 35 55 30 55C25 55 20 55 20 55" stroke="#50C878" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30 10V60" stroke="#50C878" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Text: NutriDeq -->
+  <text x="60" y="42" font-family="Inter, sans-serif" font-weight="800" font-size="32" fill="#064E3B">NutriDeq</text>
+</svg>

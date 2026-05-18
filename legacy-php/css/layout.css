@@ -1,0 +1,83 @@
+/* ============================================================
+   NUTRIDEQ : LAYOUT TOKENS
+   Grid, Main Content, Containers
+   ============================================================ */
+
+/* ─── Main Application Shell ─── */
+.nd-app {
+    display: flex;
+    min-height: 100vh;
+    background: var(--nd-bg-page);
+    position: relative;
+}
+
+.nd-main, .main-content {
+    flex: 1;
+    min-width: 0;
+    transition: margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    padding: var(--nd-space-4);
+    padding-top: calc(72px + var(--nd-space-4)); /* Accounting for mobile header */
+}
+
+/* ─── Containers ─── */
+.nd-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.nd-container--wide {
+    max-width: 1440px;
+}
+
+/* ─── Grids ─── */
+.nd-grid {
+    display: grid;
+    gap: var(--nd-space-5);
+}
+
+.nd-grid--2 { grid-template-columns: repeat(1, 1fr); }
+.nd-grid--3 { grid-template-columns: repeat(1, 1fr); }
+.nd-grid--4 { grid-template-columns: repeat(1, 1fr); }
+
+/* ─── Desktop Layout ─── */
+@media (min-width: 1025px) {
+    .nd-main, .main-content {
+        margin-left: var(--nd-sidebar-width);
+        width: calc(100% - var(--nd-sidebar-width));
+        padding: var(--nd-space-8);
+    }
+    
+    body.sidebar-collapsed .nd-main, body.sidebar-collapsed .main-content {
+        margin-left: var(--nd-sidebar-collapsed-width);
+        width: calc(100% - var(--nd-sidebar-collapsed-width));
+    }
+
+    .nd-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .nd-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .nd-grid--4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .nd-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .nd-grid--3 { grid-template-columns: repeat(2, 1fr); }
+    .nd-grid--4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── Flex Utilities ─── */
+.nd-flex-row {
+    display: flex;
+    align-items: center;
+    gap: var(--nd-space-3);
+}
+
+.nd-flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nd-space-3);
+}
+
+.nd-justify-between { justify-content: space-between; }
+.nd-justify-end { justify-content: flex-end; }
+.nd-align-start { align-items: flex-start; }

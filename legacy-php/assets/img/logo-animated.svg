@@ -1,0 +1,31 @@
+<svg width="200" height="240" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hexagon -->
+  <path class="draw-path hex-path" 
+    d="M100 12 L170 45 L170 115 L100 148 L30 115 L30 45 Z" 
+    stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Leaf Shape (overlapping hexagon) -->
+  <path class="draw-path leaf-path" 
+    d="M70 120 C70 120 55 85 65 55 C75 25 100 18 100 18 C100 18 80 50 85 75 C90 100 100 100 100 100" 
+    stroke="#10b981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Leaf Vein -->
+  <path class="draw-path vein-path" 
+    d="M82 95 C82 95 85 70 92 50 C96 38 100 30 100 30" 
+    stroke="#10b981" stroke-width="3" stroke-linecap="round" fill="none"/>
+  
+  <!-- Heartbeat / Pulse Line -->
+  <path class="draw-path pulse-path" 
+    d="M55 85 L80 85 L88 65 L100 105 L112 55 L120 85 L145 85" 
+    stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Text: NutriDeq -->
+  <text class="logo-text" x="100" y="195" text-anchor="middle" 
+    font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="36" 
+    fill="#064E3B" opacity="0">NutriDeq</text>
+  
+  <!-- Tagline -->
+  <text class="logo-tagline" x="100" y="220" text-anchor="middle" 
+    font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="10" 
+    letter-spacing="4" fill="#475569" opacity="0">CLINICAL NUTRITION</text>
+</svg>

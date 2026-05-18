@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/xampp/htdocs/**)",
+      "Bash(claude mcp *)",
+      "Bash(node *)",
+      "mcp__magic__21st_magic_component_builder",
+      "mcp__magic__21st_magic_component_refiner",
+      "mcp__magic__21st_magic_component_inspiration",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)"
+    ]
+  }
+}

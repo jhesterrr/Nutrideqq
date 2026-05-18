@@ -1,0 +1,368 @@
+/* ============================================================
+   NUTRIDEQ : SIDEBAR (ELITE CLINICAL TERMINAL)
+   Ultra-Premium, Data-Dense, Surgical Aesthetic.
+   ============================================================ */
+
+:root {
+    --nd-sidebar-width: 280px;
+    --nd-sidebar-collapsed-width: 88px;
+    --nd-sidebar-bg: #ffffff;
+    --nd-sidebar-border: rgba(226, 232, 240, 0.8);
+    --nd-sidebar-item-gap: 4px;
+}
+
+.nd-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--nd-sidebar-width);
+    background: var(--nd-sidebar-bg);
+    border-right: 1px solid var(--nd-sidebar-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: all 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.02);
+}
+
+.nd-sidebar.collapsed {
+    width: var(--nd-sidebar-collapsed-width);
+}
+
+/* ─── Header / Logo ─── */
+.nd-sidebar__header {
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    margin-bottom: 12px;
+}
+
+.nd-sidebar__logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.nd-sidebar__logo-img {
+    height: 48px;
+    width: auto;
+    /* Removed square drop-shadow since the image has a solid white background */
+    mix-blend-mode: multiply; /* Ensures any off-white difference is blended perfectly */
+    margin-left: -8px; /* Pull it slightly left to align perfectly with the margin */
+}
+
+.nd-sidebar__logo-text {
+    display: flex;
+    align-items: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.brand-text-wrapper {
+    display: flex;
+    align-items: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+    color: #1e293b;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__logo-text {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-10px);
+}
+
+.nd-sidebar__toggle {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nd-sidebar__toggle:hover {
+    background: var(--nd-primary);
+    color: white;
+    border-color: var(--nd-primary);
+    transform: scale(1.1);
+}
+
+.nd-sidebar.collapsed .nd-sidebar__header {
+    justify-content: center;
+    padding: 0;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__logo {
+    display: none;
+}
+
+/* ─── Navigation ─── */
+.nd-sidebar__nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 16px;
+    list-style: none;
+    scrollbar-width: none;
+}
+
+.nd-sidebar__nav::-webkit-scrollbar {
+    display: none;
+}
+
+.nd-sidebar__nav-header {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #94a3b8;
+    padding: 24px 12px 12px;
+    white-space: nowrap;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__nav-header {
+    text-align: center;
+    padding: 20px 0 10px;
+    font-size: 0.6rem;
+    letter-spacing: 0;
+}
+
+.nd-sidebar__nav-item {
+    margin-bottom: var(--nd-sidebar-item-gap);
+}
+
+.nd-sidebar__nav-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    color: #475569;
+    text-decoration: none;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.nd-sidebar__nav-icon {
+    font-size: 1.2rem;
+    width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.nd-sidebar__nav-link:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    transform: translateX(4px);
+}
+
+.nd-sidebar__nav-link.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+    color: var(--nd-primary);
+    border-color: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
+}
+
+.nd-sidebar__nav-link.active::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    background: var(--nd-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--nd-primary);
+}
+
+.nd-sidebar.collapsed .nd-sidebar__nav-link {
+    justify-content: center;
+    padding: 14px 0;
+    gap: 0;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__nav-link span {
+    display: none;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__nav-link:hover {
+    transform: none;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__nav-link.active::after {
+    right: 8px;
+    top: 8px;
+}
+
+/* ─── User Profile Section ─── */
+.nd-sidebar__profile {
+    padding: 20px 16px;
+    margin-top: auto;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+}
+
+.nd-sidebar__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--nd-primary) 0%, #059669 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    flex-shrink: 0;
+}
+
+.nd-sidebar__profile-info {
+    min-width: 0;
+    transition: all 0.3s ease;
+}
+
+.nd-sidebar__profile-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nd-sidebar__profile-role {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__profile {
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.nd-sidebar.collapsed .nd-sidebar__profile-info {
+    display: none;
+}
+
+/* ─── Mobile Adjustments ─── */
+.nd-mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 72px;
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    z-index: 1100;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+.nd-mobile-header__logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.nd-mobile-header__logo img {
+    height: 32px !important;
+    width: auto !important;
+    max-width: 150px !important;
+    object-fit: contain;
+}
+
+.nd-mobile-header__logo span {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.5px;
+    display: none; /* Hide text on mobile to save space if logo has text, or keep it depending on preference. Let's hide it for cleanliness. */
+}
+
+.nd-mobile-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nd-mobile-header__btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.nd-mobile-header__btn:active {
+    background: var(--nd-primary);
+    color: white;
+}
+
+.nd-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(8px);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+@media (max-width: 1024px) {
+    .nd-mobile-header {
+        display: flex;
+    }
+
+    .nd-sidebar {
+        transform: translateX(-100%);
+        width: 300px !important;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+        z-index: 1200; /* Force sidebar to be on top of overlay (1050) and mobile header (1100) */
+    }
+
+    .nd-sidebar.active {
+        transform: translateX(0);
+    }
+
+    .nd-sidebar-overlay.active {
+        visibility: visible;
+        opacity: 1;
+    }
+}

@@ -1,0 +1,13 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "claudeCode.environmentVariables": [
+    {
+      "name": "ANTHROPIC_BASE_URL",
+      "value": "http://localhost:8082"
+    },
+    {
+      "name": "ANTHROPIC_AUTH_TOKEN",
+      "value": "freecc"
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Midnight Forest Palette - Deep, Desaturated, Muted */
+  --color-em-950: #021a14;
+  --color-em-900: #052e26;
+  --color-em-800: #0a4c40;
+  --color-em-700: #0d6b5e;
+  --color-em-600: #128c7e;
+  --color-em-500: #19b3a2;
+  --color-em-100: #ccfbf6;
+  --color-em-50:  #f0fdfc;
+  
+  --color-slate-950: #020617;
+  --color-offwhite: #FAFBFC;
+}
+
+:root {
+  --background: #FAFBFC;
+  --foreground: #021a14;
+}
+
+/* ─────────────────────────────────────────────
+   GLOBAL TEXTURE & NOISE
+   ───────────────────────────────────────────── */
+.grain-overlay {
+  position: fixed;
+  inset: -200%;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  animation: noise 0.3s infinite;
+}
+
+@keyframes noise {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-1%, -1%); }
+  20% { transform: translate(1%, 1%); }
+  30% { transform: translate(-2%, -2%); }
+  40% { transform: translate(2%, 2%); }
+}
+
+/* ─────────────────────────────────────────────
+   TECHNICAL BACKGROUND
+   ───────────────────────────────────────────── */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgba(13,107,94,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 100% 100%, rgba(5,46,38,0.03) 0%, transparent 60%),
+    #FAFBFC;
+}
+
+.technical-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, rgba(2,26,20, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(2,26,20, 0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.technical-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(2,26,20, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(2,26,20, 0.08) 1px, transparent 1px);
+  background-size: 400px 400px;
+}
+
+/* ─────────────────────────────────────────────
+   INDUSTRIAL GLASS-MORPHISM
+   ───────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(25px) saturate(140%);
+  border: 1px solid rgba(2, 26, 20, 0.05);
+  box-shadow:
+    0 10px 40px -10px rgba(2,26,20, 0.04);
+}
+
+.glass-panel-deep {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(40px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 50px 100px -30px rgba(2,26,20, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.glass-emerald {
+  background: #021a14;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(2, 26, 20, 0.05);
+}
+
+/* ─────────────────────────────────────────────
+   TECHNICAL ELEMENTS
+   ───────────────────────────────────────────── */
+.section-chip {
+  @apply px-4 py-1.5 rounded-none bg-em-950 text-white text-[9px] font-black uppercase tracking-[0.4em] shadow-2xl inline-flex items-center gap-2;
+  border-left: 3px solid #14b8ac;
+}
+
+.coordinate-marker {
+  @apply absolute font-mono text-[9px] text-em-900/15 font-black pointer-events-none;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #021a14 0%, #0a4c40 50%, #0d6b5e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─────────────────────────────────────────────
+   CUSTOM CURSOR (Industrial)
+   ───────────────────────────────────────────── */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  background-color: #021a14;
+  border-radius: 0; /* Pure technical square */
+  pointer-events: none;
+  z-index: 9999;
+  margin-top: -8px;
+  margin-left: -8px;
+  will-change: transform;
+}
+
+.custom-cursor::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(2, 26, 20, 0.1);
+}
+
+.custom-cursor.hovering {
+  width: 48px;
+  height: 48px;
+  margin-top: -24px;
+  margin-left: -24px;
+  background-color: transparent;
+  border: 1px solid #021a14;
+}
+
+/* ─────────────────────────────────────────────
+   UTILITIES
+   ───────────────────────────────────────────── */
+.bar-chart-bar {
+  background: #021a14;
+  border-radius: 0;
+}
+
+.stat-pill {
+  @apply px-2 py-0.5 rounded-none bg-em-50 text-em-900 border border-em-900/10 text-[9px] font-black uppercase tracking-tighter;
+}
+
+.transform-style-3d { transform-style: preserve-3d; }
+.depth-1 { transform: translateZ(12px); }
+.depth-2 { transform: translateZ(24px); }
+.depth-3 { transform: translateZ(40px); }
+
+/* ─────────────────────────────────────────────
+   RESETS
+   ───────────────────────────────────────────── */
+@layer base {
+  body {
+    @apply bg-offwhite text-em-950 antialiased selection:bg-em-200/50;
+    overflow-x: hidden;
+  }
+}
