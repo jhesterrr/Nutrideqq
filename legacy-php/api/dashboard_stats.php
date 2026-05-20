@@ -22,6 +22,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 $user_id = $_SESSION['user_id'];
 $role = $_SESSION['user_role'];
+session_write_close(); // Release session file lock immediately to prevent page load blocking
 $database = new Database();
 $pdo = $database->getConnection();
 

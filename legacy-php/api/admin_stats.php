@@ -23,6 +23,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
+session_write_close(); // Release session file lock immediately to prevent page load blocking
 
 $staff_id = $_REQUEST['staff_id'] ?? 'all';
 $database = new Database();
@@ -47,34 +48,67 @@ try {
         $params[] = $staff_id;
     }
 
-    // 1. Health Trends (Last 7 Days)
+    // 1. Health Trends (Last 7 Days) - Optimized to run 2 grouped queries instead of 14 nested loop queries
     try {
         $dates = [];
         for ($i = 6; $i >= 0; $i--) {
             $dates[] = date('Y-m-d', strtotime("-$i days"));
         }
+        $start_date = $dates[0];
+        $end_date = $dates[count($dates) - 1];
+
+        // 1a. Query average calories per client per day in the range
+        $cal_query = "
+            SELECT 
+                ft.tracking_date,
+                AVG(ft.cal_sum) as avg_cal
+            FROM (
+                SELECT ft.user_id, ft.tracking_date, SUM(ft.calories) as cal_sum
+                FROM food_tracking ft
+                JOIN clients c ON ft.user_id = c.user_id
+                WHERE ft.tracking_date BETWEEN ? AND ?
+                " . ($staff_id !== 'all' ? "AND c.staff_id = ?" : "") . "
+                GROUP BY ft.user_id, ft.tracking_date
+            ) ft
+            GROUP BY ft.tracking_date";
+            
+        $stmt_cal = $pdo->prepare($cal_query);
+        $cal_params = [$start_date, $end_date];
+        if ($staff_id !== 'all') {
+            $cal_params = [$start_date, $end_date, $staff_id];
+        }
+        $stmt_cal->execute($cal_params);
+        $cal_results = $stmt_cal->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        // 1b. Query average hydration per client per day in the range
+        $water_query = "
+            SELECT 
+                ht.tracking_date,
+                AVG(ht.water_sum) as avg_water
+            FROM (
+                SELECT ht.user_id, ht.tracking_date, SUM(ht.glasses) as water_sum
+                FROM hydration_tracking ht
+                JOIN clients c ON ht.user_id = c.user_id
+                WHERE ht.tracking_date BETWEEN ? AND ?
+                " . ($staff_id !== 'all' ? "AND c.staff_id = ?" : "") . "
+                GROUP BY ht.user_id, ht.tracking_date
+            ) ht
+            GROUP BY ht.tracking_date";
+            
+        $stmt_water = $pdo->prepare($water_query);
+        $water_params = [$start_date, $end_date];
+        if ($staff_id !== 'all') {
+            $water_params = [$start_date, $end_date, $staff_id];
+        }
+        $stmt_water->execute($water_params);
+        $water_results = $stmt_water->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        // Map to response structure
         $health_data = ['labels' => [], 'calories' => [], 'hydration' => []];
         foreach ($dates as $date) {
-            $query = "
-                SELECT 
-                    COALESCE(AVG(cal_sum), 0) as avg_cal,
-                    COALESCE(AVG(water_sum), 0) as avg_water
-                FROM (
-                    SELECT 
-                        c.id,
-                        (SELECT SUM(calories) FROM food_tracking ft WHERE ft.user_id = c.user_id AND ft.tracking_date = ?) as cal_sum,
-                        (SELECT SUM(glasses) FROM hydration_tracking ht WHERE ht.user_id = c.user_id AND ht.tracking_date = ?) as water_sum
-                    FROM clients c
-                    " . ($staff_id !== 'all' ? "WHERE c.staff_id = ?" : "") . "
-                ) as daily_stats";
-            $stmt = $pdo->prepare($query);
-            $q_params = [$date, $date];
-            if ($staff_id !== 'all') $q_params[] = $staff_id;
-            $stmt->execute($q_params);
-            $row = $stmt->fetch();
             $health_data['labels'][] = date('M d', strtotime($date));
-            $health_data['calories'][] = round($row['avg_cal'] ?? 0, 0);
-            $health_data['hydration'][] = round($row['avg_water'] ?? 0, 1);
+            $health_data['calories'][] = round($cal_results[$date] ?? 0, 0);
+            $health_data['hydration'][] = round($water_results[$date] ?? 0, 1);
         }
         $response['health_trends'] = $health_data;
     } catch (Exception $e) {
@@ -156,20 +190,20 @@ try {
         $response['recent_activity'] = [];
     }
 
-    // 6. Staff Influence Score
+    // 6. Staff Influence Score - Optimized to run 1 query instead of O(Staff) loop queries
     try {
-        $staff_query = $pdo->query("SELECT id, name FROM users WHERE role = 'staff' AND status = 'active'");
-        $all_staff = $staff_query->fetchAll();
+        $staff_query = "
+            SELECT 
+                u.name,
+                (SELECT COUNT(*) FROM wellness_messages wm WHERE wm.sender_id = u.id) as msgs,
+                (SELECT COUNT(*) FROM clients c WHERE c.staff_id = u.id) as clients
+            FROM users u
+            WHERE u.role = 'staff' AND u.status = 'active'";
+        $staff_stmt = $pdo->query($staff_query);
+        $all_staff = $staff_stmt->fetchAll();
         foreach ($all_staff as $staff) {
-            $inf_stmt = $pdo->prepare("
-                SELECT 
-                    (SELECT COUNT(*) FROM wellness_messages WHERE sender_id = ?) as msgs,
-                    (SELECT COUNT(*) FROM clients WHERE staff_id = ?) as clients
-            ");
-            $inf_stmt->execute([$staff['id'], $staff['id']]);
-            $inf_row = $inf_stmt->fetch();
-            $msgs = (int)($inf_row['msgs'] ?? 0);
-            $clients = (int)($inf_row['clients'] ?? 0) ?: 1;
+            $msgs = (int)($staff['msgs'] ?? 0);
+            $clients = (int)($staff['clients'] ?? 0) ?: 1;
             $score = round(($msgs / $clients) * 10, 1);
             $response['staff_influence'][] = [
                 'name' => $staff['name'],

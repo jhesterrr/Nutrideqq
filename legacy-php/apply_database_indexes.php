@@ -103,6 +103,9 @@ try {
     applyIndex($pdo, 'food_tracking', 'idx_user_id', 'user_id');
     applyIndex($pdo, 'food_tracking', 'idx_user_tracking_date', 'user_id, tracking_date');
 
+    applyIndex($pdo, 'hydration_tracking', 'idx_user_id', 'user_id');
+    applyIndex($pdo, 'hydration_tracking', 'idx_user_tracking_date', 'user_id, tracking_date');
+
     applyIndex($pdo, 'clinical_reports', 'idx_user_date', 'user_id, log_date');
     applyIndex($pdo, 'diary_feedback', 'idx_user_date', 'user_id, log_date');
     
