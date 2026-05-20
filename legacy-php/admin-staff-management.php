@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (strpos(strtolower(PHP_OS), 'win') !== false) {
     $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
     if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
