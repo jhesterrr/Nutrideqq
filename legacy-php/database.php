@@ -44,7 +44,7 @@ class Database
             $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->dbname . ";charset=utf8mb4";
             
             $options = [
-                PDO::ATTR_PERSISTENT => true, // Keep connection open and reuse pools
+                PDO::ATTR_PERSISTENT => false, // Disabled to prevent stale connection 'Packets out of order' errors on containerized hosting
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             ];
