@@ -1447,7 +1447,7 @@ $pdo = $database->getConnection();
                 }
 
                 // Get Recent Symptom Markers and check for "Data-Verified Debts"
-                $stmt = $pdo->prepare("SELECT DISTINCT symptom_keyword, mapped_nutrient FROM ai_extracted_symptoms WHERE user_id = ? AND mapped_nutrient IS NOT NULL ORDER BY created_at DESC LIMIT 4");
+                $stmt = $pdo->prepare("SELECT symptom_keyword, mapped_nutrient FROM ai_extracted_symptoms WHERE user_id = ? AND mapped_nutrient IS NOT NULL GROUP BY symptom_keyword, mapped_nutrient ORDER BY MAX(created_at) DESC LIMIT 4");
                 $stmt->execute([$user_id]);
                 $raw_markers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 

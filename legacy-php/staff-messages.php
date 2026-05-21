@@ -107,7 +107,7 @@ if ($selected_client) {
     }
 
     // Get Recent Symptoms
-    $stmt = $pdo->prepare("SELECT DISTINCT symptom_keyword, mapped_nutrient FROM ai_extracted_symptoms WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+    $stmt = $pdo->prepare("SELECT symptom_keyword, mapped_nutrient FROM ai_extracted_symptoms WHERE user_id = ? GROUP BY symptom_keyword, mapped_nutrient ORDER BY MAX(created_at) DESC LIMIT 5");
     $stmt->execute([$selected_client['user_id']]);
     $ai_data['symptoms'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
