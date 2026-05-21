@@ -1,0 +1,66 @@
+{
+    "system_efficiency": {
+        "title": "System Efficiency",
+        "description": {
+            "admin": "This real-time gauge tracks the overall activity of the platform. It calculates the ratio of active logs versus total users. A high score means your community is actively tracking and engaged.",
+            "staff": "Monitors the efficiency of the platform's clinical response times.",
+            "regular": "Ensures the system is operating optimally for quick data processing."
+        }
+    },
+    "staff_performance": {
+        "title": "Staff Influence",
+        "description": {
+            "admin": "This metric measures how well your staff is interacting with their assigned clients. It analyzes message response times and diary feedback frequency to give a performance score.",
+            "staff": "Highlights your client engagement rating based on response times.",
+            "regular": "Tracks the overall platform professional response metrics."
+        }
+    },
+    "recent_activity": {
+        "title": "Live Activity Feed",
+        "description": {
+            "admin": "A dedicated stream of every action happening on NutriDeq. This ensures you always have a pulse on broad platform usage.",
+            "staff": "Track recently logged diaries or interactions across assigned patients globally.",
+            "regular": "A timeline of your recent interactions with staff."
+        }
+    },
+    "nutritional_snap": {
+        "title": "Nutritional Snap",
+        "description": {
+            "admin": "A system health monitor checking database adherence for calorie and macro tracking.",
+            "staff": "Reflects the client's macro-adherence to the clinical targets you set, pulling direct from their food diaries.",
+            "regular": "Your daily health goals represented as progress rings. Complete the rings by logging your food!"
+        }
+    },
+    "recommended_plan": {
+        "title": "Recommended Plan",
+        "description": {
+            "admin": "Tracks deployment of Dietitian-created meal plans across the platform.",
+            "staff": "Quick-deploy custom nutritional guidelines and diets to assigned clients.",
+            "regular": "Your dietitian-assigned meal plans and dietary targets to guide your daily eating."
+        }
+    },
+    "hydration_flow": {
+        "title": "Hydration Flow",
+        "description": {
+            "admin": "Monitors overall telemetry of water input across all users.",
+            "staff": "Verify if the client is meeting basic hydration benchmarks.",
+            "regular": "Tap the + button every time you drink a glass of water to build a healthy habit. Hydration is critical for metabolism!"
+        }
+    },
+    "interactions": {
+        "title": "Interactions",
+        "description": {
+            "admin": "Monitors messaging channels to ensure smooth server transport.",
+            "staff": "A quick interface to review and reply to flagged patient concerns.",
+            "regular": "Direct access to your assigned Registered Dietitian to ask clinical or dietary questions!"
+        }
+    },
+    "body_composition": {
+        "title": "Body Composition",
+        "description": {
+            "admin": "Tracks BMI demographic changes on a platform-wide scale.",
+            "staff": "A longitudinal chart assessing a client's weight trend and biological changes.",
+            "regular": "Watch your progress! Update your weight to visualize your health journey over time."
+        }
+    }
+}
