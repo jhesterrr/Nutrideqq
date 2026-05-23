@@ -17,6 +17,15 @@ try {
     $db->exec($sql2);
     echo "✅ Successfully updated 'food_tracking' table.<br>";
 
+    // Add sodium and sugar to food_logs
+    try {
+        $db->exec('ALTER TABLE food_logs ADD COLUMN sodium DECIMAL(10,2) DEFAULT 0 AFTER fat');
+        $db->exec('ALTER TABLE food_logs ADD COLUMN sugar DECIMAL(10,2) DEFAULT 0 AFTER sodium');
+        echo '✅ Successfully added sodium and sugar to food_logs.<br>';
+    } catch (Exception $e) { 
+        echo 'ℹ️ Sodium/Sugar columns might already exist.<br>'; 
+    }
+
     echo "<br><b>Migration complete!</b><br>";
     echo "<span style='color:red;'>IMPORTANT: Please delete this file (run_migration.php) from your repository immediately for security.</span>";
 
@@ -24,9 +33,3 @@ try {
     echo "❌ Error: " . $e->getMessage();
 }
 ?>
-    // Add sodium and sugar to food_logs
-    try {
-        ->exec('ALTER TABLE food_logs ADD COLUMN sodium DECIMAL(10,2) DEFAULT 0 AFTER fat');
-        ->exec('ALTER TABLE food_logs ADD COLUMN sugar DECIMAL(10,2) DEFAULT 0 AFTER sodium');
-        echo '? Successfully added sodium and sugar to food_logs.<br>';
-    } catch (Exception ) { echo '?? Sodium/Sugar columns might already exist.<br>'; }

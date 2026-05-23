@@ -56,7 +56,10 @@ try {
         "wellness_messages" => [
             "ADD COLUMN attachment_path VARCHAR(255) NULL AFTER content",
             "ADD COLUMN message_type ENUM('text', 'image', 'file') DEFAULT 'text' AFTER attachment_path",
-            "ADD COLUMN read_at DATETIME NULL AFTER message_type"
+            "ADD COLUMN read_at DATETIME NULL AFTER message_type",
+            "ADD COLUMN reply_to_id INT NULL DEFAULT NULL AFTER message_type",
+            "ADD COLUMN is_unsent TINYINT(1) NOT NULL DEFAULT 0 AFTER reply_to_id",
+            "ADD COLUMN is_read TINYINT(1) NOT NULL DEFAULT 0 AFTER is_unsent"
         ],
         "internal_thread_messages" => [
             "ADD COLUMN attachment_path VARCHAR(255) NULL AFTER message",
