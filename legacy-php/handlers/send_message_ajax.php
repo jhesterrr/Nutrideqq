@@ -32,6 +32,8 @@ if ($user_role === 'admin') {
 
 $recipient_id = isset($_POST['recipient_id']) ? intval($_POST['recipient_id']) : 0;
 $message_text = isset($_POST['message']) ? trim($_POST['message']) : '';
+$reply_to_id = isset($_POST['reply_to_id']) ? intval($_POST['reply_to_id']) : null;
+if ($reply_to_id <= 0) $reply_to_id = null;
 
 // Validation: Message can be empty IF an attachment exists
 if ($recipient_id <= 0 || (empty($message_text) && !isset($_FILES['attachment']))) {
@@ -104,9 +106,37 @@ try {
     // If sender is staff, sender_id is $user_id (from users table)
     $final_sender_id = ($sender_type === 'client') ? $client_id : $user_id;
 
-    $ins_msg = $pdo->prepare("INSERT INTO wellness_messages (conversation_id, sender_type, sender_id, content, attachment_path, message_type, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-    $ins_msg->execute([$conv_id, $sender_type, $final_sender_id, $message_text, $attachment_path, $msg_type]);
+    $ins_msg = $pdo->prepare("INSERT INTO wellness_messages (conversation_id, sender_type, sender_id, content, attachment_path, message_type, reply_to_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+    $ins_msg->execute([$conv_id, $sender_type, $final_sender_id, $message_text, $attachment_path, $msg_type, $reply_to_id]);
     $new_msg_id = $pdo->lastInsertId();
+
+    // Fetch reply parent details if applicable
+    $reply_message = null;
+    $reply_sender_name = null;
+    if ($reply_to_id) {
+        $p_stmt = $pdo->prepare("
+            SELECT wm.content,
+            CASE 
+                WHEN wm.sender_type = 'client' THEN c.name
+                WHEN wm.sender_type = 'staff' THEN u.name
+                WHEN wm.sender_type = 'ai' THEN 'NutriDeq AI'
+                ELSE 'Unknown'
+            END as sender_name
+            FROM wellness_messages wm
+            LEFT JOIN clients c ON wm.sender_type = 'client' AND wm.sender_id = c.id
+            LEFT JOIN users u ON wm.sender_type = 'staff' AND wm.sender_id = u.id
+            WHERE wm.id = ?
+        ");
+        $p_stmt->execute([$reply_to_id]);
+        $parent = $p_stmt->fetch();
+        if ($parent) {
+            $reply_message = $parent['content'];
+            $reply_sender_name = $parent['sender_name'];
+            if (strtolower($reply_sender_name) === 'users' || strtolower($reply_sender_name) === 'admin') {
+                $reply_sender_name = 'Dietician Staff';
+            }
+        }
+    }
 
     // --- 5. NLP AI Integration (Passive Monitoring) ---
     if ($sender_type === 'client' && !empty($message_text)) {
@@ -126,7 +156,11 @@ try {
             'message_type' => $msg_type,
             'file_name' => 'NutriDeq-Clinical-Report.pdf',
             'pretty_time' => date('g:i A'),
-            'type' => 'sent'
+            'type' => 'sent',
+            'is_unsent' => false,
+            'reply_to_id' => $reply_to_id,
+            'reply_message' => $reply_message,
+            'reply_sender_name' => $reply_sender_name
         ]
     ]);
 

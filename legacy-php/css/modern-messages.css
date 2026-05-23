@@ -592,61 +592,84 @@ textarea:focus {
     opacity: 0.9;
 }
 
-/* Reply Feature Styles */
+/* ── Message Action Buttons (Reply + Unsend) ── */
 .message-bubble-container {
-    position: relative;
     display: flex;
     align-items: center;
+    gap: 6px;
 }
 
-.reply-action-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%) scale(0);
-    background: var(--bg-surface);
-    color: var(--primary);
-    border: 1px solid rgba(46, 139, 87, 0.2);
+/* Action group: flex column of icon buttons */
+.msg-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+}
+
+.message-wrapper:hover .msg-actions {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* For SENT messages: actions appear to the LEFT of the bubble */
+.message-wrapper.sent .msg-actions {
+    order: -1;
+}
+
+/* For RECEIVED messages: actions appear to the RIGHT of the bubble */
+.message-wrapper.received .msg-actions {
+    order: 1;
+}
+
+/* Shared base style for all action buttons */
+.reply-action-btn,
+.unsend-action-btn {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    opacity: 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-    font-size: 0.9rem;
-}
-
-/* Larger hit area */
-.reply-action-btn::after {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -15px;
-    right: -15px;
-    bottom: -10px;
-}
-
-.message-wrapper.received .reply-action-btn {
-    right: -40px;
-}
-
-.message-wrapper.sent .reply-action-btn {
-    left: -40px;
-}
-
-.message-wrapper:hover .reply-action-btn {
-    transform: translateY(-50%) scale(1);
+    font-size: 0.78rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* No absolute positioning needed */
+    position: static;
+    transform: none;
     opacity: 1;
 }
 
+.reply-action-btn {
+    color: #059669;
+}
+
 .reply-action-btn:hover {
-    background: var(--primary);
+    background: #059669;
     color: white;
-    transform: translateY(-50%) scale(1.15);
+    border-color: #059669;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+    transform: scale(1.12);
+}
+
+.unsend-action-btn {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.15);
+}
+
+.unsend-action-btn:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    transform: scale(1.12);
 }
 
 .reply-banner {
@@ -708,3 +731,35 @@ textarea:focus {
 .lightbox-content { max-width: 90%; max-height: 90%; border-radius: 12px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); transform: scale(0.9); animation: zoomUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 @keyframes zoomUp { to { transform: scale(1); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Unsent Message Styling */
+.message-bubble.unsent {
+    font-style: italic !important;
+    opacity: 0.8 !important;
+    background: #f1f5f9 !important; /* Soft Slate-100 grey background */
+    border: 1px dashed #cbd5e1 !important; /* Slate-300 dashed border */
+    color: #475569 !important; /* Slate-600 highly readable text */
+    box-shadow: none !important;
+}
+
+.message-wrapper.sent .message-bubble.unsent {
+    background: #f1f5f9 !important;
+    border: 1px dashed #cbd5e1 !important;
+    color: #475569 !important;
+    box-shadow: none !important;
+}
+
+.message-wrapper.received .message-bubble.unsent {
+    background: #f8fafc !important; /* Extremely soft Slate-50 background */
+    border: 1px dashed #cbd5e1 !important;
+    color: #475569 !important;
+    box-shadow: none !important;
+}
+
+.message-bubble.unsent .msg-time {
+    color: #64748b !important; /* Slate-500 for the time */
+    opacity: 0.8;
+}
+
+/* Unsend button styles are merged above into .unsend-action-btn within .msg-actions */
+/* No override needed here — handled by the .msg-actions system */

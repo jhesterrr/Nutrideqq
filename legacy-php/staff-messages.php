@@ -127,7 +127,7 @@ if ($selected_client) {
     <link rel="stylesheet" href="css/sidebar.css">
     
     <!-- Messaging Specific (Pending full refactor) -->
-    <link rel="stylesheet" href="css/modern-messages.css">
+    <link rel="stylesheet" href="css/modern-messages.css?v=102">
     <style>
         /* ═══════════ WELLNESS INBOX ═══════════ */
         .dash-premium { background: transparent !important; }
@@ -627,7 +627,7 @@ if ($selected_client) {
             </div><!-- /.messaging-wrapper -->
 
             <?php if ($selected_client_id): ?>
-                <script src="scripts/chat-controller.js"></script>
+                <script src="scripts/chat-controller.js?v=102"></script>
                 <script>
                     (function() {
                         const initChat = () => {

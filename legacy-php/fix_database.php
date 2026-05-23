@@ -34,6 +34,8 @@ try {
     addColumn($pdo, 'internal_thread_messages', 'message_type', "ENUM('text', 'image', 'file') DEFAULT 'text' AFTER attachment_path");
     addColumn($pdo, 'wellness_messages', 'attachment_path', 'VARCHAR(255) NULL AFTER content');
     addColumn($pdo, 'wellness_messages', 'message_type', "ENUM('text', 'image', 'file') DEFAULT 'text' AFTER attachment_path");
+    addColumn($pdo, 'wellness_messages', 'reply_to_id', 'INT NULL DEFAULT NULL AFTER message_type');
+    addColumn($pdo, 'wellness_messages', 'is_unsent', 'TINYINT(1) DEFAULT 0 AFTER reply_to_id');
 
     echo "<h2>🎉 CLOUD SYNC COMPLETE!</h2>";
     echo "<p>Your database is now 100% compatible with the Render/Aiven environment.</p>";

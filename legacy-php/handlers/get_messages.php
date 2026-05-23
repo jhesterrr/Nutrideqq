@@ -95,10 +95,22 @@ try {
                 WHEN wm.sender_type = 'ai' THEN 'NutriDeq AI'
                 ELSE 'Unknown'
             END as sender_name,
-            wm.attachment_path, wm.message_type
+            wm.attachment_path, wm.message_type,
+            wm.reply_to_id, wm.is_unsent,
+            parent.content as reply_message,
+            CASE 
+                WHEN parent.sender_type = 'client' THEN pc.name
+                WHEN parent.sender_type = 'staff' THEN pu.name
+                WHEN parent.sender_type = 'ai' THEN 'NutriDeq AI'
+                ELSE NULL
+            END as reply_sender_name,
+            parent.is_unsent as reply_is_unsent
             FROM wellness_messages wm
             LEFT JOIN clients c ON wm.sender_type = 'client' AND wm.sender_id = c.id 
             LEFT JOIN users u ON wm.sender_type = 'staff' AND wm.sender_id = u.id
+            LEFT JOIN wellness_messages parent ON wm.reply_to_id = parent.id
+            LEFT JOIN clients pc ON parent.sender_type = 'client' AND parent.sender_id = pc.id
+            LEFT JOIN users pu ON parent.sender_type = 'staff' AND parent.sender_id = pu.id
             WHERE wm.conversation_id = ?
             ORDER BY wm.created_at ASC
         ";
@@ -137,18 +149,39 @@ try {
                 $displayName = 'Dietician Staff';
             }
 
+            $is_unsent = (bool)($row['is_unsent'] ?? 0);
+            $msg_content = $is_unsent ? 'This message was unsent' : $row['content'];
+            $msg_type = $is_unsent ? 'text' : ($row['message_type'] ?? 'text');
+            $attachment = $is_unsent ? null : $row['attachment_path'];
+
+            $reply_to_id = $row['reply_to_id'] ?? null;
+            $reply_message = null;
+            $reply_sender_name = null;
+            if ($reply_to_id) {
+                $reply_sender_name = $row['reply_sender_name'] ?? 'Unknown';
+                if ($row['reply_is_unsent'] ?? 0) {
+                    $reply_message = 'This message was unsent';
+                } else {
+                    $reply_message = $row['reply_message'] ?? '';
+                }
+            }
+
             $messages[] = [
                 'id' => $row['id'],
-                'message' => $row['content'],
+                'message' => $msg_content,
                 'sender_type' => $row['sender_type'],
                 'sender_name' => $displayName,
                 'type' => $is_me ? 'sent' : 'received',
                 'pretty_time' => date('g:i A', strtotime($row['created_at'])),
                 'read' => !is_null($row['read_at']),
-                'attachment_path' => $row['attachment_path'],
-                'message_type' => $row['message_type'] ?? 'text',
+                'attachment_path' => $attachment,
+                'message_type' => $msg_type,
                 'file_name' => 'NutriDeq-Clinical-Report.pdf',
-                'date_separator' => $separator
+                'date_separator' => $separator,
+                'is_unsent' => $is_unsent,
+                'reply_to_id' => $reply_to_id,
+                'reply_message' => $reply_message,
+                'reply_sender_name' => $reply_sender_name
             ];
         }
 

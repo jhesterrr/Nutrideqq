@@ -111,7 +111,7 @@ if ($selected_staff_id) {
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/modern-messages.css">
+    <link rel="stylesheet" href="css/modern-messages.css?v=102">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <!-- Platform Specific Styles -->
@@ -138,39 +138,13 @@ if ($selected_staff_id) {
                 text-overflow: ellipsis;
             }
             #backToInbox {
-    <link rel="stylesheet" href="css/mobile-style.css" media="all and (max-width: 1024px)">
-    <style>
-        @media screen and (max-width: 768px) {
-            .messaging-wrapper {
-                height: calc(100vh - 70px) !important;
-                margin: 0 !important;
-                border-radius: 0 !important;
-            }
-            .msg-sidebar {
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            .chat-header-user {
-                max-width: 70%;
-            }
-            .header-name {
-                font-size: 0.9rem !important;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            #backToInbox {
                 display: inline-flex !important;
             }
         }
-        
         /* Hide back button on desktop */
         @media screen and (min-width: 769px) {
-            #backToInbox {
-                display: none !important;
-            }
+            #backToInbox { display: none !important; }
         }
-        
         .message-wrapper.received .message-bubble {
             background: #f1f5f9 !important;
             border: 1px solid rgba(0,0,0,0.1) !important;
@@ -304,7 +278,7 @@ if ($selected_staff_id) {
 
             <?php if ($selected_staff_id): ?>
                 <script>const BASE_URL = '';</script>
-                <script src="scripts/chat-controller.js?v=101"></script>
+                <script src="scripts/chat-controller.js?v=102"></script>
                 <script>
                     (function() {
                         const initChat = () => {
