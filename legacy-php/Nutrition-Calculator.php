@@ -583,16 +583,20 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 
                 updateRing('bmiRing', bmi, 40);
 
-                // TDEE Capacity (Standard PAL Multipliers)
-                const activityMap = { sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725 };
-                const multiplier = activityMap[currentActivity] || 1.2;
-                let bmr = currentSex === 'male' ? 
-                    (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5 : 
-                    (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
-                
-                const tdee = Math.round(bmr * multiplier);
+                // TDEE via Tannhauser DBW Method
+                // Step 1: Compute Desirable Body Weight (DBW) using Tannhauser formula
+                //   DBW (kg) = (Height cm - 100) - 10% of (Height cm - 100)
+                //            = (Height cm - 100) * 0.9
+                const tannhauserDbw = (heightCm - 100) * 0.9;
+
+                // Step 2: Apply kcal/kg of DBW based on activity level
+                // (Standard Philippine clinical nutrition values)
+                const kcalPerKgMap = { sedentary: 25.5, light: 30.5, moderate: 35.5, very: 42 };
+                const kcalPerKg = kcalPerKgMap[currentActivity] || 25.5;
+
+                const tdee = Math.round(tannhauserDbw * kcalPerKg);
                 const tdeeEl = document.getElementById('tdeeResult');
-                
+
                 if (!isNaN(tdee) && tdee > 0) {
                     tdeeEl.textContent = tdee;
                     updateRing('tdeeRing', tdee, 4000);
