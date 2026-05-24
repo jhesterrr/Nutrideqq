@@ -391,7 +391,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 
                         <!-- DBW Terminal -->
                         <div class="terminal-panel" style="padding: 24px; border: 1px solid var(--primary-light) !important;">
-                             <div class="hud-lbl" style="margin-bottom: 12px; color: var(--primary);">Ideal Weight Formula</div>
+                             <div class="hud-lbl" style="margin-bottom: 12px; color: var(--primary);">Desirable Weight Formula</div>
                              <div class="pill-nav" id="methodToggle">
                                  <div class="pill-item active" data-val="tannhauser">Tan</div>
                                  <div class="pill-item" data-val="hamwi">Hamwi</div>
@@ -583,18 +583,23 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 
                 updateRing('bmiRing', bmi, 40);
 
-                // TDEE via Tannhauser DBW Method
-                // Step 1: Compute Desirable Body Weight (DBW) using Tannhauser formula
-                //   DBW (kg) = (Height cm - 100) - 10% of (Height cm - 100)
-                //            = (Height cm - 100) * 0.9
-                const tannhauserDbw = (heightCm - 100) * 0.9;
+                // TDEE using DBW Method
+                let dbw = 0;
+                const heightIn = heightCm / 2.54;
+                const inchesOver5ft = Math.max(0, heightIn - 60);
+
+                if (currentMethod === 'tannhauser') {
+                    dbw = (heightCm - 100) * 0.9;
+                } else if (currentMethod === 'hamwi') {
+                    dbw = currentSex === 'male' ? 48 + (2.7 * inchesOver5ft) : 45 + (2.2 * inchesOver5ft);
+                }
 
                 // Step 2: Apply kcal/kg of DBW based on activity level
                 // (Standard Philippine clinical nutrition values)
-                const kcalPerKgMap = { sedentary: 25.5, light: 30.5, moderate: 35.5, very: 42 };
-                const kcalPerKg = kcalPerKgMap[currentActivity] || 25.5;
+                const kcalPerKgMap = { sedentary: 30, light: 35, moderate: 40, very: 45 };
+                const kcalPerKg = kcalPerKgMap[currentActivity] || 30;
 
-                const tdee = Math.round(tannhauserDbw * kcalPerKg);
+                const tdee = Math.round(dbw * kcalPerKg);
                 const tdeeEl = document.getElementById('tdeeResult');
 
                 if (!isNaN(tdee) && tdee > 0) {
@@ -638,16 +643,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                     document.getElementById('whtrBar').style.width = (whtr * 100) + '%';
                 }
 
-                // Desirable Body Weight Method
-                let dbw = 0;
-                const heightIn = heightCm / 2.54;
-                const inchesOver5ft = Math.max(0, heightIn - 60);
-
-                if (currentMethod === 'tannhauser') {
-                    dbw = (heightCm - 100) - ((heightCm - 100) * 0.1);
-                } else if (currentMethod === 'hamwi') {
-                    dbw = currentSex === 'male' ? 48 + (2.7 * inchesOver5ft) : 45 + (2.2 * inchesOver5ft);
-                }
+                // Desirable Body Weight Method (Display)
                 document.getElementById('dbwResult').textContent = Math.round(dbw);
 
                 // --- Generate Guidance Tips ---

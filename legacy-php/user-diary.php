@@ -603,37 +603,41 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                                 </div>
                             <?php else: ?>
                                 <?php foreach ($items as $item): ?>
-                                    <div class="food-item">
-                                        <div class="food-info">
-                                            <h4><?php echo htmlspecialchars($item['food_name']); ?></h4>
-                                            <p><?php echo htmlspecialchars($item['display_size'] ?: number_format($item['serving_size'], 0) . 'g'); ?></p>
-                                            
-                                            <?php 
-                                            $micros = $fct->getMicronutrientsForFood($item['food_id'], $item['serving_size']);
-                                            if (!empty($micros)): 
-                                            ?>
-                                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px; line-height: 1.4; display: flex; flex-wrap: wrap; gap: 8px;">
-                                                <?php foreach($micros as $micro): ?>
-                                                    <span style="background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; color: #059669; font-weight: 600;"><?php echo htmlspecialchars($micro); ?></span>
-                                                <?php endforeach; ?>
+                                    <div class="food-item" style="display: flex; flex-direction: column; align-items: stretch;">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                                            <div class="food-info" style="flex: 1;">
+                                                <h4><?php echo htmlspecialchars($item['food_name']); ?></h4>
+                                                <p style="margin-bottom: 8px;"><?php echo htmlspecialchars($item['display_size'] ?: number_format($item['serving_size'], 0) . 'g'); ?></p>
+                                                
+                                                <?php 
+                                                $micros = $fct->getMicronutrientsForFood($item['food_id'], $item['serving_size']);
+                                                if (!empty($micros)): 
+                                                ?>
+                                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px; line-height: 1.4; display: flex; flex-wrap: wrap; gap: 8px;">
+                                                    <?php foreach($micros as $micro): ?>
+                                                        <span style="background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; color: #059669; font-weight: 600;"><?php echo htmlspecialchars($micro); ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                                <?php endif; ?>
                                             </div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="food-macros">
-                                            <span class="cals"><?php echo number_format($item['calories'], 0); ?> kcal</span>
-                                            <span class="macro-breakdown">
-                                                P: <?php echo number_format($item['protein'], 1); ?>g | 
-                                                C: <?php echo number_format($item['carbs'], 1); ?>g | 
-                                                F: <?php echo number_format($item['fat'], 1); ?>g
-                                            </span>
-                                        </div>
-                                        <?php if ($user_role === 'user'): ?>
-                                            <div class="food-actions" style="margin-left: 15px;">
-                                                <button onclick="deleteLog(<?php echo $item['id']; ?>)" class="btn-delete" style="color: #ff4d4f; background: none; border: none; cursor: pointer; font-size: 1.1rem;">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
+                                            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                                                <div class="food-macros" style="text-align: right; margin-bottom: 4px;">
+                                                    <span class="cals" style="font-weight: 700; color: #1e293b; font-size: 1.1rem;"><?php echo number_format($item['calories'], 0); ?> kcal</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 12px;">
+                                                    <span class="macro-breakdown" style="font-size: 0.85rem; color: #64748b;">
+                                                        P: <?php echo number_format($item['protein'], 1); ?>g | 
+                                                        C: <?php echo number_format($item['carbs'], 1); ?>g | 
+                                                        F: <?php echo number_format($item['fat'], 1); ?>g
+                                                    </span>
+                                                    <?php if ($user_role === 'user'): ?>
+                                                        <button onclick="deleteLog(<?php echo $item['id']; ?>)" class="btn-delete" style="color: #ef4444; background: none; border: none; cursor: pointer; font-size: 1.1rem;">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
-                                        <?php endif; ?>
+                                        </div>
                                     </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
