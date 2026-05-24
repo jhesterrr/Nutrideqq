@@ -30,12 +30,14 @@ $nav_links_array = getNavigationLinks($user_role, 'admin-client-management.php')
 
 function getInitials($name)
 {
-    $names = explode(' ', $name);
+    $names = explode(' ', trim($name ?? ''));
     $initials = '';
     foreach ($names as $n) {
-        $initials .= strtoupper($n[0]);
+        if ($n !== '') {
+            $initials .= strtoupper($n[0]);
+        }
     }
-    return substr($initials, 0, 2);
+    return !empty($initials) ? substr($initials, 0, 2) : 'U';
 }
 $user_initials = getInitials($user_name);
 
