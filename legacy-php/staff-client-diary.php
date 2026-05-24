@@ -11,6 +11,10 @@ if (strpos(strtolower(PHP_OS), 'win') !== false) {
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once 'database.php';
 require_once 'navigation.php';
+require_once 'api/fct_helper.php';
+
+$fctHelper = new FCTHelper();
+
 
 // Check staff/admin login
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || ($_SESSION['user_role'] !== 'staff' && $_SESSION['user_role'] !== 'admin')) {
@@ -1033,27 +1037,35 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                                                                     <span class="needs-review-badge"><i class="fas fa-exclamation-triangle"></i> Needs Review</span>
                                                                 <?php endif; ?>
                                                                 <span style="font-size: 0.78rem; color: #64748b; font-weight: 500; display: block; margin-top: 2px;">(<?php echo number_format($item['serving_size'], 0); ?>g)</span>
+                                                                
+                                                                <?php 
+                                                                $micros = $fctHelper->getMicronutrientsForFood($item['food_id'], $item['serving_size']);
+                                                                if (!empty($micros)): 
+                                                                ?>
+                                                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px; line-height: 1.4; display: flex; flex-wrap: wrap; gap: 8px;">
+                                                                    <?php foreach($micros as $micro): ?>
+                                                                        <span style="background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; color: #059669; font-weight: 600;"><?php echo htmlspecialchars($micro); ?></span>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                                <?php endif; ?>
                                                             </div>
                                                             <div class="entry-macros" style="display: flex; gap: 12px; align-items: center;">
                                                                 <div style="text-align: center; min-width: 58px;">
                                                                     <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Cals</div>
-                                                                    <input type="number" step="any" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="calories" value="<?php echo $item['calories']; ?>">
+                                                                    <div style="font-size: 0.85rem; font-weight: 600; color: #334155; padding: 6px 4px;"><?php echo number_format($item['calories'], 0); ?></div>
                                                                 </div>
                                                                 <div style="text-align: center; min-width: 58px;">
                                                                     <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Prot</div>
-                                                                    <input type="number" step="any" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="protein" value="<?php echo $item['protein']; ?>">
+                                                                    <div style="font-size: 0.85rem; font-weight: 600; color: #334155; padding: 6px 4px;"><?php echo number_format($item['protein'], 1); ?></div>
                                                                 </div>
                                                                 <div style="text-align: center; min-width: 58px;">
                                                                     <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Carb</div>
-                                                                    <input type="number" step="any" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="carbs" value="<?php echo $item['carbs']; ?>">
+                                                                    <div style="font-size: 0.85rem; font-weight: 600; color: #334155; padding: 6px 4px;"><?php echo number_format($item['carbs'], 1); ?></div>
                                                                 </div>
                                                                 <div style="text-align: center; min-width: 58px;">
                                                                     <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Fat</div>
-                                                                    <input type="number" step="any" class="macro-edit-input" data-id="<?php echo $item['id']; ?>" data-field="fat" value="<?php echo $item['fat']; ?>">
+                                                                    <div style="font-size: 0.85rem; font-weight: 600; color: #334155; padding: 6px 4px;"><?php echo number_format($item['fat'], 1); ?></div>
                                                                 </div>
-                                                                <button class="btn-save-macro" onclick="saveMacro(this, <?php echo $item['id']; ?>)">
-                                                                    <i class="fas fa-check"></i>
-                                                                </button>
                                                             </div>
                                                         </div>
                                                     <?php endforeach; ?>

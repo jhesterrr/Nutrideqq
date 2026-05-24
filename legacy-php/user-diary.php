@@ -607,6 +607,17 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                                         <div class="food-info">
                                             <h4><?php echo htmlspecialchars($item['food_name']); ?></h4>
                                             <p><?php echo htmlspecialchars($item['display_size'] ?: number_format($item['serving_size'], 0) . 'g'); ?></p>
+                                            
+                                            <?php 
+                                            $micros = $fct->getMicronutrientsForFood($item['food_id'], $item['serving_size']);
+                                            if (!empty($micros)): 
+                                            ?>
+                                            <div style="font-size: 0.75rem; color: #64748b; margin-top: 6px; line-height: 1.4; display: flex; flex-wrap: wrap; gap: 8px;">
+                                                <?php foreach($micros as $micro): ?>
+                                                    <span style="background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 12px; color: #059669; font-weight: 600;"><?php echo htmlspecialchars($micro); ?></span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="food-macros">
                                             <span class="cals"><?php echo number_format($item['calories'], 0); ?> kcal</span>

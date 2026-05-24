@@ -156,4 +156,27 @@ class FCTHelper
         $stmt = $this->conn->prepare("DELETE FROM fct_food_items WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    public function getMicronutrientsForFood($food_id, $serving_size) {
+        if (!$food_id) return [];
+        $sql = "SELECT n.nutrient_name, n.value, n.unit 
+                FROM fct_nutrients n 
+                JOIN fct_food_items f ON f.id = n.food_item_id 
+                WHERE f.food_id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$food_id]);
+        $nutrients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $exclude = ['Energy', 'Protein', 'Fat', 'Carbohydrate', 'Water', 'Ash', 'Edible Portion'];
+        $result = [];
+        foreach ($nutrients as $n) {
+            if (!in_array($n['nutrient_name'], $exclude)) {
+                $val = floatval($n['value']) * ($serving_size / 100);
+                if ($val > 0) {
+                    $result[] = $n['nutrient_name'] . ': ' . number_format($val, 1) . $n['unit'];
+                }
+            }
+        }
+        return $result;
+    }
 }
