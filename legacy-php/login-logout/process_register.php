@@ -1,21 +1,12 @@
 <?php
-// process_register.php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
 
 // require the Database class from project root
 require_once __DIR__ . '/../database.php';
 
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     // Get form data
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);

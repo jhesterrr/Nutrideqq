@@ -687,15 +687,16 @@
 }
 
 .exchange-value.highlight {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: #fff !important;
-    padding: 5px 12px;
-    border-radius: 50px;
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: var(--primary) !important;
+    padding: 4px 12px;
+    border-radius: 8px;
     font-size: 0.88rem;
-    font-weight: 900;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3), 0 0 0 3px rgba(16, 185, 129, 0.06);
+    font-weight: 800;
+    border: 1.5px solid rgba(16, 185, 129, 0.18);
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.06);
     z-index: 10;
-    transform: scale(1.08);
+    transform: none;
 }
 
 /* Active Column Tracing */
@@ -707,14 +708,16 @@
 }
 
 .calorie-ref-table th.active {
-    background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
-    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.08) !important;
+    color: var(--primary) !important;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08);
+    border-radius: 8px;
     padding: 8px 6px !important;
-    transform: translateY(-1px);
+    transform: none;
     z-index: 20;
     font-size: 0.78rem !important;
+    position: relative;
+    font-weight: 800;
 }
 
 /* ─── 10. ELITE EXCHANGE LIST (FEL) ENHANCEMENTS ─── */
@@ -794,7 +797,7 @@
 
 @media (max-width: 1024px) {
     .calorie-ref-wrap {
-        padding: 5px;
+        padding: 12px;
         border-radius: 20px;
     }
 }
@@ -1283,11 +1286,11 @@
 }
 
 .calorie-pill.active {
-    background: linear-gradient(135deg, #10b981, #059669) !important;
-    color: white !important;
-    border-color: transparent;
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35);
-    transform: translateY(-3px) scale(1.05);
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    color: var(--primary) !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+    transform: translateY(-1px);
 }
 
 .calorie-pill.active::before {
@@ -1302,6 +1305,7 @@
 /* Mobile Cards Enhanced */
 .mobile-calorie-cards {
     padding: 16px 0;
+    gap: 12px;
 }
 
 .mcv-category-header {
@@ -1321,7 +1325,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 16px;
+    padding: 16px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     border-radius: 14px;
@@ -1329,6 +1333,7 @@
     border: 1px solid rgba(255, 255, 255, 0.5);
     transition: all 0.3s;
     animation: slideInRight 0.4s ease-out backwards;
+    min-height: 52px;
 }
 
 .mcv-row:nth-child(odd) { animation-delay: 0.05s; }
@@ -1363,7 +1368,7 @@
     font-size: 1.1rem;
     color: #10b981;
     background: rgba(16, 185, 129, 0.08);
-    padding: 4px 14px;
+    padding: 6px 16px;
     border-radius: 10px;
 }
 

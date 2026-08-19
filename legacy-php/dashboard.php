@@ -1,18 +1,6 @@
 <?php
-// Fix for XAMPP Permission Denied session error
-$session_path = __DIR__ . DIRECTORY_SEPARATOR . 'api' . DIRECTORY_SEPARATOR . 'sessions';
-if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-session_save_path($session_path);
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 // FORCE REFRESH - ANTI CACHE
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -92,7 +80,7 @@ $pdo = $database->getConnection();
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>NutriDeq - <?php echo getDashboardTitle($user_role); ?></title>
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     <link
@@ -359,7 +347,7 @@ $pdo = $database->getConnection();
                         $staff_count = (int) ($row['staff_count'] ?? 0);
                         $staff_active_count = (int) ($row['staff_active'] ?? 0);
                     }
-                } catch (Exception $e) {}
+                } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
 
                 try {
                     $week_curr = $pdo->prepare("SELECT COUNT(*) FROM users WHERE YEARWEEK(created_at,1)=YEARWEEK(CURDATE(),1)");
@@ -373,7 +361,7 @@ $pdo = $database->getConnection();
 
                 try {
                     $staff_month_curr = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role='staff' AND YEAR(created_at)=YEAR(CURDATE()) AND MONTH(created_at)=MONTH(CURDATE())");
-                    $staff_month_prev = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role='staff' AND YEAR(created_at)=YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND MONTH(created_at)=MONTH(CURDATE())"); // Truncated original logic for safety
+                    $staff_month_prev = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role='staff' AND YEAR(created_at)=YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) AND MONTH(created_at)=MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))");
                     $staff_month_curr->execute();
                     $staff_month_prev->execute();
                     $staff_month_diff = (int) $staff_month_curr->fetchColumn() - (int) $staff_month_prev->fetchColumn();
@@ -485,7 +473,7 @@ $pdo = $database->getConnection();
                         <div class="charts-section" style="grid-template-columns: 1fr 1.2fr; gap: 25px;">
                             <div class="chart-container nutri-glass" id="staffInfluenceContainer" style="box-shadow: none; border: none; background: rgba(0,0,0,0.01); padding: 20px;">
                                 <div class="chart-header" style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-                                    <h3 style="font-family: 'Outfit'; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fas fa-users-cog"></i> Performance Influence <info-button feature="staff_performance" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h3>
+                                    <h3 style="font-family: 'Outfit'; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;"><i class="fas fa-users-cog"></i> Performance Influence <info-button feature="staff_performance" role="<?php echo htmlspecialchars($_SESSION['user_role'] ?? 'user'); ?>"></info-button></h3>
                                     <span id="deltaSelectedBadge" style="display: none; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">--</span>
                                 </div>
                                 <div id="staffInfluenceList" style="display: flex; flex-direction: column; gap: 12px; max-height: 280px; overflow-y: auto; padding-right: 8px;">
@@ -524,7 +512,7 @@ $pdo = $database->getConnection();
 
                     <div class="dash-panel nutri-glass">
                         <div class="dash-panel-header">
-                            <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-bolt"></i> System Feed <info-button feature="recent_activity" role="<?php echo $_SESSION['role'] ?? 'regular'; ?>"></info-button></h2>
+                            <h2 class="dash-panel-title" style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-bolt"></i> System Feed <info-button feature="recent_activity" role="<?php echo htmlspecialchars($_SESSION['user_role'] ?? 'user'); ?>"></info-button></h2>
                             <button class="btn btn-outline" id="refreshSystemActivity" style="border-radius: 12px; font-size: 0.75rem; padding: 4px 8px;">Refresh</button>
                         </div>
                         <div class="activity-feed" id="recentActivityList" style="max-height: 280px; overflow-y: auto;">
@@ -630,17 +618,17 @@ $pdo = $database->getConnection();
                                 <tbody>
                                     <?php 
                                         try {
-                                            $stmt = $pdo->prepare("SELECT name, status, created_at FROM users WHERE role = 'regular' ORDER BY created_at DESC LIMIT 5");
+                                             $stmt = $pdo->prepare("SELECT name, status, created_at FROM users WHERE role = 'user' ORDER BY created_at DESC LIMIT 5");
                                             $stmt->execute();
                                             while($row = $stmt->fetch()) {
-                                                $badge = $row['status'] === 'verified' ? 'success' : 'warning';
+                                                 $badge = $row['status'] === 'active' ? 'success' : 'warning';
                                                 echo "<tr style='border-bottom: 1px solid rgba(0,0,0,0.02);'>
                                                     <td style='padding: 12px 10px; font-weight: 600; color: #1e293b;'>".htmlspecialchars($row['name'])."</td>
                                                     <td style='padding: 12px 10px;'><span style='font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; background: ".($badge === 'success' ? '#e9f7ef' : '#fef9e7')."; color: ".($badge === 'success' ? '#27ae60' : '#f39c12')."; font-weight: 700;'>".ucfirst($row['status'])."</span></td>
                                                     <td style='padding: 12px 10px; color: #94a3b8;'>".date('M j', strtotime($row['created_at']))."</td>
                                                 </tr>";
                                             }
-                                        } catch(Exception $e) {}
+                                        } catch(Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
                                     ?>
                                 </tbody>
                             </table>
@@ -801,12 +789,12 @@ $pdo = $database->getConnection();
                             if ($c_user_id > 0) {
                                 try {
                                     $pdo->prepare("INSERT INTO client_bmi_history (user_id, weight, height, bmi) VALUES (?, ?, ?, ?)")->execute([$c_user_id, $selected_bmi_client['weight'], $selected_bmi_client['height'], $staff_bmi]);
-                                } catch (Exception $e) {}
+                                } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
                             }
                             // Always provide at least one point for the JS chart
                             $staff_bmi_history = [['bmi' => $staff_bmi, 'date_label' => date('M d')]];
                         }
-                    } catch (Exception $e) {}
+                    } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
                     
                     // Set status based on the final staff_bmi
                     if ($staff_bmi > 0) {
@@ -1301,7 +1289,7 @@ $pdo = $database->getConnection();
                     $_SESSION['quick_update_success'] = true;
                     header("Location: dashboard.php");
                     exit();
-                } catch (Exception $e) {}
+                } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
             }
 
             // Get client data with fallback to email if user_id link is missing
@@ -1463,7 +1451,7 @@ $pdo = $database->getConnection();
                         'foods' => $analyzer->getFoodSuggestion($m['mapped_nutrient'])
                     ];
                 }
-            } catch (Exception $e) {}
+            } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
             ?>
 
             <!-- ── Premium Hero Ribbon ── -->
@@ -1503,7 +1491,7 @@ $pdo = $database->getConnection();
                     $stmt = $pdo->prepare("SELECT SUM(glasses) FROM hydration_tracking WHERE user_id = ? AND tracking_date = CURDATE()");
                     $stmt->execute([$user_id]);
                     $water_today = (int)$stmt->fetchColumn();
-                } catch (Exception $e) {}
+                } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
             ?>
             <div class="dash-hero-ribbon stagger d-1">
                 <?php if (isset($_SESSION['quick_update_success'])): ?>

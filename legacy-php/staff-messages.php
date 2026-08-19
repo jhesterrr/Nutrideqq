@@ -1,18 +1,6 @@
 <?php
-// Fix for XAMPP Permission Denied session error
-$session_path = __DIR__ . DIRECTORY_SEPARATOR . 'api' . DIRECTORY_SEPARATOR . 'sessions';
-if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-session_save_path($session_path);
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || ($_SESSION['user_role'] !== 'staff' && $_SESSION['user_role'] !== 'admin')) {
     header("Location: login-logout/NutriDeqN-Login.php");
     exit();
@@ -84,7 +72,7 @@ try {
         $params = $is_admin ? [] : [$staff_id, $staff_id, $staff_id];
         $stmt->execute($params);
         $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e2) {}
+    } catch (Exception $e2) { error_log('NutriDeq error: ' . $e->getMessage()); }
 }
 
 $selected_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
@@ -117,7 +105,7 @@ if ($selected_client) {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Wellness Inbox | NutriDeq</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Phase 2 Tokens -->
@@ -143,7 +131,7 @@ if ($selected_client) {
             overflow: hidden;
             display: grid !important;
             grid-template-columns: 340px 1fr !important;
-            height: calc(100vh - 48px) !important;
+            height: calc(var(--app-height-dvh) - 48px) !important;
             margin-top: 14px !important;
             width: 100% !important;
             max-width: 100% !important;

@@ -1,13 +1,6 @@
 <?php
-// Fix for XAMPP Permission Denied session error
-$session_path = __DIR__ . DIRECTORY_SEPARATOR . 'api' . DIRECTORY_SEPARATOR . 'sessions';
-if (!is_dir($session_path)) {
-    mkdir($session_path, 0777, true);
-}
-session_save_path($session_path);
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/session_bootstrap.php';
+
 // ANTI-CACHE HEADERS
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -18,7 +11,7 @@ header("Pragma: no-cache");
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>NutriDeq — Nutrition Data, Equity, and Quantification</title>
     <meta name="description"
         content="NutriDeq is a modern platform helping dietitians provide precise, accessible, and personalized nutrition care.">

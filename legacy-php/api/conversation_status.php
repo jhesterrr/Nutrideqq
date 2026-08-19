@@ -1,16 +1,6 @@
 <?php
-ini_set('display_errors', 0);
-// api/conversation_status.php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 header('Content-Type: application/json');
 require_once '../database.php';
 
@@ -44,7 +34,9 @@ if ($action === 'read' && $contact_id > 0) {
         // Real implementation would be: 
         // UPDATE wellness_messages SET read_at = NOW() WHERE sender_id = ? AND read_at IS NULL AND conversation_id IN (SELECT id FROM conversations WHERE ...)
         
-    } catch (Exception $e) { }
+    } catch (Exception $e) {
+        error_log('NutriDeq conversation_status error: ' . $e->getMessage());
+    }
 }
 
 echo json_encode(['success' => true]);

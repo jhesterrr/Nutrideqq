@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
@@ -82,7 +74,7 @@ $nav_links = getNavigationLinks($user_role, 'dietary-information.php');
 
         .dash-premium {
             background: transparent !important;
-            min-height: 100vh;
+            min-height: var(--app-height-dvh);
             position: relative;
         }
 
@@ -93,7 +85,7 @@ $nav_links = getNavigationLinks($user_role, 'dietary-information.php');
             margin-top: 20px;
             position: relative;
             z-index: 10;
-            height: calc(100vh - 180px);
+            height: calc(var(--app-height-dvh) - 180px);
         }
 
         .bento-nutrient-grid {

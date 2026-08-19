@@ -302,7 +302,7 @@
     box-shadow: 
         0 20px 50px -15px rgba(15, 23, 42, 0.09),
         0 5px 20px -5px rgba(15, 23, 42, 0.04);
-    min-height: 400px;
+    min-height: 50dvh;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -390,18 +390,33 @@
     .dash-row { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 992px) {
+    .bento-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .dash-row { grid-template-columns: 1fr; }
+    .dash-hero-ribbon { padding: 28px; }
+    .dash-hero-content h1 { font-size: 2rem; }
+    .command-tiles { grid-template-columns: 1fr; gap: 16px; }
+}
+
 @media (max-width: 768px) {
-    .dash-hero-ribbon { padding: 30px; flex-direction: column; align-items: flex-start; }
+    .dash-hero-ribbon { padding: 24px; flex-direction: column; align-items: flex-start; }
     .dash-hero-content h1 { font-size: 1.8rem; }
     .dash-hero-content p { font-size: 0.95rem; }
     .bento-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
     .command-tiles { grid-template-columns: 1fr; }
-    .dash-panel { padding: 22px; }
+    .dash-panel { padding: 20px; }
 }
 
 @media (max-width: 480px) {
     .bento-stat { padding: 18px; min-height: 120px; }
     .bento-stat-val { font-size: 1.6rem; }
+}
+
+@media (max-width: 400px) {
+    .bento-grid { grid-template-columns: 1fr; }
+    .command-tiles { grid-template-columns: 1fr; }
+    .dash-hero-content h1 { font-size: 1.5rem; }
+    .dash-hero-badge { font-size: 0.85rem; padding: 10px 18px; }
 }
 
 /* ── Premium Button Overrides ── */

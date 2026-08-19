@@ -76,7 +76,7 @@ try {
                 echo "✅ Full-Text Index <b>$indexName</b> already exists on <b>$table</b>.<br>";
                 return;
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
 
         // Apply Full-Text index
         try {

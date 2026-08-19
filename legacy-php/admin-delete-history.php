@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     header("Location: login-logout/NutriDeqN-Login.php");
     exit();
@@ -104,7 +96,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>NutriDeq - Delete History</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
@@ -359,6 +351,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
                                                 <td>
                                                     <?php if (!$user['is_restored']): ?>
                                                         <form method="POST" style="display: inline;">
+                    <?php echo csrf_field(); ?>
                                                             <input type="hidden" name="action" value="restore_user">
                                                             <input type="hidden" name="deleted_user_id"
                                                                 value="<?php echo $user['id']; ?>">
@@ -369,6 +362,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
                                                         </form>
                                                     <?php endif; ?>
                                                     <form method="POST" style="display: inline;">
+                    <?php echo csrf_field(); ?>
                                                         <input type="hidden" name="action" value="permanently_delete_user">
                                                         <input type="hidden" name="deleted_user_id"
                                                             value="<?php echo $user['id']; ?>">
@@ -482,6 +476,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
                                                 <td>
                                                     <?php if (!$client['is_restored']): ?>
                                                         <form method="POST" style="display: inline;">
+                    <?php echo csrf_field(); ?>
                                                             <input type="hidden" name="action" value="restore_client">
                                                             <input type="hidden" name="deleted_client_id"
                                                                 value="<?php echo $client['id']; ?>">
@@ -495,6 +490,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
                                                     $age_days = $deleted_ts ? floor((time() - $deleted_ts) / 86400) : 0;
                                                     $can_perm_delete = $deleted_ts && $age_days >= 10; ?>
                                                     <form method="POST" style="display: inline;">
+                    <?php echo csrf_field(); ?>
                                                         <input type="hidden" name="action" value="permanently_delete_client">
                                                         <input type="hidden" name="deleted_client_id"
                                                             value="<?php echo $client['id']; ?>">

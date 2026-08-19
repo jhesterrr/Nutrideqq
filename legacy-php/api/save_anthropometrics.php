@@ -1,15 +1,6 @@
 <?php
-ini_set('display_errors', 0);
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 header('Content-Type: application/json');
 require_once '../database.php';
 
@@ -44,7 +35,9 @@ try {
             bmi DECIMAL(5,1),
             recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
-    } catch (Exception $e) {}
+    } catch (Exception $e) {
+        error_log('NutriDeq save_anthropometrics table creation error: ' . $e->getMessage());
+    }
 
     // Update Clients table
     $upd = $pdo->prepare("UPDATE clients SET weight = ?, height = ?, updated_at = NOW() WHERE user_id = ?");

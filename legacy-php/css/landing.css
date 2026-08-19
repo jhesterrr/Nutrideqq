@@ -103,8 +103,8 @@ html { scroll-behavior: smooth; }
     position: absolute; border-radius: 50%; filter: blur(120px);
     will-change: transform;
 }
-.ld-ambient-orb--1 { width: 600px; height: 600px; background: var(--ld-primary); top: -15%; left: -10%; opacity: 0.18; }
-.ld-ambient-orb--2 { width: 500px; height: 500px; background: var(--ld-secondary); bottom: -10%; right: -5%; opacity: 0.12; }
+.ld-ambient-orb--1 { width: 600px; height: var(--app-height-dvh); background: var(--ld-primary); top: -15%; left: -10%; opacity: 0.18; }
+.ld-ambient-orb--2 { width: 500px; height: var(--app-height-dvh); background: var(--ld-secondary); bottom: -10%; right: -5%; opacity: 0.12; }
 .ld-ambient-orb--3 { width: 350px; height: 350px; background: #a78bfa; top: 40%; left: 60%; opacity: 0.06; }
 .ld-dot-grid {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;

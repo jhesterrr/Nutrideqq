@@ -12,7 +12,7 @@
         
         .chat-container {
             display: flex;
-            height: 600px;
+            height: var(--app-height-dvh);
             background: var(--bg-surface);
             border-radius: 15px;
             overflow: hidden;
@@ -213,9 +213,9 @@
         .chat-action-btn {
             background: none;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -352,9 +352,9 @@
         .input-action-btn {
             background: none;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -409,44 +409,33 @@
 @media (max-width: 992px) {
     .chat-container {
         flex-direction: column;
-        height: 700px;
+        height: var(--app-height-dvh);
     }
     
     .chat-contacts {
         width: 100%;
-        height: 200px;
+        max-height: 35vh;
         border-right: none;
         border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
     
     .contacts-list {
-        display: flex;
-        overflow-x: auto;
-        padding: 10px;
-    }
-}
-
-.contact-item {
-    min-width: 200px;
-    flex-shrink: 0;
-    border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-@media (max-width: 992px) {
-    .contacts-list {
         flex-direction: column;
         overflow-x: visible;
+        padding: 10px;
     }
     
     .contact-item {
-        min-width: 200px;
+        min-width: unset;
+        flex-shrink: unset;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 }
 
 @media (max-width: 576px) {
     .chat-container {
-        height: 500px;
+        height: var(--app-height-dvh);
         padding: 10px;
     }
     
@@ -463,7 +452,7 @@
     }
     
     .chat-container {
-        height: 500px;
+        height: var(--app-height-dvh);
     }
     
     .logout-icon {

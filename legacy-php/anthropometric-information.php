@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 require_once 'database.php';
 
 $database = new Database();
@@ -143,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             $pdo->prepare("INSERT INTO client_bmi_history (user_id, weight, height, bmi) VALUES (?, ?, ?, ?)")
                                 ->execute([$c_user_id, $weight, $height, $bmi]);
                         }
-                    } catch (Exception $e) {}
+                    } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
                 }
                 
                 header("Location: anthropometric-information.php?client_id=" . urlencode($client_id_post) . "&tab=body-stats");
@@ -297,7 +289,7 @@ if (isset($_GET['tab'])) {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>NutriDeq – Anthropometric Information</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -520,7 +512,7 @@ if (isset($_GET['tab'])) {
                             $bmi_history_data = [['bmi' => $bmi_val, 'date_label' => date('M d')]];
                         }
                     }
-                } catch (Exception $e) {}
+                } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
             }
             ?>
 

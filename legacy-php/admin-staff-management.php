@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     header("Location: login-logout/NutriDeqN-Login.php");
     exit();
@@ -63,6 +55,7 @@ try {
 
 // Handle form actions for inline operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'delete_staff':
@@ -305,7 +298,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Handle GET parameters for tabs
-$current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'active_users';
+$current_tab = isset($_GET['tab']) ? preg_replace('/[^a-z0-9_-]/i', '', $_GET['tab']) : 'active_staff';
+if (!in_array($current_tab, ['active_staff', 'delete_history'], true)) {
+    $current_tab = 'active_staff';
+}
 
 try {
     // Get staff statistics
@@ -346,7 +342,7 @@ try {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>NutriDeq - Staff Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -419,9 +415,11 @@ try {
                         <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Joined <?php echo date('M j, Y',strtotime($staff['created_at'])); ?></div>
                     </div>
                     <div class="profile-card-footer">
-                        <form method="POST" class="inline-form" style="flex:1;"><input type="hidden" name="action" value="toggle_status"><input type="hidden" name="staff_id" value="<?php echo $staff['id']; ?>"><button type="submit" class="card-action toggle" style="width:100%;display:flex;justify-content:center;align-items:center;gap:6px;font-size:0.8rem;padding:8px 14px;border-radius:10px;" title="Toggle Status"><i class="fas fa-power-off"></i> <?php echo $staff['status']==='active'?'Deactivate':'Activate'; ?></button></form>
+                         <form method="POST" class="inline-form">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="toggle_status"><input type="hidden" name="staff_id" value="<?php echo $staff['id']; ?>">                    <button type="submit" class="card-action toggle" title="Toggle Status"><i class="fas fa-power-off"></i> <?php echo $staff['status']==='active'?'Deactivate':'Activate'; ?></button></form>
                         <button type="button" class="card-action edit edit-staff-btn" data-staff-id="<?php echo $staff['id']; ?>" data-name="<?php echo htmlspecialchars($staff['name']); ?>" data-email="<?php echo htmlspecialchars($staff['email']); ?>" data-status="<?php echo $staff['status']; ?>" title="Edit"><i class="fas fa-pen"></i></button>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this staff member?')"><input type="hidden" name="action" value="delete_staff"><input type="hidden" name="staff_id" value="<?php echo $staff['id']; ?>"><button type="submit" class="card-action delete" title="Delete"><i class="fas fa-trash"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this staff member?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="delete_staff"><input type="hidden" name="staff_id" value="<?php echo $staff['id']; ?>"><button type="submit" class="card-action delete" title="Delete"><i class="fas fa-trash"></i></button></form>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -431,7 +429,7 @@ try {
 
         <!-- Delete History -->
         <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ?>">
-            <div class="mgmt-section-label" style="margin-bottom:20px;"><i class="fas fa-history"></i> Deleted Staff Archive</div>
+            <div class="mgmt-section-label mgmt-section-label--mb"><i class="fas fa-history"></i> Deleted Staff Archive</div>
             <?php if(empty($deleted_staff)): ?>
             <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No deleted staff</h3><p>Deleted staff will appear here.</p></div>
             <?php else: ?>
@@ -448,8 +446,10 @@ try {
                         </div>
                     </div>
                     <div class="deleted-actions">
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore?')"><input type="hidden" name="action" value="restore_staff"><input type="hidden" name="deleted_staff_id" value="<?php echo $ds['id']; ?>"><button type="submit" class="card-action restore" title="Restore"><i class="fas fa-undo"></i></button></form>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete? Cannot be undone.')"><input type="hidden" name="action" value="permanent_delete_staff"><input type="hidden" name="deleted_staff_id" value="<?php echo $ds['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $ds['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?> title="Permanent Delete"><i class="fas fa-skull"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="restore_staff"><input type="hidden" name="deleted_staff_id" value="<?php echo $ds['id']; ?>"><button type="submit" class="card-action restore" title="Restore"><i class="fas fa-undo"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete? Cannot be undone.')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="permanent_delete_staff"><input type="hidden" name="deleted_staff_id" value="<?php echo $ds['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $ds['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?> title="Permanent Delete"><i class="fas fa-skull"></i></button></form>
                         <span class="countdown-chip perm-countdown" data-deleted-at="<?php echo $ds['deleted_at']; ?>" data-min-days="10"></span>
                     </div>
                 </div>
@@ -467,6 +467,7 @@ try {
     <div class="premium-modal">
         <div class="premium-modal-title"><i class="fas fa-user-plus"></i> Add Staff Member</div>
         <form method="POST">
+                    <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="add_staff">
             <div class="premium-form-group"><label>Full Name</label><input type="text" name="name" required placeholder="Enter full name"></div>
             <div class="premium-form-group"><label>Email Address</label><input type="email" name="email" required placeholder="Enter email"></div>
@@ -485,6 +486,7 @@ try {
     <div class="premium-modal">
         <div class="premium-modal-title"><i class="fas fa-user-edit"></i> Edit Staff</div>
         <form method="POST" id="editStaffForm">
+                    <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="edit_staff">
             <input type="hidden" name="staff_id" id="edit_staff_id">
             <div class="premium-form-group"><label>Full Name</label><input type="text" id="edit_staff_name" name="name" required></div>
@@ -534,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <!-- Global Logout Modal -->
-<div class="logout-modal" id="logoutModal" style="z-index: 10001;">
+<div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
         <div class="logout-icon">
             <i class="fas fa-sign-out-alt"></i>

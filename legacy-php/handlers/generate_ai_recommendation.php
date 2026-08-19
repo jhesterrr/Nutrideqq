@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 header('Content-Type: application/json');
 
 require_once '../database.php';
@@ -56,7 +48,10 @@ try {
     $notes = htmlspecialchars($client['notes'] ?? 'None');
 
     // Call Groq API
-    $apiKey = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? 'YOUR_GROQ_API_KEY');
+    $apiKey = getenv('GROQ_API_KEY') ?: $_ENV['GROQ_API_KEY'];
+    if (!$apiKey) {
+        throw new Exception('GROQ_API_KEY environment variable is not set');
+    }
     $apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
     $model = 'llama-3.1-8b-instant';
 
@@ -105,7 +100,6 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
     ]);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
     $response = curl_exec($ch);

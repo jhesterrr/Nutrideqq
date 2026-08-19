@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 require_once __DIR__ . '/../database.php';
 
 $message = '';
@@ -88,7 +80,7 @@ try {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="theme-color" content="#059669">
     <title>Account Recovery - NutriDeq Elite</title>
     <link rel="icon" type="image/png" href="../assets/img/logo.png">
@@ -109,7 +101,7 @@ try {
         }
 
         body {
-            margin: 0; padding: 0; min-height: 100vh;
+            margin: 0; padding: 0; min-height: var(--app-height-dvh);
             background-color: var(--bg-body);
             font-family: 'Inter', sans-serif;
             overflow: hidden;

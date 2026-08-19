@@ -1,23 +1,33 @@
 <?php
-// Fix for XAMPP Permission Denied session error
-$session_path = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'api' . DIRECTORY_SEPARATOR . 'sessions';
-if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-session_save_path($session_path);
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 // Database configuration
 require_once '../database.php';
 
+$login_locked = false;
+$login_lock_remaining = 0;
+
+if (isset($_SESSION['login_attempts'])) {
+    $attempts = $_SESSION['login_attempts'];
+    if ($attempts['count'] >= 5) {
+        $elapsed = time() - $attempts['first_attempt_time'];
+        if ($elapsed < 900) {
+            $login_locked = true;
+            $login_lock_remaining = 900 - $elapsed;
+        } else {
+            unset($_SESSION['login_attempts']);
+        }
+    }
+}
+
 // Process login if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
+    if ($login_locked) {
+        $_SESSION['error'] = "Too many failed attempts. Please try again in " . ceil($login_lock_remaining / 60) . " minutes.";
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
     // FORCE NO-CACHE - SECURITY FIX
     header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
     header("Cache-Control: post-check=0, pre-check=0", false);
@@ -44,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             if (password_verify($input_password, $user['password'])) {
+                unset($_SESSION['login_attempts']);
                 if ($user['role'] === 'regular') {
                     $user['role'] = 'user';
                 }
@@ -61,12 +72,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header("Location: ../dashboard.php");
                 exit();
             } else {
+                if (!isset($_SESSION['login_attempts'])) {
+                    $_SESSION['login_attempts'] = ['count' => 0, 'first_attempt_time' => time()];
+                }
+                $_SESSION['login_attempts']['count']++;
                 $_SESSION['error'] = "Incorrect password. Please try again.";
                 $_SESSION['login_email'] = $email;
                 header("Location: " . $_SERVER['PHP_SELF']);
                 exit();
             }
         } else {
+            if (!isset($_SESSION['login_attempts'])) {
+                $_SESSION['login_attempts'] = ['count' => 0, 'first_attempt_time' => time()];
+            }
+            $_SESSION['login_attempts']['count']++;
             $_SESSION['error'] = "No account found with this email address.";
             $_SESSION['login_email'] = $email;
             header("Location: " . $_SERVER['PHP_SELF']);
@@ -91,7 +110,7 @@ if (isset($_SESSION['error'])) {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="theme-color" content="#059669">
     <link rel="manifest" href="../manifest.json">
     <title>NutriDeq - Elite Authentication</title>
@@ -113,7 +132,7 @@ if (isset($_SESSION['error'])) {
         }
 
         body {
-            margin: 0; padding: 0; min-height: 100vh;
+            margin: 0; padding: 0; min-height: var(--app-height-dvh);
             background-color: var(--bg-body);
             font-family: 'Inter', sans-serif;
             overflow: hidden;
@@ -364,6 +383,7 @@ if (isset($_SESSION['error'])) {
                 <?php endif; ?>
 
                 <form method="POST" action="NutriDeqN-Login.php" id="loginForm">
+                    <?php echo csrf_field(); ?>
                     <div class="form-group stagger">
                         <input type="email" id="email" name="email" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                         <label for="email">Email Address</label>

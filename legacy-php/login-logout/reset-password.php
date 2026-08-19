@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 require_once '../database.php';
 
 $token = $_GET['token'] ?? '';
@@ -66,7 +58,7 @@ try {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Create New Password - NutriDeq</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -76,7 +68,7 @@ try {
             --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         body {
-            margin: 0; padding: 0; min-height: 100vh;
+            margin: 0; padding: 0; min-height: var(--app-height-dvh);
             display: flex; align-items: center; justify-content: center;
             font-family: 'Inter', sans-serif;
             background: #f8fafc;

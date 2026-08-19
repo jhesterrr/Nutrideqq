@@ -428,7 +428,7 @@ textarea:focus {
         position: relative !important;
         width: 100% !important;
         height: auto !important;
-        min-height: 500px !important;
+        min-height: var(--app-height-dvh) !important;
         z-index: 90 !important;
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }

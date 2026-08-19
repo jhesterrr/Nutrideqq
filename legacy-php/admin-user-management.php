@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     header("Location: login-logout/NutriDeqN-Login.php");
     exit();
@@ -67,6 +59,7 @@ try {
 
 // Handle form actions for inline operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'delete_user':
@@ -334,7 +327,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Handle GET parameters for tabs
-$current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'active_users';
+$current_tab = isset($_GET['tab']) ? preg_replace('/[^a-z0-9_-]/i', '', $_GET['tab']) : 'active_users';
+if (!in_array($current_tab, ['active_users', 'delete_history'], true)) {
+    $current_tab = 'active_users';
+}
 
 try {
     // Get user statistics
@@ -385,7 +381,7 @@ try {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     <!-- Fonts handled by base.css (Phase 2) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -449,7 +445,7 @@ try {
                 <p class="mgmt-hero-subtitle">Manage system users, roles, and permissions across NutriDeq</p>
             </div>
             <div class="mgmt-hero-right">
-                <a href="reset_passwords.php" class="btn-premium-add" style="background: linear-gradient(135deg, #1e293b, #475569); box-shadow: 0 4px 14px rgba(30,41,59,0.3); margin-right: 8px;"><i class="fas fa-database"></i> Database Sandbox</a>
+                <a href="admin-client-management.php" class="btn-premium-add" style="background: linear-gradient(135deg, #1e293b, #475569); box-shadow: 0 4px 14px rgba(30,41,59,0.3); margin-right: 8px;"><i class="fas fa-users"></i> Client Management</a>
                 <button class="btn-premium-add" id="addUserBtn"><i class="fas fa-user-plus"></i> Add New User</button>
             </div>
         </div>
@@ -494,10 +490,13 @@ try {
                         <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Joined <?php echo date('M j, Y',strtotime($user['created_at'])); ?></div>
                     </div>
                     <div class="profile-card-footer">
-                        <form method="POST" class="inline-form" style="flex:1;"><input type="hidden" name="action" value="update_role"><input type="hidden" name="user_id" value="<?php echo $user['id']; ?>"><select name="role" onchange="this.form.submit()" class="card-role-select"><option value="regular" <?php echo $user['role']==='regular'?'selected':''; ?>>Regular</option><option value="staff" <?php echo $user['role']==='staff'?'selected':''; ?>>Staff</option><option value="admin" <?php echo $user['role']==='admin'?'selected':''; ?>>Admin</option></select></form>
-                        <form method="POST" class="inline-form"><input type="hidden" name="action" value="toggle_status"><input type="hidden" name="user_id" value="<?php echo $user['id']; ?>"><button type="submit" class="card-action toggle" title="Toggle Status"><i class="fas fa-power-off"></i></button></form>
+                        <form method="POST" class="inline-form" style="flex:1;">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="update_role"><input type="hidden" name="user_id" value="<?php echo $user['id']; ?>"><select name="role" onchange="this.form.submit()" class="card-role-select"><option value="regular" <?php echo $user['role']==='regular'?'selected':''; ?>>Regular</option><option value="staff" <?php echo $user['role']==='staff'?'selected':''; ?>>Staff</option><option value="admin" <?php echo $user['role']==='admin'?'selected':''; ?>>Admin</option></select></form>
+                        <form method="POST" class="inline-form">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="toggle_status"><input type="hidden" name="user_id" value="<?php echo $user['id']; ?>"><button type="submit" class="card-action toggle" title="Toggle Status"><i class="fas fa-power-off"></i></button></form>
                         <button type="button" class="card-action edit edit-btn" data-user-id="<?php echo $user['id']; ?>" data-name="<?php echo htmlspecialchars($user['name']); ?>" data-email="<?php echo htmlspecialchars($user['email']); ?>" data-role="<?php echo $user['role']; ?>" data-status="<?php echo $user['status']; ?>" title="Edit"><i class="fas fa-pen"></i></button>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Move to trash?')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?php echo $user['id']; ?>"><button type="submit" class="card-action delete" title="Delete"><i class="fas fa-trash"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Move to trash?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?php echo $user['id']; ?>"><button type="submit" class="card-action delete" title="Delete"><i class="fas fa-trash"></i></button></form>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -525,8 +524,10 @@ try {
                         </div>
                     </div>
                     <div class="deleted-actions">
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore this user?')"><input type="hidden" name="action" value="restore_user"><input type="hidden" name="deleted_user_id" value="<?php echo $du['id']; ?>"><button type="submit" class="card-action restore" title="Restore"><i class="fas fa-undo"></i></button></form>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete? Cannot be undone.')"><input type="hidden" name="action" value="permanent_delete"><input type="hidden" name="deleted_user_id" value="<?php echo $du['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $du['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?> title="Permanent Delete"><i class="fas fa-skull"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore this user?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="restore_user"><input type="hidden" name="deleted_user_id" value="<?php echo $du['id']; ?>"><button type="submit" class="card-action restore" title="Restore"><i class="fas fa-undo"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete? Cannot be undone.')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="permanent_delete"><input type="hidden" name="deleted_user_id" value="<?php echo $du['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $du['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?> title="Permanent Delete"><i class="fas fa-skull"></i></button></form>
                         <span class="countdown-chip perm-countdown" data-deleted-at="<?php echo $du['deleted_at']; ?>" data-min-days="10"></span>
                     </div>
                 </div>
@@ -544,6 +545,7 @@ try {
     <div class="premium-modal">
         <div class="premium-modal-title"><i class="fas fa-user-plus"></i> Add New User</div>
         <form method="POST" action="process_admin_add_user.php">
+                    <?php echo csrf_field(); ?>
             <input type="hidden" name="origin" value="admin-user-management.php">
             <div class="premium-form-group"><label>Full Name</label><input type="text" name="name" required placeholder="Enter full name"></div>
             <div class="premium-form-group"><label>Email Address</label><input type="email" name="email" required placeholder="Enter email"></div>
@@ -563,6 +565,7 @@ try {
     <div class="premium-modal">
         <div class="premium-modal-title"><i class="fas fa-user-edit"></i> Edit User</div>
         <form method="POST" id="editUserForm">
+                    <?php echo csrf_field(); ?>
             <input type="hidden" name="action" value="edit_user">
             <input type="hidden" name="user_id" id="edit_user_id">
             <div class="premium-form-group"><label>Full Name</label><input type="text" id="edit_name" name="name" required></div>

@@ -140,7 +140,7 @@ if (isset($_SESSION['user_id'])) {
         top: 0;
         left: 0;
         width: 100vw;
-        height: 100vh;
+        height: var(--app-height-dvh);
         background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         display: flex;

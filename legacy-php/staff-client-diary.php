@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 require_once 'database.php';
 require_once 'navigation.php';
 require_once 'api/fct_helper.php';
@@ -42,7 +34,7 @@ try {
     $params = $is_admin ? [] : [$staff_id];
     $stmt->execute($params);
     $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (Exception $e) {}
+} catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
 
 $selected_client_id = isset($_GET['client_id']) ? intval($_GET['client_id']) : null;
 $selected_client = null;
@@ -142,7 +134,7 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>Client Diary Monitor | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -564,7 +556,7 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
         .split-layout {
             display: grid;
             grid-template-columns: 320px 1fr;
-            height: calc(100vh - 100px);
+            height: calc(var(--app-height-dvh) - 100px);
             gap: 24px;
             position: relative;
             z-index: 10;
@@ -676,7 +668,7 @@ $nav_links = getNavigationLinks($_SESSION['user_role'], 'staff-client-diary.php'
                 width: 100% !important;
                 height: 100% !important;
                 max-width: 100vw !important;
-                max-height: 100vh !important;
+                max-height: var(--app-height-dvh) !important;
                 top: 0 !important;
                 left: 0 !important;
                 transform: none !important;

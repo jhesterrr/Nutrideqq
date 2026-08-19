@@ -1,15 +1,6 @@
 <?php
-ini_set('display_errors', 0);
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 header('Content-Type: application/json');
 
 require_once '../database.php';
@@ -30,17 +21,6 @@ if (!$data) {
 try {
     $database = new Database();
     $pdo = $database->getConnection();
-
-    // Ensure the goal columns exist in clients table
-    try {
-        $pdo->exec("ALTER TABLE clients 
-            ADD COLUMN IF NOT EXISTS goal_calories INT DEFAULT 2000,
-            ADD COLUMN IF NOT EXISTS goal_protein INT DEFAULT 150,
-            ADD COLUMN IF NOT EXISTS goal_carbs INT DEFAULT 200,
-            ADD COLUMN IF NOT EXISTS goal_fats INT DEFAULT 65");
-    } catch (Exception $e) {
-        // Ignore if exists or error
-    }
 
     $stmt = $pdo->prepare("UPDATE clients SET 
         goal_calories = ?, goal_protein = ?, goal_carbs = ?, goal_fats = ? 

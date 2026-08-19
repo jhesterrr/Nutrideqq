@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     header("Location: login-logout/NutriDeqN-Login.php");
     exit();
@@ -63,6 +55,7 @@ try {
 
 // Handle form actions for inline operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'delete_client':
@@ -206,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user_id = $_POST['user_id'];
                 $name = trim($_POST['name']);
                 $email = trim($_POST['email']);
-                $role = 'staff';
+                $role = $_POST['role'] ?? 'user';
                 $status = $_POST['status'];
                 $new_password = $_POST['password'] ?? '';
                 $confirm_password = $_POST['confirm_password'] ?? '';
@@ -216,11 +209,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $check_stmt->execute([$email, $user_id]);
                     if ($check_stmt->fetch()) {
                         $_SESSION['error'] = "Email already exists";
-                        header("Location: admin-staff-management.php");
+                        header("Location: admin-client-management.php");
                         exit();
                     }
 
-                    $role = 'staff';
+                    if (!in_array($role, ['user', 'staff', 'admin'])) {
+                        $role = 'user';
+                    }
                     if (!in_array($status, ['active', 'inactive'])) {
                         $status = 'active';
                     }
@@ -228,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!empty($new_password)) {
                         if ($new_password !== $confirm_password) {
                             $_SESSION['error'] = "New password and confirm password do not match";
-                            header("Location: admin-staff-management.php");
+                            header("Location: admin-client-management.php");
                             exit();
                         }
                         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
@@ -239,12 +234,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt->execute([$name, $email, $role, $status, $user_id]);
                     }
 
-                    $_SESSION['success'] = "User updated successfully";
-                    header("Location: admin-staff-management.php");
+                    $_SESSION['success'] = "Client updated successfully";
+                    header("Location: admin-client-management.php");
                     exit();
                 } catch (PDOException $e) {
                     $_SESSION['error'] = "Database error: " . $e->getMessage();
-                    header("Location: admin-staff-management.php");
+                    header("Location: admin-client-management.php");
                     exit();
                 }
                 break;
@@ -282,7 +277,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Handle GET parameters for tabs
-$current_tab = isset($_GET['tab']) ? $_GET['tab'] : 'active_clients';
+$current_tab = isset($_GET['tab']) ? preg_replace('/[^a-z0-9_-]/i', '', $_GET['tab']) : 'active_clients';
+if (!in_array($current_tab, ['active_clients', 'delete_history'], true)) {
+    $current_tab = 'active_clients';
+}
 
 try {
     // Get client statistics
@@ -334,7 +332,7 @@ try {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>NutriDeq - Client Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -392,9 +390,9 @@ try {
                             <span class="profile-badge badge-role-regular"><i class="fas fa-user"></i> Client</span>
                             <span class="profile-badge badge-<?php echo $client['status']??'active'; ?>"><i class="fas fa-circle"></i> <?php echo ucfirst($client['status']??'active'); ?></span>
                         </div>
-                        <div class="profile-meta staff-assignment-wrapper" style="margin-top: 8px;">
-                            <i class="fas fa-user-shield" style="color:#0369a1;"></i>
-                            <select class="staff-assignment-dropdown" data-client-id="<?php echo $client['id']; ?>" style="width: calc(100% - 25px); padding: 4px 6px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg, transparent); color: var(--text-color); font-size: 0.8rem; cursor: pointer; display: inline-block;">
+                        <div class="profile-meta staff-assignment-wrapper">
+                            <i class="fas fa-user-shield"></i>
+                            <select class="staff-assignment-dropdown" data-client-id="<?php echo $client['id']; ?>">
                                 <option value="">-- Unassigned --</option>
                                 <?php foreach($available_staff as $staff): ?>
                                     <option value="<?php echo $staff['id']; ?>" <?php echo (isset($client['staff_id']) && $client['staff_id'] == $staff['id']) ? 'selected' : ''; ?>>
@@ -402,13 +400,15 @@ try {
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                            <div class="assign-feedback" id="feedback-<?php echo $client['id']; ?>" style="font-size: 0.75rem; margin-top: 4px; padding-left: 20px; display: none;"></div>
+                            <div class="assign-feedback" id="feedback-<?php echo $client['id']; ?>"></div>
                         </div>
                         <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Joined <?php echo date('M j, Y',strtotime($client['created_at']??'now')); ?></div>
                     </div>
                     <div class="profile-card-footer">
-                        <form method="POST" class="inline-form" style="flex:1;"><input type="hidden" name="action" value="toggle_client_status"><input type="hidden" name="client_id" value="<?php echo $client['id']; ?>"><button type="submit" class="card-action toggle" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;font-size:0.8rem;padding:8px;border-radius:10px;"><i class="fas fa-power-off"></i><?php echo ($client['status']??'active')==='active'?'Deactivate':'Activate'; ?></button></form>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this client?')"><input type="hidden" name="action" value="delete_client"><input type="hidden" name="client_id" value="<?php echo $client['id']; ?>"><button type="submit" class="card-action delete"><i class="fas fa-trash"></i></button></form>
+                         <form method="POST" class="inline-form">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="toggle_client_status"><input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">                    <button type="submit" class="card-action toggle"><i class="fas fa-power-off"></i><?php echo ($client['status']??'active')==='active'?'Deactivate':'Activate'; ?></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this client?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="delete_client"><input type="hidden" name="client_id" value="<?php echo $client['id']; ?>"><button type="submit" class="card-action delete"><i class="fas fa-trash"></i></button></form>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -416,7 +416,7 @@ try {
             <?php endif; ?>
         </div>
         <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ?>">
-            <div class="mgmt-section-label" style="margin-bottom:20px;"><i class="fas fa-history"></i> Deleted Client Archive</div>
+            <div class="mgmt-section-label mgmt-section-label--mb"><i class="fas fa-history"></i> Deleted Client Archive</div>
             <?php if(empty($deleted_clients)): ?>
             <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No deleted clients</h3></div>
             <?php else: ?>
@@ -433,8 +433,10 @@ try {
                         </div>
                     </div>
                     <div class="deleted-actions">
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore?')"><input type="hidden" name="action" value="restore_client"><input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>"><button type="submit" class="card-action restore"><i class="fas fa-undo"></i></button></form>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete?')"><input type="hidden" name="action" value="permanent_delete_client"><input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $dc['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?>><i class="fas fa-skull"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="restore_client"><input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>"><button type="submit" class="card-action restore"><i class="fas fa-undo"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete?')">
+                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="permanent_delete_client"><input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $dc['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?>><i class="fas fa-skull"></i></button></form>
                         <span class="countdown-chip perm-countdown" data-deleted-at="<?php echo $dc['deleted_at']; ?>" data-min-days="10"></span>
                     </div>
                 </div>
@@ -493,7 +495,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 <!-- Global Logout Modal -->
-<div class="logout-modal" id="logoutModal" style="z-index: 10001;">
+<div class="logout-modal" id="logoutModal">
     <div class="logout-modal-content">
         <div class="logout-icon">
             <i class="fas fa-sign-out-alt"></i>

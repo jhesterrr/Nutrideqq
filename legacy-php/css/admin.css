@@ -171,7 +171,12 @@ body {
     color: #8c8c8c;
     font-size: 1.1rem;
     cursor: pointer;
-    padding: 5px;
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: color 0.2s;
 }
 

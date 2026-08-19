@@ -75,7 +75,7 @@ body {
   width: 60vw;
   height: 60vw;
   max-width: 700px;
-  max-height: 700px;
+  max-height: var(--app-height-dvh);
   /* Replaced heavy filter:blur(100px) with native gradient fading */
   background: radial-gradient(circle, rgba(6, 78, 59, 0.08) 0%, rgba(6, 78, 59, 0.04) 30%, transparent 70%);
   border-radius: 50%;
@@ -786,7 +786,7 @@ body {
   position: relative;
   width: 100%;
   max-width: 1000px;
-  height: 600px;
+  height: var(--app-height-dvh);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1604,7 +1604,7 @@ footer {
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .hero-dashboard-wrapper { height: 500px; }
+  .hero-dashboard-wrapper { height: var(--app-height-dvh); }
   .data-container { flex-direction: column; }
   .chart-container { width: 300px; height: 300px; }
   .bento-grid { grid-template-columns: 1fr 1fr; }
@@ -1640,7 +1640,7 @@ footer {
   gap: 4rem;
   margin-top: 6rem;
   position: relative;
-  min-height: 500px;
+  min-height: var(--app-height-dvh);
 }
 .philosophy-side {
   flex: 1;
@@ -2302,7 +2302,7 @@ footer {
   /* Sentiment Awareness (NLP) Mobile Overhaul */
   .psych-visual-container {
     height: auto !important;
-    min-height: 500px !important;
+    min-height: var(--app-height-dvh) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;

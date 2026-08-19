@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 require_once 'database.php';
 require_once 'navigation.php';
 require_once 'api/fct_helper.php';
@@ -107,7 +99,7 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>My Food Diary | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -190,7 +182,7 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                 width: 100% !important;
                 height: 100% !important;
                 max-width: 100vw !important;
-                max-height: 100vh !important;
+                max-height: var(--app-height-dvh) !important;
                 margin: 0 !important;
                 border-radius: 0 !important;
                 display: flex !important;
@@ -679,7 +671,7 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
     </div>
 
     <!-- User Personal Report Modal -->
-    <div id="userReportOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.5); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center;">
+    <div id="userReportOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height: var(--app-height-dvh); background:rgba(15,23,42,0.5); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center;">
         <div style="background:white; width:90%; max-width:860px; max-height:90vh; border-radius:24px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 30px 60px rgba(0,0,0,0.2);">
             <div style="padding:20px 28px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; background:#f8fafc;">
                 <h3 style="margin:0; font-size:1rem; color:#1e293b;"><i class="fas fa-file-medical" style="color:#10b981; margin-right:8px;"></i>My Personal Health Report</h3>

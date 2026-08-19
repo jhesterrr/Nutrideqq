@@ -1,15 +1,6 @@
 <?php
-header('Content-Type: application/json');
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once dirname(__DIR__) . '/session_bootstrap.php';
+
 require_once '../database.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -42,15 +33,6 @@ if (empty($food_name) || empty($meal_type)) {
 try {
     $db = new Database();
     $conn = $db->getConnection();
-
-    // Auto-migration: Ensure columns exist
-    $columns = $conn->query("SHOW COLUMNS FROM food_logs")->fetchAll(PDO::FETCH_COLUMN);
-    if (!in_array('serving_unit', $columns)) {
-        $conn->exec("ALTER TABLE food_logs ADD COLUMN serving_unit VARCHAR(50) DEFAULT 'g' AFTER serving_size");
-    }
-    if (!in_array('display_size', $columns)) {
-        $conn->exec("ALTER TABLE food_logs ADD COLUMN display_size VARCHAR(100) AFTER serving_unit");
-    }
 
     $sql = "INSERT INTO food_logs (user_id, food_id, food_name, calories, protein, carbs, fat, serving_size, serving_unit, display_size, meal_type, log_date) 
             VALUES (:user_id, NULL, :food_name, :calories, :protein, :carbs, :fat, :serving_size, :unit, :display, :meal_type, :log_date)";

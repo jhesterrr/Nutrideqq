@@ -1,14 +1,5 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -405,11 +396,11 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .food-exchange-table th.active {
-            background: var(--gradient) !important;
-            color: #fff;
+            background: rgba(16, 185, 129, 0.08) !important;
+            color: var(--primary);
             position: relative;
-            border-radius: 12px 12px 0 0;
-            box-shadow: 0 10px 30px rgba(5, 150, 105, 0.3);
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08);
             border: none;
         }
 
@@ -496,25 +487,25 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
         }
 
         .exchange-value.highlight {
-            background: rgba(5, 150, 105, 0.1) !important;
+            background: rgba(5, 150, 105, 0.08) !important;
             color: var(--primary) !important;
-            border-radius: 50px;
-            padding: 4px 14px;
+            border-radius: 8px;
+            padding: 4px 12px;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             min-width: 36px;
-            border: 1.5px solid rgba(5, 150, 105, 0.2);
-            box-shadow: 0 4px 10px rgba(5, 150, 105, 0.05);
+            border: 1.5px solid rgba(5, 150, 105, 0.18);
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.06);
             transition: all 0.3s;
         }
 
         .active-cell .exchange-value.highlight {
-            background: var(--gradient) !important;
-            color: white !important;
-            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
-            transform: scale(1.05);
+            background: rgba(16, 185, 129, 0.08) !important;
+            color: var(--primary) !important;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.06);
+            transform: none;
         }
 
         /* ── Calorie Selector ── */
@@ -558,10 +549,11 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
         }
-
         /* ── Mobile Calorie Pills ── */
+
         .mobile-calorie-pills-container {
             margin-bottom: 16px;
+            padding: 0 4px;
         }
 
         .pill-slider-label {
@@ -576,7 +568,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
         .mobile-pill-slider {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             overflow-x: auto;
             padding-bottom: 6px;
             scrollbar-width: none;
@@ -588,29 +580,34 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 
         .calorie-pill {
             flex-shrink: 0;
-            padding: 6px 14px;
+            padding: 12px 22px;
             border-radius: 50px;
             border: 1.5px solid var(--border-color);
             background: var(--bg-surface);
             font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.25s;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .calorie-pill.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+            background: rgba(16, 185, 129, 0.1) !important;
+            border-color: rgba(16, 185, 129, 0.4) !important;
+            color: var(--primary) !important;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+            transform: translateY(-1px);
         }
 
         .mobile-calorie-cards {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 10px;
             margin-top: 12px;
         }
 
@@ -630,8 +627,9 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 14px 16px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            min-height: 52px;
         }
 
         .mcv-row--sub {
@@ -679,7 +677,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
                 font-size: 0.75rem;
             }
             .desktop-view {
-                display: block;
+                display: none;
             }
         }
 
@@ -1636,19 +1634,20 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
+            padding: 16px;
             background: #fff;
             margin-bottom: 8px;
             border-radius: 16px;
             border: 1px solid #f1f5f9;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            min-height: 52px;
         }
 
         .mcv-label { font-weight: 600; color: #1e293b; font-size: 0.95rem; }
         .mcv-value { 
             background: var(--primary-light);
             color: var(--primary);
-            padding: 4px 12px;
+            padding: 6px 16px;
             border-radius: 8px;
             font-weight: 800;
             font-size: 0.9rem;

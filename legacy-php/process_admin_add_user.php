@@ -1,14 +1,6 @@
 <?php
-if (strpos(strtolower(PHP_OS), 'win') !== false) {
-    $session_path = 'c:\\xampp\\htdocs\\nutrideq\\api\\sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-} else {
-    $session_path = '/tmp/sessions';
-    if (!is_dir($session_path)) { mkdir($session_path, 0777, true); }
-    session_save_path($session_path);
-}
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+require_once __DIR__ . '/session_bootstrap.php';
+
 require_once 'database.php';
 
 // Check if user is admin
@@ -18,6 +10,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -67,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         try {
                             $client_insert = $conn->prepare("INSERT INTO clients (user_id, staff_id, name, email, phone, address, city, state, zip_code, age, gender, waist_circumference, hip_circumference, status, created_at, updated_at) VALUES (?, NULL, ?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'active', NOW(), NOW())");
                             $client_insert->execute([$conn->lastInsertId(), $name, $email]);
-                        } catch (PDOException $e) {}
+                        } catch (PDOException $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
                     }
                     $_SESSION['success'] = "User added successfully!";
                     header("Location: " . ($origin === 'admin-staff-management.php' || $role === 'staff' ? 'admin-staff-management.php' : 'admin-user-management.php'));

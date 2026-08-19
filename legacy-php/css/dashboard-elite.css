@@ -51,14 +51,14 @@
 }
 
 .blob-1 {
-    width: 600px; height: 600px;
+    width: 600px; height: var(--app-height-dvh);
     background: #10b981;
     top: -150px; left: -100px;
     animation: blobDrift1 14s infinite alternate ease-in-out;
 }
 
 .blob-2 {
-    width: 500px; height: 500px;
+    width: 500px; height: var(--app-height-dvh);
     background: #3b82f6;
     bottom: -100px; right: 10%;
     animation: blobDrift2 18s infinite alternate ease-in-out;

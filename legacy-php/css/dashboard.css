@@ -61,8 +61,8 @@
 }
 
 .notification-btn {
-    width: clamp(40px, 4vw, 50px);
-    height: clamp(40px, 4vw, 50px);
+    width: clamp(44px, 4vw, 50px);
+    height: clamp(44px, 4vw, 50px);
     border-radius: 50%;
     background: var(--bg-surface);
     display: flex;
@@ -195,7 +195,7 @@
     padding: 30px;
     box-shadow: var(--shadow) !important;
     border: 1px solid var(--glass-border) !important;
-    min-height: 300px;
+    min-height: 40dvh;
     /* Prevent layout shift */
     width: 100%;
 }
@@ -872,8 +872,8 @@
                     }
 
                     .user-dashboard .action-btn {
-                        width: 32px;
-                        height: 32px;
+                        width: 44px;
+                        height: 44px;
                         padding: 0;
                         display: flex;
                         align-items: center;
@@ -937,8 +937,8 @@
                     }
             .notification-toast {
                 position: fixed;
-                bottom: 30px;
-                right: 30px;
+                bottom: calc(64px + env(safe-area-inset-bottom) + 16px);
+                right: 16px;
                 background: var(--bg-surface);
                 border-radius: 12px;
                 padding: 15px 20px;
@@ -949,7 +949,7 @@
                 transform: translateY(100px);
                 opacity: 0;
                 transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-                z-index: 9999;
+                z-index: 10001;
                 border-left: 5px solid var(--accent);
                 max-width: 350px;
             }

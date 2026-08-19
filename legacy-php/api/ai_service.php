@@ -9,7 +9,10 @@ class NutriDeqAI {
     private $pdo;
 
     public function __construct() {
-        $this->apiKey = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? 'YOUR_GROQ_API_KEY');
+        $this->apiKey = getenv('GROQ_API_KEY') ?: $_ENV['GROQ_API_KEY'];
+        if (!$this->apiKey) {
+            throw new Exception('GROQ_API_KEY environment variable is not set');
+        }
         $database = new Database();
         $this->pdo = $database->getConnection();
     }
@@ -52,7 +55,6 @@ Client Message: \"$text\"";
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
         $response  = curl_exec($ch);
@@ -109,6 +111,48 @@ Client Message: \"$text\"";
             file_put_contents(__DIR__ . '/ai_error.log', date('Y-m-d H:i:s') . " HTTP $httpCode: $response\n", FILE_APPEND);
         }
 
+        return false;
+    }
+
+    public function generateResponse($prompt) {
+        $data = [
+            "model"    => $this->model,
+            "messages" => [
+                ["role" => "user", "content" => $prompt]
+            ],
+            "temperature" => 0.2,
+            "max_tokens"  => 2048
+        ];
+
+        $ch = curl_init($this->apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $response  = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($curlError) {
+            file_put_contents(__DIR__ . '/ai_error.log', date('Y-m-d H:i:s') . " cURL Error: $curlError\n", FILE_APPEND);
+            return false;
+        }
+
+        if ($httpCode === 200 && $response) {
+            $responseData = json_decode($response, true);
+            $content = $responseData['choices'][0]['message']['content'] ?? null;
+            if ($content) {
+                return trim($content);
+            }
+        }
+
+        file_put_contents(__DIR__ . '/ai_error.log', date('Y-m-d H:i:s') . " HTTP $httpCode: $response\n", FILE_APPEND);
         return false;
     }
 }

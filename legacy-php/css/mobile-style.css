@@ -144,8 +144,8 @@ body {
 
     .mobile-sidebar-close {
         display: flex !important;
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         background: rgba(239, 68, 68, 0.08);
         color: #ef4444;
         border: none;

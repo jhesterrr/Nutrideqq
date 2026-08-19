@@ -139,8 +139,8 @@
         }
 
         .notification-btn {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: var(--bg-surface);
             display: flex;
@@ -283,7 +283,7 @@
             display: none;
             padding: 30px;
             animation: fadeIn 0.5s ease;
-            min-height: 500px;
+            min-height: var(--app-height-dvh);
         }
 
         .tab-content.active {
