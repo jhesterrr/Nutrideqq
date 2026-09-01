@@ -332,7 +332,7 @@ try {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NutriDeq - Client Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -488,26 +488,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function fmt(s){const d=Math.floor(s/86400);s-=d*86400;const h=Math.floor(s/3600);s-=h*3600;const m=Math.floor(s/60);const sec=Math.floor(s-m*60);return d+'d '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
     document.querySelectorAll('.perm-delete-btn').forEach(btn=>{const dMs=Date.parse((btn.dataset.deletedAt||'').replace(' ','T'));const min=parseInt(btn.dataset.minDays||'10',10);const chip=btn.closest('.deleted-actions')?.querySelector('.perm-countdown');function upd(){const l=Math.max(0,min*86400000-(Date.now()-dMs));if(l<=0){btn.removeAttribute('disabled');if(chip)chip.textContent='';return true;}btn.setAttribute('disabled','disabled');if(chip)chip.textContent='Available in '+fmt(Math.floor(l/1000));return false;}upd();const iv=setInterval(()=>{if(upd())clearInterval(iv);},1000);});
-    document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();document.getElementById('logoutModal')?.classList.add('active');});
-    document.getElementById('cancelLogout')?.addEventListener('click',()=>document.getElementById('logoutModal')?.classList.remove('active'));
-    document.getElementById('confirmLogout')?.addEventListener('click',()=>window.location.href='login-logout/logout.php');
-    window.addEventListener('click',e=>{if(e.target===document.getElementById('logoutModal'))document.getElementById('logoutModal').classList.remove('active');});
 });
 </script>
-<!-- Global Logout Modal -->
-<div class="logout-modal" id="logoutModal">
-    <div class="logout-modal-content">
-        <div class="logout-icon">
-            <i class="fas fa-sign-out-alt"></i>
-        </div>
-        <h3>Are you sure?</h3>
-        <p>You will be logged out and redirected to the login page.</p>
-        <div class="logout-modal-actions">
-            <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
-            <button class="btn btn-primary" id="confirmLogout">Yes, Logout</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
+
 

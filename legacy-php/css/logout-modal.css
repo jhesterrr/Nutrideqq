@@ -1,172 +1,226 @@
-/* Logout modal - compiled for Dashboard (solid card, non-transparent) */
+/* ============================================================
+   NUTRIDEQ : LOGOUT MODAL STYLES
+   Clinical, Modern, Viewport-Centered Confirmation Modal
+   ============================================================ */
 
+.nd-logout-modal,
 .logout-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    /* top:0; right:0; bottom:0; left:0; */
-    background: rgba(0, 0, 0, 0.35);
-    /* overlay */
-    z-index: 11000;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    -webkit-font-smoothing: antialiased;
-    transition: opacity 0.22s ease, visibility 0.22s ease;
-    visibility: hidden;
-    opacity: 0;
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    z-index: 9999999 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
+.nd-logout-modal.active,
 .logout-modal.active {
-    display: flex;
-    visibility: visible;
-    opacity: 1;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
-
-/* Modal card */
-
+.nd-logout-modal__content,
 .logout-modal-content {
     background: #ffffff !important;
-    /* solid white card */
-    border-radius: 12px;
-    padding: 36px 32px;
-    width: 420px;
-    max-width: calc(100% - 48px);
-    box-shadow: 0 10px 30px rgba(11, 22, 34, 0.12);
-    text-align: center;
-    position: relative;
-    transform: translateY(0);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    border-radius: 24px !important;
+    padding: 36px 28px 28px !important;
+    max-width: 420px !important;
+    width: 100% !important;
+    text-align: center !important;
+    position: relative !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
+    transform: scale(0.92) translateY(12px) !important;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    box-sizing: border-box !important;
+    margin: auto !important;
 }
 
-
-/* subtle lift when active */
-
+.nd-logout-modal.active .nd-logout-modal__content,
 .logout-modal.active .logout-modal-content {
-    transform: translateY(-6px);
+    transform: scale(1) translateY(0) !important;
 }
 
-
-/* circular icon */
-
-.logout-icon {
-    width: 72px;
-    height: 72px;
+.nd-logout-modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 18px;
-    font-size: 30px;
-    color: #fff;
-    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
-    box-shadow: 0 6px 18px rgba(255, 82, 82, 0.16);
-}
-
-
-/* title and description */
-
-.logout-modal-content h3 {
-    margin: 0 0 8px 0;
-    font-size: 22px;
-    font-weight: 600;
-    color: #172b4d;
-    /* dark slate */
-    font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-}
-
-.logout-modal-content p {
-    margin: 0 0 22px 0;
-    font-size: 14px;
-    color: #6b7280;
-    /* muted gray */
-    line-height: 1.5;
-}
-
-
-/* action buttons */
-
-.logout-modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-}
-
-
-/* base button */
-
-.logout-modal-actions .btn {
-    min-width: 120px;
-    padding: 10px 18px;
-    border-radius: 8px;
     border: none;
+    background: #f1f5f9;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
-    font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    padding: 0;
+    z-index: 10;
 }
 
+.nd-logout-modal__close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: scale(1.05);
+}
 
-/* secondary (cancel) */
+.nd-logout-modal__icon,
+.logout-icon {
+    width: 68px !important;
+    height: 68px !important;
+    border-radius: 50% !important;
+    background: #fef2f2 !important;
+    border: 6px solid #fee2e2 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto 20px !important;
+    box-shadow: 0 8px 16px -4px rgba(239, 68, 68, 0.2) !important;
+}
 
+.nd-logout-modal__icon-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nd-logout-modal__icon i,
+.logout-icon i {
+    font-size: 24px !important;
+    color: #ef4444 !important;
+    margin-left: 2px;
+}
+
+.nd-logout-modal__title,
+.logout-modal-content h3 {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 10px !important;
+    letter-spacing: -0.02em !important;
+}
+
+.nd-logout-modal__message,
+.logout-modal-content p {
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-size: 0.925rem !important;
+    color: #64748b !important;
+    margin: 0 0 26px !important;
+    line-height: 1.55 !important;
+    padding: 0 6px !important;
+}
+
+.nd-logout-modal__actions,
+.logout-modal-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.nd-logout-modal__btn,
+.logout-modal-actions .btn {
+    padding: 13px 18px !important;
+    border-radius: 12px !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 0.925rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.nd-logout-modal__btn--cancel,
 .logout-modal-actions .btn-secondary {
-    background: #eef2f6;
-    color: #1f2937;
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+    background: #f8fafc !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
 }
 
-.logout-modal-actions .btn-secondary:hover,
-.logout-modal-actions .btn-secondary:focus {
-    transform: translateY(-2px);
-    background: #e6eef7;
-    outline: none;
+.nd-logout-modal__btn--cancel:hover,
+.logout-modal-actions .btn-secondary:hover {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px) !important;
 }
 
-
-/* primary (confirm logout) */
-
+.nd-logout-modal__btn--confirm,
 .logout-modal-actions .btn-primary {
-    background: #27ae60;
-    color: #ffffff;
-    box-shadow: 0 6px 18px rgba(39, 174, 96, 0.14);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
 }
 
-.logout-modal-actions .btn-primary:hover,
-.logout-modal-actions .btn-primary:focus {
-    transform: translateY(-2px);
-    background: #219150;
-    outline: none;
+.nd-logout-modal__btn--confirm:hover,
+.logout-modal-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45) !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
 }
 
-
-/* accessibility focus */
-
-.logout-modal .btn:focus {
-    box-shadow: 0 0 0 4px rgba(37, 150, 90, 0.12);
+.nd-logout-modal__btn--confirm:active,
+.logout-modal-actions .btn-primary:active {
+    transform: translateY(0) !important;
 }
-
-
-/* small screens */
 
 @media (max-width: 480px) {
+    .nd-logout-modal__content,
     .logout-modal-content {
-        padding: 28px 18px;
+        padding: 28px 20px 24px !important;
+        border-radius: 20px !important;
     }
+    .nd-logout-modal__icon,
     .logout-icon {
-        width: 62px;
-        height: 62px;
-        font-size: 26px;
-        margin-bottom: 14px;
+        width: 60px !important;
+        height: 60px !important;
+        border-width: 4px !important;
+        margin-bottom: 16px !important;
     }
+    .nd-logout-modal__icon i,
+    .logout-icon i {
+        font-size: 20px !important;
+    }
+    .nd-logout-modal__title,
+    .logout-modal-content h3 {
+        font-size: 1.2rem !important;
+    }
+    .nd-logout-modal__actions,
     .logout-modal-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .logout-modal-actions .btn {
-        width: 100%;
-        min-width: 0;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
     }
 }

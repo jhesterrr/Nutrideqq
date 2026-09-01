@@ -1,5 +1,6 @@
 <?php
 // /api/ai_service.php
+// Data source: symptom-to-nutrient mapping keys reference Philippine DOST-FNRI FCT (not USDA).
 require_once __DIR__ . '/../database.php';
 
 class NutriDeqAI {
@@ -88,7 +89,7 @@ Client Message: \"$text\"";
                         $mappedNutrient = null;
                         $lower = strtolower(trim($symptom));
                         // Mapping to exact keys in fct_nutrients table
-                        if (str_contains($lower, 'cramp'))                        $mappedNutrient = 'Potassium, K';
+                        if (str_contains($lower, 'cramp') || str_contains($lower, 'spasm'))  $mappedNutrient = 'Potassium, K';
                         elseif (str_contains($lower, 'fatigue') || str_contains($lower, 'tired') || str_contains($lower, 'exhausted')) $mappedNutrient = 'Iron';
                         elseif (str_contains($lower, 'dizz'))                     $mappedNutrient = 'Sodium';
                         elseif (str_contains($lower, 'headache'))                 $mappedNutrient = 'Calcium'; // Proxy for missing Magnesium

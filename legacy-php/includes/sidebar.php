@@ -118,133 +118,253 @@ if (isset($_SESSION['user_id'])) {
     </div>
 </aside>
 
-<!-- Logout Confirmation Modal (Moved outside sidebar to escape CSS transform bounding context) -->
-<div class="nd-logout-modal" id="logoutModal">
+<!-- Logout Confirmation Modal (Self-contained, viewport-centered) -->
+<div class="nd-logout-modal" id="logoutModal" role="dialog" aria-modal="true" aria-labelledby="ndLogoutTitle">
     <div class="nd-logout-modal__content">
+        <button type="button" class="nd-logout-modal__close" onclick="hideLogoutConfirmation()" aria-label="Close dialog">
+            <i class="fas fa-times"></i>
+        </button>
         <div class="nd-logout-modal__icon">
-            <i class="fas fa-sign-out-alt"></i>
+            <div class="nd-logout-modal__icon-inner">
+                <i class="fas fa-arrow-right-from-bracket"></i>
+            </div>
         </div>
-        <h3 class="nd-logout-modal__title">Confirm Logout</h3>
-        <p class="nd-logout-modal__message">Are you sure you want to log out of your account?</p>
+        <h3 class="nd-logout-modal__title" id="ndLogoutTitle">Confirm Logout</h3>
+        <p class="nd-logout-modal__message">Are you sure you want to end your active session? You will need to sign back in to access your dashboard.</p>
         <div class="nd-logout-modal__actions">
-            <button class="nd-logout-modal__btn nd-logout-modal__btn--cancel" onclick="hideLogoutConfirmation()">Cancel</button>
-            <a href="login-logout/logout.php" class="nd-logout-modal__btn nd-logout-modal__btn--confirm">Yes, Logout</a>
+            <button type="button" id="cancelLogout" class="nd-logout-modal__btn nd-logout-modal__btn--cancel" onclick="hideLogoutConfirmation()">Cancel</button>
+            <a href="login-logout/logout.php" id="confirmLogout" class="nd-logout-modal__btn nd-logout-modal__btn--confirm">
+                <span>Yes, Logout</span>
+                <i class="fas fa-arrow-right" style="font-size: 11px; margin-left: 6px;"></i>
+            </a>
         </div>
     </div>
 </div>
 
 <style>
     /* Logout Confirmation Modal Styles */
-    .nd-logout-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: var(--app-height-dvh);
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999999;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
+    .nd-logout-modal,
+    .logout-modal {
+        position: fixed !important;
+        inset: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 100vh !important;
+        min-height: 100dvh !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+        z-index: 9999999 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
-    .nd-logout-modal.active {
-        opacity: 1;
-        visibility: visible;
+    .nd-logout-modal.active,
+    .logout-modal.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
     }
 
-    .nd-logout-modal__content {
-        background: white;
-        border-radius: 20px;
-        padding: 32px;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        transform: scale(0.9);
-        transition: transform 0.3s ease;
+    .nd-logout-modal__content,
+    .logout-modal-content {
+        background: #ffffff !important;
+        border: 1px solid rgba(226, 232, 240, 0.9) !important;
+        border-radius: 24px !important;
+        padding: 36px 28px 28px !important;
+        max-width: 420px !important;
+        width: 100% !important;
+        text-align: center !important;
+        position: relative !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
+        transform: scale(0.92) translateY(12px) !important;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        box-sizing: border-box !important;
+        margin: auto !important;
     }
 
-    .nd-logout-modal.active .nd-logout-modal__content {
-        transform: scale(1);
+    .nd-logout-modal.active .nd-logout-modal__content,
+    .logout-modal.active .logout-modal-content {
+        transform: scale(1) translateY(0) !important;
     }
 
-    .nd-logout-modal__icon {
-        width: 64px;
-        height: 64px;
-        background: rgba(239, 68, 68, 0.1);
+    .nd-logout-modal__close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-    }
-
-    .nd-logout-modal__icon i {
-        font-size: 24px;
-        color: #ef4444;
-    }
-
-    .nd-logout-modal__title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0 0 12px;
-    }
-
-    .nd-logout-modal__message {
-        font-size: 0.95rem;
-        color: #64748b;
-        margin: 0 0 24px;
-        line-height: 1.5;
-    }
-
-    .nd-logout-modal__actions {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-    }
-
-    .nd-logout-modal__btn {
-        padding: 12px 24px;
-        border-radius: 12px;
-        font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .nd-logout-modal__btn--cancel {
+        border: none;
         background: #f1f5f9;
         color: #64748b;
-        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        padding: 0;
+        z-index: 10;
     }
 
-    .nd-logout-modal__btn--cancel:hover {
+    .nd-logout-modal__close:hover {
         background: #e2e8f0;
+        color: #0f172a;
+        transform: scale(1.05);
     }
 
-    .nd-logout-modal__btn--confirm {
-        background: #ef4444;
-        color: white;
-        border: none;
+    .nd-logout-modal__icon,
+    .logout-icon {
+        width: 68px !important;
+        height: 68px !important;
+        border-radius: 50% !important;
+        background: #fef2f2 !important;
+        border: 6px solid #fee2e2 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 auto 20px !important;
+        box-shadow: 0 8px 16px -4px rgba(239, 68, 68, 0.2) !important;
     }
 
-    .nd-logout-modal__btn--confirm:hover {
-        background: #dc2626;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    .nd-logout-modal__icon-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+
+    .nd-logout-modal__icon i,
+    .logout-icon i {
+        font-size: 24px !important;
+        color: #ef4444 !important;
+        margin-left: 2px;
+    }
+
+    .nd-logout-modal__title,
+    .logout-modal-content h3 {
+        font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+        font-size: 1.35rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 0 10px !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    .nd-logout-modal__message,
+    .logout-modal-content p {
+        font-family: 'Inter', system-ui, sans-serif !important;
+        font-size: 0.925rem !important;
+        color: #64748b !important;
+        margin: 0 0 26px !important;
+        line-height: 1.55 !important;
+        padding: 0 6px !important;
+    }
+
+    .nd-logout-modal__actions,
+    .logout-modal-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    .nd-logout-modal__btn,
+    .logout-modal-actions .btn {
+        padding: 13px 18px !important;
+        border-radius: 12px !important;
+        font-family: 'Inter', system-ui, sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 0.925rem !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .nd-logout-modal__btn--cancel,
+    .logout-modal-actions .btn-secondary {
+        background: #f8fafc !important;
+        color: #475569 !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
+    }
+
+    .nd-logout-modal__btn--cancel:hover,
+    .logout-modal-actions .btn-secondary:hover {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-color: #cbd5e1 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    .nd-logout-modal__btn--confirm,
+    .logout-modal-actions .btn-primary {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid transparent !important;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
+    }
+
+    .nd-logout-modal__btn--confirm:hover,
+    .logout-modal-actions .btn-primary:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45) !important;
+        transform: translateY(-1px) !important;
+        color: #ffffff !important;
+    }
+
+    .nd-logout-modal__btn--confirm:active,
+    .logout-modal-actions .btn-primary:active {
+        transform: translateY(0) !important;
+    }
+
+    @media (max-width: 480px) {
+        .nd-logout-modal__content,
+        .logout-modal-content {
+            padding: 28px 20px 24px !important;
+            border-radius: 20px !important;
+        }
+        .nd-logout-modal__icon,
+        .logout-icon {
+            width: 60px !important;
+            height: 60px !important;
+            border-width: 4px !important;
+            margin-bottom: 16px !important;
+        }
+        .nd-logout-modal__icon i,
+        .logout-icon i {
+            font-size: 20px !important;
+        }
+        .nd-logout-modal__title,
+        .logout-modal-content h3 {
+            font-size: 1.2rem !important;
+        }
+        .nd-logout-modal__actions,
+        .logout-modal-actions {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+        }
+    }
+
     .nd-logo-svg {
         width: 32px;
         height: 32px;
@@ -375,9 +495,19 @@ if (isset($_SESSION['user_id'])) {
     });
 
     /* ── Logout Confirmation Modal ── */
-    window.showLogoutConfirmation = function() {
+    function ensureModalInBody() {
         const modal = document.getElementById('logoutModal');
+        if (modal && modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+        return modal;
+    }
+
+    window.showLogoutConfirmation = function() {
+        const modal = ensureModalInBody();
         if (modal) {
+            modal.style.display = 'flex';
+            void modal.offsetWidth; // force reflow
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -388,23 +518,36 @@ if (isset($_SESSION['user_id'])) {
         if (modal) {
             modal.classList.remove('active');
             document.body.style.overflow = '';
+            setTimeout(() => {
+                if (!modal.classList.contains('active')) {
+                    modal.style.display = '';
+                }
+            }, 250);
         }
     };
 
-    // Close modal on backdrop click
-    const logoutModal = document.getElementById('logoutModal');
-    if (logoutModal) {
-        logoutModal.addEventListener('click', function(e) {
-            if (e.target === logoutModal) {
-                hideLogoutConfirmation();
-            }
-        });
+    // Auto-reparent to body as early as possible
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureModalInBody);
+    } else {
+        ensureModalInBody();
     }
+
+    // Close modal on backdrop click
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('logoutModal');
+        if (modal && e.target === modal) {
+            hideLogoutConfirmation();
+        }
+    });
 
     // Close modal on ESC key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            hideLogoutConfirmation();
+            const modal = document.getElementById('logoutModal');
+            if (modal && modal.classList.contains('active')) {
+                hideLogoutConfirmation();
+            }
         }
     });
 

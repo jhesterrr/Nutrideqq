@@ -1,4 +1,9 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ob_start();
+
 require_once dirname(__DIR__) . '/session_bootstrap.php';
 
 header('Content-Type: application/json');
@@ -7,6 +12,7 @@ require_once '../database.php';
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     http_response_code(401);
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
@@ -15,6 +21,7 @@ $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'regular';
 
 if ($user_role === 'admin') {
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Admins cannot edit messages']);
     exit;
 }
@@ -22,6 +29,7 @@ if ($user_role === 'admin') {
 $message_id = isset($_POST['message_id']) ? intval($_POST['message_id']) : 0;
 
 if ($message_id <= 0) {
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Invalid message ID']);
     exit;
 }
@@ -36,6 +44,8 @@ try {
     $message = $stmt->fetch();
 
     if (!$message) {
+        while (ob_get_level() > 0) ob_end_clean();
+        header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Message not found']);
         exit;
     }
@@ -57,6 +67,8 @@ try {
     }
 
     if (!$is_owner) {
+        while (ob_get_level() > 0) ob_end_clean();
+        header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Permission denied. You can only unsend your own messages.']);
         exit;
     }
@@ -65,9 +77,12 @@ try {
     $upd = $pdo->prepare("UPDATE wellness_messages SET is_unsent = 1, content = 'This message was unsent', attachment_path = NULL, message_type = 'text' WHERE id = ?");
     $upd->execute([$message_id]);
 
+    while (ob_get_level() > 0) ob_end_clean();
+    header('Content-Type: application/json');
     echo json_encode(['success' => true]);
 
 } catch (Throwable $e) {
+    while (ob_get_level() > 0) ob_end_clean();
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
-?>

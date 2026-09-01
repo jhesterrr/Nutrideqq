@@ -1,5 +1,6 @@
 <?php
 // api/nutrient_analyzer.php
+// Nutrient debt thresholds derived from Philippine DOST-FNRI FCT daily adequate intakes (not USDA).
 require_once __DIR__ . '/../database.php';
 
 class NutrientAnalyzer {

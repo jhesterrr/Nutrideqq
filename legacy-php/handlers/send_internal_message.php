@@ -1,4 +1,9 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ob_start();
+
 require_once dirname(__DIR__) . '/session_bootstrap.php';
 
 header('Content-Type: application/json');
@@ -7,6 +12,7 @@ require_once '../database.php';
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     http_response_code(401);
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
@@ -20,6 +26,7 @@ $message = trim($_POST['message'] ?? '');
 // Only staff and admin can send internal messages
 if (!in_array($user_role, ['staff', 'admin'])) {
     http_response_code(403);
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Forbidden']);
     exit;
 }
@@ -27,6 +34,7 @@ if (!in_array($user_role, ['staff', 'admin'])) {
 $has_attachment = (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK);
 
 if ($thread_id <= 0 || (empty($message) && !$has_attachment)) {
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Invalid input - message or attachment required']);
     exit;
 }
@@ -54,11 +62,15 @@ try {
     $thread = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$thread) {
+        while (ob_get_level() > 0) ob_end_clean();
+        header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Access denied']);
         exit;
     }
 
     if ($thread['status'] !== 'open') {
+        while (ob_get_level() > 0) ob_end_clean();
+        header('Content-Type: application/json');
         echo json_encode(['success' => false, 'error' => 'Thread is closed']);
         exit;
     }
@@ -134,9 +146,12 @@ try {
         'read_status' => 1
     ];
 
+    while (ob_get_level() > 0) ob_end_clean();
+    header('Content-Type: application/json');
     echo json_encode(['success' => true, 'message' => $formatted_message]);
 
 } catch (Throwable $e) {
-    // Stop returning 500 for better cloud debugging
+    while (ob_get_level() > 0) ob_end_clean();
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

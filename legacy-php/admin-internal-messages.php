@@ -63,7 +63,7 @@ if ($selected_thread_id) {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Clinical Command | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -439,14 +439,21 @@ if ($selected_thread_id) {
                         <div class="chat-messages" id="chatMessages">
                             <?php foreach ($thread_messages as $index => $msg): 
                                 $isMe = ($msg['sender_id'] == $user_id); ?>
-                                <div class="msg-row <?= $isMe ? 'me' : 'them' ?>">
+                                <div class="msg-row <?= $isMe ? 'me' : 'them' ?>" id="msg-<?= $msg['id'] ?>">
                                     <div class="msg-bubble">
                                         <?php if(!$isMe): ?>
                                             <div style="font-size:0.75rem; font-weight:700; color:#10b981; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                                                <i class="fas fa-user-md"></i> <?= htmlspecialchars($msg['sender_name']) ?>
+                                                <i class="fas fa-user-md"></i> <?= htmlspecialchars($msg['sender_name'] ?? 'Staff') ?>
                                             </div>
                                         <?php endif; ?>
-                                        <div><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
+                                        <?php if(!empty($msg['message_type']) && $msg['message_type'] === 'image' && !empty($msg['attachment_path'])): ?>
+                                            <div class="message-text" style="margin-bottom:6px;"><img src="<?= htmlspecialchars($msg['attachment_path']) ?>" class="chat-img-zoomable" alt="Attachment" style="max-width:100%; border-radius:12px; cursor:zoom-in;"></div>
+                                        <?php elseif(!empty($msg['message_type']) && $msg['message_type'] === 'file' && !empty($msg['attachment_path'])): ?>
+                                            <div class="message-text clinical-file-msg" style="margin-bottom:6px;"><a href="<?= htmlspecialchars($msg['attachment_path']) ?>" target="_blank" style="color:<?= $isMe ? '#ffffff' : '#059669' ?>; font-weight:600;"><i class="fas fa-file-pdf"></i> View clinical report</a></div>
+                                        <?php endif; ?>
+                                        <?php if(!empty($msg['message'])): ?>
+                                            <div><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
+                                        <?php endif; ?>
                                         <div class="msg-meta"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
                                     </div>
                                 </div>
@@ -457,12 +464,12 @@ if ($selected_thread_id) {
                             <?php if($selected_thread['status'] == 'open'): ?>
                                 <form id="messageForm">
                                     <div class="chat-input-pill">
-                                        <button type="button" style="background:none; border:none; color:#64748b; cursor:pointer; padding:8px;" id="attachBtn">
+                                        <button type="button" style="background:none; border:none; color:#64748b; cursor:pointer; padding:8px;" id="attachBtn" title="Attach file">
                                             <i class="fas fa-paperclip"></i>
                                         </button>
                                         <input type="file" id="fileInput" style="display:none;" accept=".pdf,.png,.jpg,.jpeg">
                                         <textarea class="chat-input" id="messageInput" placeholder="Write clinical response..." rows="1"></textarea>
-                                        <button type="submit" class="chat-send-btn">
+                                        <button type="submit" class="chat-send-btn" title="Send response">
                                             <i class="fas fa-paper-plane"></i>
                                         </button>
                                     </div>
@@ -490,10 +497,14 @@ if ($selected_thread_id) {
             <script>
                 document.addEventListener('DOMContentLoaded', () => {
                     const el = document.getElementById('chatMessages'); 
-                    if(el) el.scrollTop = el.scrollHeight;
+                    if(el) {
+                        el.scrollTop = el.scrollHeight;
+                        requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+                        setTimeout(() => { el.scrollTop = el.scrollHeight; }, 60);
+                    }
                     
                     <?php if ($selected_thread_id): ?>
-                    new ChatController(<?= $user_id ?>, 'admin', <?= $selected_thread_id ?>);
+                    window.currentChat = new ChatController(<?= $user_id ?>, 'admin', <?= $selected_thread_id ?>);
                     <?php endif; ?>
 
                     // Auto-resize textarea
@@ -510,3 +521,4 @@ if ($selected_thread_id) {
     </div>
 </body>
 </html>
+

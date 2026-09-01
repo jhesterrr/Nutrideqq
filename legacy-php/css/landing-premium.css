@@ -7,6 +7,7 @@
   --emerald-deep: #064E3B;
   --emerald-glow: rgba(80, 200, 120, 0.4);
   --emerald-liquid: rgba(80, 200, 120, 0.15);
+  --emerald-soft: rgba(16, 185, 129, 0.2);
   --glass-bg: rgba(255, 255, 255, 0.65);
   --glass-border: rgba(255, 255, 255, 0.9);
   --glass-shadow: 0 20px 50px rgba(6, 78, 59, 0.12);
@@ -626,11 +627,33 @@ body {
   animation: telemetry-pulse 3s ease-in-out infinite;
   display: inline-block;
   transform-origin: left center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .mock-stat-card:nth-child(2) .mock-stat-val { animation-delay: 0.5s; }
 .mock-stat-card:nth-child(3) .mock-stat-val { animation-delay: 1.2s; }
 .mock-stat-card:nth-child(4) .mock-stat-val { animation-delay: 2.1s; }
-.mock-stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+.mock-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Telemetry width classes — responsive telemetry widths for stat values/labels */
+.stat-val-w-40 { width: 40%; }
+.stat-val-w-50 { width: 50%; }
+.stat-val-w-60 { width: 60%; }
+.stat-val-w-70 { width: 70%; }
+.stat-label-w-60 { width: 60%; }
+.stat-label-w-70 { width: 70%; }
+.stat-label-w-80 { width: 80%; }
+.stat-label-w-90 { width: 90%; }
 
 .mock-content-row {
   display: grid;
@@ -1611,6 +1634,31 @@ footer {
   .bento-item.large { grid-column: span 2; grid-row: span 1; }
 }
 
+@media (max-width: 860px) {
+  .main-nav {
+    top: 1rem;
+    width: 95%;
+    max-width: 1100px;
+    height: 58px;
+    padding: 0 1.5rem;
+  }
+  .main-nav .links { gap: 1rem; }
+  .main-nav .links a { font-size: 0.85rem; padding: 0.4rem 0; }
+  .cta-btn { padding: 0.6rem 1.4rem; font-size: 0.85rem; }
+  .hero-title { font-size: 4rem; }
+  .hero-dashboard-wrapper {
+    height: var(--app-height-dvh);
+    max-width: 100%;
+  }
+  .mock-stats { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .mock-stat-card { height: 100px; padding: 0.85rem; }
+  .mock-stat-val { font-size: 1.25rem; }
+  .mock-stat-label { font-size: 0.7rem; }
+  .hero-actions { gap: 0.5rem; }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary { padding: 0.6rem 1.5rem; font-size: 0.85rem; }
+}
+
 @media (max-width: 768px) {
   .hero-title { font-size: 3.5rem; }
   .main-nav .links { display: none; }
@@ -2073,14 +2121,24 @@ footer {
   .mock-stat-card:nth-child(3) { --i: 2; }
   .mock-stat-card:nth-child(4) { --i: 1; }
 
-  .mock-stat-val {
+  .mock-stat-val,
+  .stat-val-w-40,
+  .stat-val-w-50,
+  .stat-val-w-60,
+  .stat-val-w-70 {
     font-size: 1.3rem !important;
     width: auto !important;
+    max-width: 100%;
     color: var(--emerald-deep);
   }
 
-  .mock-stat-label {
+  .mock-stat-label,
+  .stat-label-w-60,
+  .stat-label-w-70,
+  .stat-label-w-80,
+  .stat-label-w-90 {
     width: auto !important;
+    max-width: 100%;
     font-size: 0.8rem !important;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -2448,7 +2506,19 @@ footer {
   }
 
   .mock-stats {
-    grid-template-columns: 1fr;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .mock-stat-card {
+    min-height: 80px;
+    padding: 0.85rem !important;
+    gap: 1rem;
+  }
+
+  .mock-stat-val {
+    font-size: 1.2rem !important;
   }
 
   .v-main {

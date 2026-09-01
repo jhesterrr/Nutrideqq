@@ -101,7 +101,7 @@ try {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NutriDeq - Book Appointment</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
@@ -203,3 +203,4 @@ try {
 </body>
 
 </html>
+

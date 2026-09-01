@@ -24,6 +24,7 @@ $height = isset($data['height']) ? (float)$data['height'] : null;
 try {
     $database = new Database();
     $pdo = $database->getConnection();
+    AuditLogger::init($pdo);
 
     // Create BMI History table if it doesn't exist
     try {
@@ -62,6 +63,7 @@ try {
         
         $hist = $pdo->prepare("INSERT INTO client_bmi_history (user_id, weight, height, bmi) VALUES (?, ?, ?, ?)");
         $hist->execute([$user_id, $weight, $height, $bmi]);
+        AuditLogger::log('anthropometric_create', 'client_bmi_history', $user_id, $user_id);
 
         if ($bmi < 18.5) $bmi_status = 'Underweight';
         elseif ($bmi < 25) $bmi_status = 'Normal';

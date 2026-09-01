@@ -11,7 +11,7 @@ header("Pragma: no-cache");
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NutriDeq — Nutrition Data, Equity, and Quantification</title>
     <meta name="description"
         content="NutriDeq is a modern platform helping dietitians provide precise, accessible, and personalized nutrition care.">
@@ -19,6 +19,7 @@ header("Pragma: no-cache");
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/landing-premium.css">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
@@ -160,23 +161,23 @@ header("Pragma: no-cache");
                             <div class="mock-stats">
                                 <div class="glass-layer mock-stat-card" style="--tz: 60px;">
                                     <div class="mock-icon primary"></div>
-                                    <div class="mock-stat-val">2,150 kcal</div>
-                                    <div class="mock-stat-label">Daily Target</div>
+                                    <div class="mock-stat-val stat-val-w-60">2,150 kcal</div>
+                                    <div class="mock-stat-label stat-label-w-80">Daily Target</div>
                                 </div>
                                 <div class="glass-layer mock-stat-card" style="--tz: 60px;">
                                     <div class="mock-icon secondary"></div>
-                                    <div class="mock-stat-val" style="width: 50%;">145g</div>
-                                    <div class="mock-stat-label" style="width: 70%;">Protein</div>
+                                    <div class="mock-stat-val stat-val-w-50">145g</div>
+                                    <div class="mock-stat-label stat-label-w-70">Protein</div>
                                 </div>
                                 <div class="glass-layer mock-stat-card" style="--tz: 60px;">
                                     <div class="mock-icon accent"></div>
-                                    <div class="mock-stat-val" style="width: 40%;">85g</div>
-                                    <div class="mock-stat-label" style="width: 60%;">Lipids</div>
+                                    <div class="mock-stat-val stat-val-w-40">85g</div>
+                                    <div class="mock-stat-label stat-label-w-60">Lipids</div>
                                 </div>
                                 <div class="glass-layer mock-stat-card" style="--tz: 60px;">
                                     <div class="mock-icon danger"></div>
-                                    <div class="mock-stat-val" style="width: 70%;">210g</div>
-                                    <div class="mock-stat-label" style="width: 90%;">Carbohydrates</div>
+                                    <div class="mock-stat-val stat-val-w-70">210g</div>
+                                    <div class="mock-stat-label stat-label-w-90">Carbohydrates</div>
                                 </div>
                             </div>
 
@@ -643,6 +644,11 @@ header("Pragma: no-cache");
     <script src="assets/js/landing-animations.js"></script>
     <script src="scripts/interactive-effects.js"></script>
     <script src="scripts/particle-engine.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js?v=3').catch(() => {});
+        }
+    </script>
 </body>
 
 </html>

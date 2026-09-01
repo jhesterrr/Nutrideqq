@@ -5,8 +5,12 @@ const STATIC_ASSETS = [
     '/css/base.css',
     '/css/dashboard.css',
     '/css/user-premium.css',
-    '/scripts/user-realtime.js',
+    '/css/landing-premium.css',
+    '/scripts/landing-animations.js',
+    '/scripts/interactive-effects.js',
+    '/scripts/particle-engine.js',
     '/assets/img/logo.png',
+    '/manifest.json',
     '/offline.html'
 ];
 

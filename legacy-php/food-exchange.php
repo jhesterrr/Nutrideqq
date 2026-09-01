@@ -37,7 +37,7 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="scripts/diet-engine.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Food Exchange Terminal | NutriDeq</title>
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     <link
@@ -3509,3 +3509,4 @@ $nav_links_array = getNavigationLinks($user_role, 'food-exchange.php');
 </body>
 
 </html>
+

@@ -1,6 +1,15 @@
 <?php
 ini_set('display_errors', 0);
-// This matches your specific file structure
+/**
+ * FCTHelper — Food Composition Table Helper
+ *
+ * Data Source: Philippine DOST-FNRI Food Composition Tables (FCT)
+ *   - Department of Science and Technology - Food and Nutrition Research Institute
+ *   - "Food Composition Tables - The Philippine Food Guide" (2016, revised 2020)
+ *   - NOT USDA — the thesis incorrectly cites USDA as the data source.
+ *
+ * This matches your specific file structure
+ */
 require_once dirname(__DIR__) . '/database.php';
 
 class FCTHelper

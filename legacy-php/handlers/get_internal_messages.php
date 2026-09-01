@@ -84,6 +84,8 @@ try {
             'sender_id' => $msg['sender_id'],
             'sender_role' => $msg['sender_role'],
             'sender_name' => $msg['sender_name'],
+            'attachment_path' => $msg['attachment_path'],
+            'message_type' => $msg['message_type'],
             'type' => $is_me ? 'sent' : 'received',
             'created_at' => $msg['created_at'],
             'pretty_time' => date('g:i A', strtotime($msg['created_at'])),

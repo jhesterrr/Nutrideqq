@@ -87,7 +87,7 @@ if ($selected_thread_id) {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Clinical Support Hub | NutriDeq</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
@@ -102,45 +102,80 @@ if ($selected_thread_id) {
             background: transparent !important;
         }
 
-        .messaging-hub {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            height: calc(var(--app-height-dvh) - 100px);
-            gap: 24px;
-            margin: 20px;
+        /* ════════════════════════════════════════════════
+           SHARED HELP HUB LAYOUT — FULLY RESPONSIVE
+           ════════════════════════════════════════════════ */
+        .help-hub-wrapper {
+            display: flex;
+            flex-direction: column;
             position: relative;
             z-index: 10;
+            padding: 20px;
+            min-height: calc(100vh - 80px);
         }
 
-        /* Thread List Pane */
+        .help-hub-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            height: calc(100vh - 120px);
+            min-height: 600px;
+            gap: 20px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* ═══════ THREAD LIST PANE (DESKTOP) ═══════ */
         .thread-pane {
             display: flex;
             flex-direction: column;
-            background: var(--glass-bg) !important;
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
             overflow: hidden;
-            border: 1px solid var(--glass-border) !important;
-            box-shadow: var(--glass-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05), 0 5px 15px rgba(0, 0, 0, 0.03);
         }
 
         .thread-header {
-            padding: 32px 24px;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(255, 255, 255, 0.05) !important;
+            padding: 24px 20px;
+            border-bottom: 1px solid #F3F4F6;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .thread-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            margin: 0 0 2px;
+            font-size: 1.2rem;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thread-header h2 i {
+            color: #10b981;
+        }
+
+        .thread-subtitle {
+            font-size: 0.8rem;
+            color: #6B7280;
+            font-weight: 500;
+            margin-bottom: 14px;
         }
 
         .new-inquiry-btn {
-            margin-top: 16px;
             width: 100%;
-            background: #10b981;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: #fff;
             border: none;
-            padding: 12px 20px;
+            padding: 12px 18px;
             border-radius: 14px;
             font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -148,24 +183,32 @@ if ($selected_thread_id) {
             gap: 10px;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             letter-spacing: 0.01em;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         }
 
         .new-inquiry-btn:hover {
-            background: #059669;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .new-inquiry-btn:active {
+            transform: translateY(0);
         }
 
         .thread-list {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 12px 10px 16px;
             scroll-behavior: smooth;
         }
 
         .thread-list::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
+        }
+
+        .thread-list::-webkit-scrollbar-track {
+            background: transparent;
         }
 
         .thread-list::-webkit-scrollbar-thumb {
@@ -173,85 +216,265 @@ if ($selected_thread_id) {
             border-radius: 4px;
         }
 
+        .thread-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(5, 150, 105, 0.35);
+        }
+
         .thread-card {
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 12px;
+            padding: 14px;
+            border-radius: 16px;
+            margin-bottom: 6px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
             border: 1px solid transparent;
             display: flex;
-            align-items: center;
-            gap: 16px;
-            background: transparent !important;
+            align-items: flex-start;
+            gap: 12px;
+            background: transparent;
+            position: relative;
         }
 
         .thread-card:hover {
-            background: rgba(255, 255, 255, 0.4) !important;
-            transform: translateX(5px);
+            background: rgba(243, 244, 246, 0.8);
+            transform: translateX(3px);
         }
 
         .thread-card.active {
-            background: rgba(255, 255, 255, 0.7) !important;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
-            border-color: transparent !important;
+            background: #ECFDF5;
+            border-color: #A7F3D0;
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.12);
+        }
+
+        .thread-card.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: #10b981;
+            border-radius: 0 3px 3px 0;
         }
 
         .thread-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(59, 130, 246, 0.1) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            color: #1e293b;
+            color: #059669;
             flex-shrink: 0;
-            font-size: 1.2rem;
-            border: 2px solid #ffffff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            font-size: 1rem;
+            border: 1.5px solid rgba(16, 185, 129, 0.18);
         }
 
-        /* Chat Pane */
+        .thread-card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .thread-card-title {
+            font-weight: 700;
+            color: #0F172A;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+
+        .thread-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            font-size: 0.72rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .thread-card-meta i {
+            font-size: 0.65rem;
+        }
+
+        .thread-status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .thread-status-dot.open {
+            background: #10b981;
+            box-shadow: 0 0 0 2px #ECFDF5, 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        .thread-status-dot.closed {
+            background: #94a3b8;
+        }
+
+        .empty-threads {
+            text-align: center;
+            color: #94a3b8;
+            padding: 50px 20px;
+            font-weight: 500;
+        }
+
+        .empty-threads i {
+            font-size: 2.5rem;
+            color: #10b981;
+            opacity: 0.5;
+            margin-bottom: 12px;
+        }
+
+        /* ═══════ CHAT PANE — IMPROVED PC DESIGN ═══════ */
         .chat-pane {
-            background: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(20px);
-            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.4) !important;
-            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07), 0 10px 20px rgba(0, 0, 0, 0.04);
             overflow: hidden;
             position: relative;
         }
 
-        .chat-header {
-            padding: 24px 32px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        .chat-pane-header {
+            padding: 18px 28px;
+            border-bottom: 1px solid #F3F4F6;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(255, 255, 255, 0.3) !important;
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
+            position: relative;
             z-index: 10;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
+        .chat-pane-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mobile-back-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(5, 150, 105, 0.08);
+            color: #059669;
+            border: 1px solid rgba(5, 150, 105, 0.15);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-back-btn:hover {
+            background: rgba(5, 150, 105, 0.14);
+        }
+
+        .chat-title-wrap {
+            min-width: 0;
+        }
+
+        .chat-pane-title {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #0F172A;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-pane-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .chat-status {
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 22px;
+        }
+
+        .status-open {
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .status-closed {
+            background: rgba(148, 163, 184, 0.12);
+            color: #64748b;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .chat-thread-id {
+            font-size: 0.72rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* ═══════ CHAT MESSAGES — ENHANCED PC ═══════ */
         .chat-messages {
             flex: 1;
-            padding: 40px;
+            padding: 28px 32px;
             overflow-y: auto;
-            background: transparent !important;
+            background:
+                radial-gradient(ellipse at top left, rgba(59, 130, 246, 0.02) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(16, 185, 129, 0.02) 0%, transparent 50%);
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 14px;
+            scroll-behavior: smooth;
         }
 
-        /* Chat Bubbles */
+        .chat-messages::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #D1D5DB;
+        }
+
         .msg-row {
             display: flex;
             width: 100%;
-            margin-bottom: 8px;
+            margin-bottom: 0;
         }
 
         .msg-row.me {
@@ -263,131 +486,308 @@ if ($selected_thread_id) {
         }
 
         .msg-bubble {
-            max-width: 70%;
-            padding: 16px 24px;
-            border-radius: 24px;
-            font-size: 0.98rem;
+            max-width: 72%;
+            padding: 14px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
             line-height: 1.6;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
-            transition: transform 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .msg-bubble:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
         }
 
         .msg-row.me .msg-bubble {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.2);
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .msg-row.them .msg-bubble {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(5px);
             color: #1e293b;
-            border-bottom-left-radius: 4px;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .msg-sender-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #059669;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .msg-sender-label i {
+            font-size: 0.65rem;
+        }
+
+        .msg-row.me .msg-sender-label {
+            color: rgba(255, 255, 255, 0.85);
+            border-bottom-color: rgba(255, 255, 255, 0.12);
         }
 
         .msg-meta {
-            font-size: 0.75rem;
+            font-size: 0.68rem;
             color: #64748b;
             margin-top: 6px;
-            font-weight: 500;
+            font-weight: 600;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
         }
 
         .msg-row.me .msg-meta {
-            text-align: right;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .chat-input-area {
-            padding: 24px 32px;
-            background: rgba(255, 255, 255, 0.2) !important;
+        .msg-img {
+            max-width: 100%;
+            max-height: 260px;
+            border-radius: 14px;
+            margin: 8px 0 4px;
+            display: block;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+            cursor: zoom-in;
+        }
+
+        .msg-file-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            margin: 6px 0 4px;
+            font-weight: 600;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .msg-row.me .msg-file-link {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .msg-row.them .msg-file-link {
+            color: #059669;
+        }
+
+        /* ═══════ INPUT AREA — ENHANCED PC ═══════ */
+        .chat-input-section {
+            padding: 20px 28px 24px;
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
         }
 
-        .chat-input-pill {
-            background: #f1f5f9;
-            border-radius: 16px;
-            padding: 8px 12px;
+        .chat-closed-banner {
+            text-align: center;
+            color: #64748b;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: rgba(148, 163, 184, 0.08);
+            border-radius: 12px;
+            border: 1px dashed rgba(148, 163, 184, 0.3);
+        }
+
+        .typing-indicator-help {
             display: flex;
             align-items: center;
-            gap: 12px;
-            border: 1.5px solid transparent;
-            transition: all 0.2s;
+            gap: 8px;
+            padding: 4px 4px 10px;
+            font-size: 0.78rem;
+            color: #6B7280;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+            min-height: 22px;
         }
 
-        .chat-input-pill:focus-within {
-            background: white;
+        .typing-indicator-help.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .typing-dots-help {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots-help span {
+            width: 5px;
+            height: 5px;
+            background: #9CA3AF;
+            border-radius: 50%;
+            animation: typingBounceHelp 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dots-help span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots-help span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounceHelp {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .input-pill {
+            background: #F8FAFC;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 8px 10px 8px 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            transition: all 0.25s ease;
+        }
+
+        .input-pill:focus-within {
+            background: #fff;
             border-color: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12), 0 4px 16px rgba(16, 185, 129, 0.08);
+            transform: translateY(-1px);
         }
 
-        .chat-input {
+        .input-attach-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            margin-bottom: 3px;
+        }
+
+        .input-attach-btn:hover {
+            background: rgba(16, 185, 129, 0.08);
+            color: #059669;
+        }
+
+        .chat-input-help {
             flex: 1;
             background: transparent;
             border: none;
-            padding: 8px;
+            padding: 10px 6px;
             font-family: inherit;
             font-size: 0.95rem;
+            color: #1E293B;
             outline: none;
             resize: none;
-            max-height: 120px;
+            max-height: 140px;
+            line-height: 1.5;
+        }
+
+        .chat-input-help::placeholder {
+            color: #94a3b8;
         }
 
         .chat-send-btn {
             width: 44px;
             height: 44px;
-            background: #10b981;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            margin-bottom: 2px;
         }
 
         .chat-send-btn:hover {
-            background: #059669;
-            transform: scale(1.05);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: scale(1.06);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
         }
 
-        /* Status Badges */
-        .chat-status {
-            padding: 2px 14px;
-            border-radius: 50px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: inline-flex;
+        .chat-send-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ═══════ EMPTY CHAT STATE ═══════ */
+        .empty-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 24px;
+            padding: 40px 24px;
+            text-align: center;
         }
 
-        .status-open {
-            background: rgba(16, 185, 129, 0.1);
+        .empty-chat-icon {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.1);
+            transform: rotate(-5deg);
+        }
+
+        .empty-chat-icon i {
+            font-size: 3rem;
             color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            opacity: 0.85;
         }
 
-        .status-closed {
-            background: rgba(148, 163, 184, 0.1);
-            color: #64748b;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+        .empty-chat h3 {
+            font-family: 'Outfit', sans-serif;
+            color: #0F172A;
+            margin: 0 0 8px;
+            font-size: 1.5rem;
+            font-weight: 800;
         }
 
-        /* Modal Styles matching the premium look */
+        .empty-chat p {
+            color: #64748B;
+            font-weight: 600;
+            margin: 0;
+            font-size: 0.95rem;
+            max-width: 360px;
+            line-height: 1.6;
+        }
+
+        /* ═══════ MODAL ═══════ */
         .modal-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
@@ -399,16 +799,18 @@ if ($selected_thread_id) {
         }
 
         .modal-body {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(20px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
             width: 100%;
             max-width: 480px;
-            padding: 32px;
-            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            box-shadow: 0 50px 120px -25px rgba(0, 0, 0, 0.25);
             position: relative;
             overflow: hidden;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-body::before {
@@ -418,34 +820,38 @@ if ($selected_thread_id) {
             left: 0;
             width: 100%;
             height: 4px;
-            background: linear-gradient(90deg, #10b981, #059669);
+            background: linear-gradient(90deg, #10b981, #3B82F6);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .modal-title {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 1.3rem;
-            color: #1e293b;
+            font-size: 1.25rem;
+            color: #0F172A;
             margin: 0;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        .modal-title i {
+            color: #10b981;
+        }
+
         .modal-close-btn {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 12px;
             background: rgba(0, 0, 0, 0.04);
             border: none;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -466,7 +872,7 @@ if ($selected_thread_id) {
         .modal-label {
             display: block;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: #64748b;
@@ -475,62 +881,70 @@ if ($selected_thread_id) {
 
         .modal-input {
             width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
+            padding: 13px 16px;
+            border: 1px solid #CBD5E1;
+            border-radius: 14px;
             font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem;
-            color: #1e293b;
-            background: #f8fafc;
+            font-size: 0.92rem;
+            color: #0F172A;
+            background: #F8FAFC;
             outline: none;
             transition: all 0.25s;
+            box-sizing: border-box;
         }
 
         .modal-input:focus {
             border-color: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+            background: #fff;
         }
 
         .modal-textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 110px;
+            line-height: 1.5;
         }
 
-        .admin-select-list {
-            max-height: 140px;
+        .admin-select-wrap {
+            max-height: 150px;
             overflow-y: auto;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 12px 16px;
-            background: #f8fafc;
+            border: 1px solid #CBD5E1;
+            border-radius: 14px;
+            padding: 10px 14px;
+            background: #F8FAFC;
         }
 
-        .admin-select-list::-webkit-scrollbar {
+        .admin-select-wrap::-webkit-scrollbar {
             width: 4px;
         }
 
-        .admin-select-list::-webkit-scrollbar-thumb {
+        .admin-select-wrap::-webkit-scrollbar-thumb {
             background: rgba(16, 185, 129, 0.2);
             border-radius: 4px;
         }
 
-        .admin-check-label {
+        .admin-check-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 12px;
-            font-size: 0.95rem;
+            padding: 8px 4px;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #1e293b;
+            color: #1E293B;
             cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.15s ease;
         }
 
-        .admin-check-label:last-child {
-            margin-bottom: 0;
+        .admin-check-item:hover {
+            background: rgba(16, 185, 129, 0.06);
         }
 
-        .admin-check-label input[type="checkbox"] {
+        .admin-check-item + .admin-check-item {
+            border-top: 1px solid rgba(203, 213, 225, 0.5);
+        }
+
+        .admin-check-item input[type="checkbox"] {
             accent-color: #10b981;
             width: 18px;
             height: 18px;
@@ -542,17 +956,17 @@ if ($selected_thread_id) {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 16px;
-            border-radius: 16px;
+            padding: 15px;
+            border-radius: 14px;
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.98rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-top: 8px;
+            margin-top: 6px;
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         }
@@ -562,46 +976,471 @@ if ($selected_thread_id) {
             box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
         }
 
-        @media screen and (max-width: 992px) {
-            .messaging-hub {
-                grid-template-columns: 1fr;
-                margin: 0;
-                height: calc(100vh - 60px);
-                padding: 10px;
-                gap: 0;
+        /* ════════════════════════════════════════════════
+           RESPONSIVE BREAKPOINTS — TABLET & MOBILE
+           Aligned to nd-app / nd-mobile-header from sidebar.php
+           to match staff-messages.php visual language.
+           ════════════════════════════════════════════════ */
+
+        /* Desktop (>= 1025px) — ensure dash-premium main accounts for fixed sidebar */
+        @media (min-width: 1025px) {
+            main.nd-main.dash-premium {
+                margin-left: 280px !important;
+                width: calc(100% - 280px) !important;
+                padding: 32px !important;
+                transition: margin-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            }
+            body.sidebar-collapsed main.nd-main.dash-premium {
+                margin-left: 88px !important;
+                width: calc(100% - 88px) !important;
+            }
+        }
+
+        /* Tablet (<= 1024px) */
+        @media (max-width: 1024px) {
+            main.nd-main.dash-premium {
+                padding-top: 72px !important; /* Reserve space for fixed nd-mobile-header */
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+                min-height: 100dvh !important;
+                box-sizing: border-box !important;
+                margin-left: 0 !important;
+                width: 100% !important;
             }
 
-            .thread-pane {
-                <?php if ($selected_thread_id)
-                    echo 'display: none;'; ?>
-                border-radius: 20px;
+            .help-hub-wrapper {
+                padding: 16px;
             }
 
-            .chat-pane {
-                <?php if (!$selected_thread_id)
-                    echo 'display: none;'; ?>
-                border-radius: 20px;
+            .help-hub-grid {
+                grid-template-columns: 320px 1fr;
+                height: calc(100vh - 110px);
+                min-height: 520px;
+                gap: 16px;
             }
 
-            .mobile-nav-header {
-                display: flex;
-                background: linear-gradient(135deg, #1e293b, #0f172a);
-                padding: 14px 20px;
-                position: fixed;
-                top: 0;
-                width: 100%;
-                z-index: 9000;
-                justify-content: space-between;
-                align-items: center;
+            .chat-pane-header {
+                padding: 16px 22px;
             }
 
-            .main-content {
-                margin-top: 60px;
-                height: calc(100vh - 60px);
+            .chat-messages {
+                padding: 22px 24px;
+            }
+
+            .msg-bubble {
+                max-width: 80%;
+                padding: 12px 18px;
+                font-size: 0.92rem;
+            }
+
+            .chat-input-section {
+                padding: 16px 24px 20px;
+            }
+        }
+
+        /* Mobile & Small Tablet (<= 850px) — SINGLE PANE MODE */
+        @media (max-width: 850px) {
+            .mesh-gradient-container.dashboard-mesh,
+            .spotlight,
+            #organicCursor,
+            #cursorAura {
+                display: none !important;
             }
 
             body {
-                padding-top: 60px;
+                padding-top: 0 !important;
+                margin: 0;
+                overflow-x: hidden;
+            }
+
+            .nd-app {
+                min-height: 100dvh;
+            }
+
+            .nd-main.dash-premium {
+                padding: 0 !important;
+                padding-top: 72px !important; /* Reserve space for fixed nd-mobile-header */
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                padding-bottom: 0 !important;
+                margin: 0 !important;
+                min-height: 100dvh !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .help-hub-wrapper {
+                padding: 0 !important;
+                margin: 0 !important;
+                min-height: calc(100dvh - 72px);
+                position: relative;
+            }
+
+            .help-hub-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                height: calc(100dvh - 72px) !important;
+                min-height: calc(100dvh - 72px) !important;
+                max-height: calc(100dvh - 72px) !important;
+                gap: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+
+            .thread-pane,
+            .chat-pane {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 0 !important;
+                transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.2s ease;
+            }
+
+            /* LIST VIEW: show thread list, hide chat */
+            .help-hub-grid.view-list .thread-pane {
+                transform: translateX(0);
+                opacity: 1;
+                z-index: 10;
+            }
+
+            .help-hub-grid.view-list .chat-pane {
+                transform: translateX(100%);
+                opacity: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            /* CHAT VIEW: show chat, hide thread list */
+            .help-hub-grid.view-chat .thread-pane {
+                transform: translateX(-100%);
+                opacity: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            .help-hub-grid.view-chat .chat-pane {
+                transform: translateX(0);
+                opacity: 1;
+                z-index: 10;
+            }
+
+            /* Thread Pane Mobile Tweaks */
+            .thread-header {
+                padding: 18px 16px 14px;
+            }
+
+            .thread-header h2 {
+                font-size: 1.08rem;
+            }
+
+            .thread-subtitle {
+                font-size: 0.76rem;
+                margin-bottom: 12px;
+            }
+
+            .new-inquiry-btn {
+                padding: 11px 16px;
+                font-size: 0.88rem;
+                border-radius: 12px;
+            }
+
+            .thread-list {
+                padding: 10px 10px 20px;
+            }
+
+            .thread-card {
+                padding: 13px 12px;
+                border-radius: 14px;
+                gap: 10px;
+            }
+
+            .thread-avatar {
+                width: 42px;
+                height: 42px;
+                border-radius: 11px;
+                font-size: 0.95rem;
+            }
+
+            .thread-card-title {
+                font-size: 0.88rem;
+            }
+
+            .thread-card-meta {
+                font-size: 0.7rem;
+                gap: 6px;
+            }
+
+            /* Chat Pane Mobile Tweaks */
+            .chat-pane-header {
+                padding: 12px 14px !important;
+                gap: 10px;
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                position: sticky;
+                top: 0;
+                z-index: 50;
+            }
+
+            .chat-pane-header-left {
+                gap: 10px;
+            }
+
+            .mobile-back-btn {
+                display: flex !important;
+            }
+
+            .chat-pane-title {
+                font-size: 0.95rem !important;
+            }
+
+            .chat-pane-meta {
+                margin-top: 3px;
+                gap: 8px;
+            }
+
+            .chat-status {
+                padding: 2px 10px;
+                font-size: 0.65rem;
+                height: 20px;
+            }
+
+            .chat-thread-id {
+                font-size: 0.68rem;
+            }
+
+            .chat-messages {
+                padding: 14px 12px !important;
+                gap: 10px;
+            }
+
+            .msg-bubble {
+                max-width: 88% !important;
+                padding: 10px 15px !important;
+                border-radius: 18px !important;
+                font-size: 0.88rem !important;
+                line-height: 1.5 !important;
+            }
+
+            .msg-row.me .msg-bubble {
+                border-bottom-right-radius: 5px !important;
+            }
+
+            .msg-row.them .msg-bubble {
+                border-bottom-left-radius: 5px !important;
+            }
+
+            .msg-sender-label {
+                font-size: 0.7rem;
+                margin-bottom: 4px;
+            }
+
+            .msg-meta {
+                font-size: 0.65rem;
+                margin-top: 4px;
+            }
+
+            .msg-img {
+                max-height: 180px;
+                border-radius: 10px;
+            }
+
+            .chat-input-section {
+                padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                position: sticky;
+                bottom: 0;
+                z-index: 50;
+            }
+
+            .chat-closed-banner {
+                padding: 10px;
+                font-size: 0.8rem;
+                border-radius: 10px;
+            }
+
+            .input-pill {
+                padding: 6px 8px 6px 12px;
+                border-radius: 18px;
+                gap: 4px;
+            }
+
+            .input-attach-btn {
+                padding: 6px;
+                border-radius: 8px;
+                margin-bottom: 2px;
+            }
+
+            .chat-input-help {
+                padding: 9px 4px;
+                font-size: 0.9rem;
+                max-height: 120px;
+            }
+
+            .chat-send-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                box-shadow: 0 3px 10px rgba(16, 185, 129, 0.28);
+            }
+
+            .empty-chat {
+                padding: 30px 20px;
+            }
+
+            .empty-chat-icon {
+                width: 90px;
+                height: 90px;
+                border-radius: 24px;
+                margin-bottom: 22px;
+            }
+
+            .empty-chat-icon i {
+                font-size: 2.2rem;
+            }
+
+            .empty-chat h3 {
+                font-size: 1.2rem;
+            }
+
+            .empty-chat p {
+                font-size: 0.88rem;
+            }
+
+            /* Modal Mobile */
+            .modal-overlay {
+                padding: 0;
+                align-items: flex-end;
+            }
+
+            .modal-body {
+                max-width: 100%;
+                border-radius: 24px 24px 0 0;
+                padding: 22px 20px 28px;
+                max-height: 88vh;
+                animation: slideUpModal 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+
+            @keyframes slideUpModal {
+                from { transform: translateY(30px); opacity: 0.5; }
+                to   { transform: translateY(0); opacity: 1; }
+            }
+
+            .modal-header {
+                margin-bottom: 18px;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
+            }
+
+            .modal-field {
+                margin-bottom: 16px;
+            }
+
+            .modal-input {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+                border-radius: 12px;
+            }
+
+            .modal-submit-btn {
+                padding: 14px;
+                font-size: 0.92rem;
+                border-radius: 12px;
+            }
+        }
+
+        /* Small Phones (<= 480px) */
+        @media (max-width: 480px) {
+            .thread-header {
+                padding: 15px 14px 12px;
+            }
+
+            .thread-header h2 {
+                font-size: 1rem;
+            }
+
+            .new-inquiry-btn {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+            }
+
+            .thread-card {
+                padding: 11px 10px;
+            }
+
+            .thread-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+            }
+
+            .chat-pane-header {
+                padding: 10px 12px !important;
+            }
+
+            .chat-pane-title {
+                font-size: 0.9rem !important;
+            }
+
+            .chat-thread-id {
+                display: none;
+            }
+
+            .chat-messages {
+                padding: 12px 10px !important;
+                gap: 8px;
+            }
+
+            .msg-bubble {
+                max-width: 92% !important;
+                padding: 9px 13px !important;
+                font-size: 0.86rem !important;
+            }
+
+            .chat-input-section {
+                padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+
+            .input-pill {
+                padding: 5px 6px 5px 10px;
+                border-radius: 16px;
+            }
+
+            .chat-send-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 11px;
+            }
+
+            .empty-chat-icon {
+                width: 76px;
+                height: 76px;
+                border-radius: 20px;
+                margin-bottom: 18px;
+            }
+
+            .empty-chat-icon i {
+                font-size: 1.8rem;
+            }
+
+            .empty-chat h3 {
+                font-size: 1.05rem;
+            }
+
+            .empty-chat p {
+                font-size: 0.84rem;
             }
         }
     </style>
@@ -613,30 +1452,10 @@ if ($selected_thread_id) {
 </head>
 
 <body>
-    <div class="mobile-nav-header">
-        <button onclick="toggleSidebar()"
-            style="background:none;border:none;font-size:1.5rem;color:white;cursor:pointer;padding:4px;">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div
-            style="font-weight:800;color:white;font-family:'Outfit',sans-serif;font-size:1.1rem;display:flex;align-items:center;gap:8px;">
-            <i class="fas fa-headset" style="color:#10b981;"></i> Support Hub
-        </div>
-        <button onclick="openModal()"
-            style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:white;padding:6px 12px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.75rem;">
-            New
-        </button>
-    </div>
-
-    <!-- Sidebar Overlay (mobile) -->
-    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"
-        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:8500; backdrop-filter:blur(5px);">
-    </div>
-
-    <div class="main-layout">
+    <div class="nd-app">
         <?php include 'includes/sidebar.php'; ?>
 
-        <main class="main-content dash-premium">
+        <main class="nd-main dash-premium">
             <!-- Modern Mesh Background Elements -->
             <div class="mesh-gradient-container dashboard-mesh">
                 <div class="mesh-blob blob-1"></div>
@@ -649,131 +1468,136 @@ if ($selected_thread_id) {
             <div id="organicCursor"></div>
             <div class="glow-aura" id="cursorAura"></div>
 
-            <div class="messaging-hub">
-                <!-- Thread Pane -->
-                <div class="thread-pane stagger d-1">
-                    <div class="thread-header">
-                        <h2
-                            style="font-family:'Outfit',sans-serif; font-weight: 800; margin:0; font-size:1.4rem; color:#1e293b;">
-                            Clinical Support</h2>
-                        <button class="new-inquiry-btn" onclick="openModal()">
-                            <i class="fas fa-plus-circle"></i> New Inquiry
-                        </button>
-                    </div>
-
-                    <div class="thread-list">
-                        <?php if (empty($threads)): ?>
-                            <div style="text-align:center; color:#94a3b8; padding: 40px 20px; font-weight:500;">
-                                <i class="fas fa-comments"
-                                    style="font-size: 2.5rem; color:#10b981; opacity:0.5; margin-bottom: 12px;"></i>
-                                <p>No consultations yet.<br>Start a new inquiry to connect.</p>
-                            </div>
-                        <?php else: ?>
-                            <?php foreach ($threads as $thread): ?>
-                                <div class="thread-card <?= ($selected_thread_id == $thread['id']) ? 'active' : '' ?>"
-                                    onclick="window.location.href='?thread_id=<?= $thread['id'] ?>'">
-                                    <div class="thread-avatar" style="font-size: 1rem;"><i class="fas fa-hashtag"
-                                            style="opacity: 0.5;"></i></div>
-                                    <div style="flex:1;">
-                                        <div style="font-weight:700; color:#1e293b; font-size: 0.95rem;">
-                                            <?= htmlspecialchars($thread['title']) ?></div>
-                                        <div style="font-size:0.75rem; color:#64748b; margin-top:4px; font-weight: 500;">
-                                            <i class="far fa-clock" style="margin-right: 4px;"></i>
-                                            <?= date('M j, g:i A', strtotime($thread['last_message_at'])) ?>
-                                        </div>
-                                    </div>
-                                    <?php if ($thread['status'] == 'open'): ?>
-                                        <div
-                                            style="width:10px; height:10px; border-radius:50%; background:#10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); border: 2px solid #ffffff;">
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Chat Area -->
-                <div class="chat-pane stagger d-2">
-                    <?php if ($selected_thread): ?>
-                        <div class="chat-header">
-                            <div>
-                                <h3
-                                    style="margin:0; font-size:1.25rem; color:#1e293b; font-family:'Outfit',sans-serif; font-weight: 800;">
-                                    <?php if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/Mobile|Android|iPhone/i', $_SERVER['HTTP_USER_AGENT'])): ?>
-                                        <button onclick="window.location.href='staff-help.php'"
-                                            style="background:none; border:none; color:#10b981; font-size:1.2rem; margin-right:10px; cursor:pointer;"><i
-                                                class="fas fa-arrow-left"></i></button>
-                                    <?php endif; ?>
-                                    <?= htmlspecialchars($selected_thread['title']) ?>
-                                </h3>
-                                <div style="display:flex; align-items:center; gap:12px; margin-top:6px;">
-                                    <span
-                                        class="chat-status <?= $selected_thread['status'] == 'open' ? 'status-open' : 'status-closed' ?>">
-                                        <?= ucfirst($selected_thread['status']) ?>
-                                    </span>
-                                    <span style="font-size:0.75rem; color:#64748b; font-weight: 600;">Thread ID:
-                                        #<?= $selected_thread_id ?></span>
-                                </div>
-                            </div>
+            <div class="help-hub-wrapper">
+                <div class="help-hub-grid <?= $selected_thread_id ? 'view-chat' : 'view-list' ?>" id="helpHubGrid">
+                    <!-- Thread Pane -->
+                    <div class="thread-pane stagger d-1">
+                        <div class="thread-header">
+                            <h2>Clinical Support</h2>
+                            <button class="new-inquiry-btn" onclick="openModal()">
+                                <i class="fas fa-plus-circle"></i> New Inquiry
+                            </button>
                         </div>
 
-                        <div class="chat-messages" id="chatMessages">
-                            <?php foreach ($thread_messages as $msg):
-                                $isMe = ($msg['sender_id'] == $user_id); ?>
-                                <div class="msg-row <?= $isMe ? 'me' : 'them' ?>">
-                                    <div class="msg-bubble">
-                                        <?php if (!$isMe): ?>
-                                            <div
-                                                style="font-size:0.75rem; font-weight:700; color:#10b981; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                                                <i class="fas fa-user-shield"></i> <?= htmlspecialchars($msg['sender_name']) ?>
-                                            </div>
-                                        <?php endif; ?>
-                                        <div><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
-                                        <div class="msg-meta"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
-                                    </div>
+                        <div class="thread-list">
+                            <?php if (empty($threads)): ?>
+                                <div class="empty-threads">
+                                    <i class="fas fa-comments"></i>
+                                    <p>No consultations yet.<br>Start a new inquiry to connect.</p>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
-
-                        <div class="chat-input-area">
-                            <?php if ($selected_thread['status'] == 'open'): ?>
-                                <form id="messageForm">
-                                    <div class="chat-input-pill">
-                                        <button type="button"
-                                            style="background:none; border:none; color:#64748b; cursor:pointer; padding:8px;"
-                                            id="attachBtn">
-                                            <i class="fas fa-paperclip"></i>
-                                        </button>
-                                        <input type="file" id="fileInput" style="display:none;" accept=".pdf,.png,.jpg,.jpeg">
-                                        <textarea class="chat-input" id="messageInput" placeholder="Write clinical inquiry..."
-                                            rows="1"></textarea>
-                                        <button type="submit" class="chat-send-btn">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </button>
-                                    </div>
-                                </form>
                             <?php else: ?>
-                                <div style="text-align:center; color:#94a3b8; padding:10px; font-weight:600;">
+                                <?php foreach ($threads as $thread): ?>
+                                    <div class="thread-card <?= ($selected_thread_id == $thread['id']) ? 'active' : '' ?>"
+                                        onclick="openThreadView(<?= $thread['id'] ?>)" data-thread-id="<?= $thread['id'] ?>">
+                                        <div class="thread-avatar">
+                                            <i class="fas fa-hashtag"></i>
+                                        </div>
+                                        <div class="thread-card-content">
+                                            <div class="thread-card-title">
+                                                <?= htmlspecialchars($thread['title']) ?>
+                                            </div>
+                                            <div class="thread-card-meta">
+                                                <i class="far fa-clock"></i>
+                                                <?= date('M j, g:i A', strtotime($thread['last_message_at'])) ?>
+                                            </div>
+                                        </div>
+                                        <?php if ($thread['status'] == 'open'): ?>
+                                            <div class="thread-status-dot" title="Open"></div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Chat Pane -->
+                    <div class="chat-pane stagger d-2">
+                        <?php if ($selected_thread): ?>
+                            <div class="chat-pane-header">
+                                <button class="mobile-back-btn" onclick="closeThreadView()" aria-label="Back">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <div class="cph-info">
+                                    <h3><?= htmlspecialchars($selected_thread['title']) ?></h3>
+                                    <div class="cph-meta">
+                                        <span class="chat-status <?= $selected_thread['status'] == 'open' ? 'status-open' : 'status-closed' ?>">
+                                            <?= ucfirst($selected_thread['status']) ?>
+                                        </span>
+                                        <span class="cph-id">Thread #<?= $selected_thread_id ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <?php if ($selected_thread['status'] != 'open'): ?>
+                                <div class="chat-closed-banner">
+                                    <i class="fas fa-check-circle"></i>
                                     This support case has been resolved.
                                 </div>
                             <?php endif; ?>
-                        </div>
-                    <?php else: ?>
-                        <!-- Empty State -->
-                        <div
-                            style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background: transparent;">
-                            <div
-                                style="width:140px; height:140px; background: rgba(255,255,255,0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); border-radius:40px; display:flex; align-items:center; justify-content:center; margin-bottom:32px; box-shadow: 0 40px 80px -20px rgba(0,0,0,0.1); transform: rotate(-5deg);">
-                                <i class="fas fa-comment-medical fa-4x" style="color:#10b981; opacity:0.8;"></i>
+
+                            <div class="chat-messages" id="chatMessages">
+                                <?php foreach ($thread_messages as $msg):
+                                    $isMe = ($msg['sender_id'] == $user_id); ?>
+                                    <div class="msg-row <?= $isMe ? 'me' : 'them' ?>" id="msg-<?= $msg['id'] ?>">
+                                        <div class="msg-bubble">
+                                            <?php if (!$isMe): ?>
+                                                <div class="msg-sender-label">
+                                                    <i class="fas fa-user-shield"></i>
+                                                    <?= htmlspecialchars($msg['sender_name'] ?? 'Admin') ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if (!empty($msg['message_type']) && $msg['message_type'] === 'image' && !empty($msg['attachment_path'])): ?>
+                                                <img src="<?= htmlspecialchars($msg['attachment_path']) ?>"
+                                                    class="msg-img chat-img-zoomable" alt="Attachment">
+                                            <?php elseif (!empty($msg['message_type']) && $msg['message_type'] === 'file' && !empty($msg['attachment_path'])): ?>
+                                                <a href="<?= htmlspecialchars($msg['attachment_path']) ?>" target="_blank" class="msg-file-link">
+                                                    <i class="fas fa-file-pdf"></i> View clinical report
+                                                </a>
+                                            <?php endif; ?>
+                                            <?php if (!empty($msg['message'])): ?>
+                                                <div class="msg-text"><?= nl2br(htmlspecialchars($msg['message'])) ?></div>
+                                            <?php endif; ?>
+                                            <div class="msg-meta"><?= date('g:i A', strtotime($msg['created_at'])) ?></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                            <h3
-                                style="font-family:'Outfit',sans-serif; color:#1e293b; margin:0; font-size:1.8rem; font-weight: 800;">
-                                NutriDeq Support Center</h3>
-                            <p style="color:#64748b; font-weight: 600; margin-top:12px; font-size: 1.05rem;">Select a
-                                consultation thread or start a new inquiry.</p>
-                        </div>
-                    <?php endif; ?>
+
+                            <div class="chat-input-section">
+                                <div class="typing-indicator-help" id="typingIndicator" style="display:none;">
+                                    <span></span><span></span><span></span>
+                                    <div class="ti-label">Admin is typing…</div>
+                                </div>
+                                <?php if ($selected_thread['status'] == 'open'): ?>
+                                    <form id="messageForm">
+                                        <div class="input-pill">
+                                            <button type="button" class="input-attach-btn" id="attachBtn" aria-label="Attach file">
+                                                <i class="fas fa-paperclip"></i>
+                                            </button>
+                                            <input type="file" id="fileInput" style="display:none;" accept=".pdf,.png,.jpg,.jpeg">
+                                            <textarea class="chat-input-help" id="messageInput" placeholder="Write clinical inquiry..."
+                                                rows="1"></textarea>
+                                            <button type="submit" class="chat-send-btn" aria-label="Send">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <!-- Empty Chat State -->
+                            <div class="empty-chat">
+                                <div class="ec-visual">
+                                    <i class="fas fa-comment-medical"></i>
+                                </div>
+                                <h3>NutriDeq Support Center</h3>
+                                <p>Select a consultation thread or start a new inquiry.</p>
+                                <button class="new-inquiry-btn ec-cta" onclick="openModal()">
+                                    <i class="fas fa-plus-circle"></i> Start New Inquiry
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 
@@ -822,15 +1646,6 @@ if ($selected_thread_id) {
 
     <script src="scripts/internal-chat-controller.js?v=110"></script>
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('mainSidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (sidebar) sidebar.classList.toggle('active');
-            if (overlay) {
-                overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
-            }
-        }
-
         function openModal() {
             document.getElementById('threadModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -839,6 +1654,51 @@ if ($selected_thread_id) {
             document.getElementById('threadModal').classList.remove('active');
             document.body.style.overflow = '';
         }
+
+        function openThreadView(id) {
+            const grid = document.getElementById('helpHubGrid');
+            if (window.innerWidth <= 850) {
+                if (grid) {
+                    grid.classList.remove('view-list');
+                    grid.classList.add('view-chat');
+                }
+                const state = { view: 'chat', thread_id: id };
+                const url = '?thread_id=' + id;
+                history.pushState(state, '', url);
+                setTimeout(() => { window.location.href = url; }, 280);
+            } else {
+                window.location.href = '?thread_id=' + id;
+            }
+        }
+
+        function closeThreadView() {
+            const grid = document.getElementById('helpHubGrid');
+            if (grid) {
+                grid.classList.remove('view-chat');
+                grid.classList.add('view-list');
+            }
+            const state = { view: 'list' };
+            history.pushState(state, '', 'staff-help.php');
+            setTimeout(() => { window.location.href = 'staff-help.php'; }, 280);
+        }
+
+        window.addEventListener('popstate', function (e) {
+            const grid = document.getElementById('helpHubGrid');
+            if (!grid) return;
+            if (e.state && e.state.view === 'list') {
+                grid.classList.remove('view-chat');
+                grid.classList.add('view-list');
+            } else if (e.state && e.state.view === 'chat') {
+                grid.classList.remove('view-list');
+                grid.classList.add('view-chat');
+            } else if (location.search.indexOf('thread_id=') !== -1) {
+                grid.classList.remove('view-list');
+                grid.classList.add('view-chat');
+            } else {
+                grid.classList.remove('view-chat');
+                grid.classList.add('view-list');
+            }
+        });
 
         document.getElementById('threadModal').addEventListener('click', function (e) {
             if (e.target === this) closeModal();
@@ -855,14 +1715,33 @@ if ($selected_thread_id) {
                 new ChatController(<?= $user_id ?>, 'staff', <?= $selected_thread_id ?>);
             <?php endif; ?>
 
+            const attachBtn = document.getElementById('attachBtn');
+            const fileInput = document.getElementById('fileInput');
+            if (attachBtn && fileInput) {
+                attachBtn.addEventListener('click', () => fileInput.click());
+            }
+
             const textarea = document.getElementById('messageInput');
             if (textarea) {
                 textarea.addEventListener('input', function () {
                     this.style.height = 'auto';
-                    this.style.height = (this.scrollHeight) + 'px';
+                    const capped = Math.min(this.scrollHeight, 140);
+                    this.style.height = capped + 'px';
+                    this.style.overflowY = (this.scrollHeight > 140) ? 'auto' : 'hidden';
+                });
+                textarea.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const form = document.getElementById('messageForm');
+                        if (form) form.requestSubmit();
+                    }
                 });
             }
         });
+
+        // ── Shared Sidebar Toggle (mobile / tablet ≤1024px) ──
+        // NOTE: sidebar.php already wires up #ndMobileNavToggle. Do NOT re-attach handlers here.
+        // (Duplicate handlers would toggle the sidebar twice, cancelling the click.)
     </script>
 </body>
 

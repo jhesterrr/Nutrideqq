@@ -7,8 +7,11 @@ class ChatController {
         this.userId = userId;
         this.userRole = userRole;
         this.contactId = contactId;
-        this.pollingInterval = null;
+        this.pollingTimeout = null;
         this.replyToId = null;
+        this.isFirstLoad = true;
+        this.typingTimeout = null;
+        this.isTyping = false;
 
         // Register globally for reference
         window.chatControllerInstance = this;
@@ -18,6 +21,7 @@ class ChatController {
         this.inputArea = document.getElementById('messageInput') || document.querySelector('.chat-input');
         this.attachBtn = document.getElementById('attachBtn');
         this.fileInput = document.getElementById('fileInput');
+        this.typingIndicator = document.getElementById('typingIndicator');
 
         this.init();
     }
@@ -26,6 +30,13 @@ class ChatController {
         if (this.contactId) {
             this.fetchMessages();
             this.startPolling();
+        }
+
+        // Typing indicator — send "is typing" signals
+        if (this.inputArea) {
+            this.inputArea.addEventListener('focus', () => this.onTypingStart());
+            this.inputArea.addEventListener('input', () => this.onTypingInput());
+            this.inputArea.addEventListener('blur', () => this.onTypingStop());
         }
 
         // Enter to Send (Keyboard)
@@ -80,39 +91,116 @@ class ChatController {
         this.initLightbox();
     }
 
+    onTypingStart() {
+        this.isTyping = true;
+        this.sendTypingSignal(true);
+    }
+
+    onTypingInput() {
+        if (!this.isTyping) {
+            this.isTyping = true;
+            this.sendTypingSignal(true);
+        }
+        // Reset the debounce timer
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => this.onTypingStop(), 3000);
+    }
+
+    onTypingStop() {
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+        if (this.isTyping) {
+            this.isTyping = false;
+            this.sendTypingSignal(false);
+        }
+    }
+
+    async sendTypingSignal(isTyping) {
+        if (!this.contactId) return;
+        try {
+            const baseUrl = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
+            const formData = new FormData();
+            formData.append('action', 'set_typing');
+            formData.append('contact_id', this.contactId);
+            formData.append('is_typing', isTyping ? 1 : 0);
+            await fetch(`${baseUrl}handlers/typing_status.php`, {
+                method: 'POST',
+                body: formData,
+                signal: AbortSignal.timeout(3000)
+            }).catch(() => {});
+        } catch (e) { /* ignore typing errors */ }
+    }
+
+    async checkTypingStatus() {
+        if (!this.contactId) return;
+        try {
+            const baseUrl = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
+            const res = await fetch(`${baseUrl}handlers/typing_status.php?action=check_typing&contact_id=${this.contactId}`, {
+                signal: AbortSignal.timeout(3000)
+            });
+            const data = await res.json();
+            if (data.success && this.typingIndicator) {
+                if (data.is_typing) {
+                    this.typingIndicator.classList.add('visible');
+                } else {
+                    this.typingIndicator.classList.remove('visible');
+                }
+            }
+        } catch (e) { /* ignore */ }
+    }
+
     startPolling() {
+        if (this.pollingTimeout) clearTimeout(this.pollingTimeout);
         this.pollingTimeout = setTimeout(() => this.poll(), 3000);
     }
 
     async poll() {
         await this.fetchMessages();
+        await this.checkTypingStatus();
         this.pollingTimeout = setTimeout(() => this.poll(), 3000);
     }
 
     async fetchMessages() {
         if (!this.contactId) return;
         try {
-            console.log("Fetching messages for contact:", this.contactId);
+            const baseUrl = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-            const res = await fetch(`${BASE_URL}handlers/get_messages.php?contact_id=${this.contactId}`, {
+            const res = await fetch(`${baseUrl}handlers/get_messages.php?contact_id=${this.contactId}`, {
                 signal: controller.signal
             });
             clearTimeout(id);
 
             const data = await res.json();
             
-            // Clean up ANY loading indicators in the container
+            // Clean up ANY loading spinners and loading states in the container
             if (this.chatMessages) {
                 const spinners = this.chatMessages.querySelectorAll('.fa-spinner, .fa-spin');
                 spinners.forEach(s => {
                     if (s.parentElement) s.parentElement.remove();
                 });
+                const loadingStates = this.chatMessages.querySelectorAll('.chat-loading-state');
+                loadingStates.forEach(ls => ls.remove());
             }
 
             if (data.success) {
-                this.renderMessages(data.messages);
+                if (!data.messages || data.messages.length === 0) {
+                    if (this.chatMessages && this.chatMessages.querySelectorAll('.message-wrapper').length === 0) {
+                        this.chatMessages.innerHTML = `
+                            <div class="empty-chat-placeholder" style="text-align:center; padding:60px 20px; color:#64748b; font-family:'Inter', system-ui, sans-serif;">
+                                <div style="width:56px; height:56px; border-radius:50%; background:rgba(16,185,129,0.1); color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; font-size:1.3rem;">
+                                    <i class="far fa-comments"></i>
+                                </div>
+                                <div style="font-weight:700; color:#1e293b; font-size:1.05rem; margin-bottom:4px;">No messages yet</div>
+                                <p style="font-size:0.875rem; color:#64748b; margin:0;">Start this clinical conversation using the message input below.</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    const emptyNotice = this.chatMessages.querySelector('.empty-chat-placeholder');
+                    if (emptyNotice) emptyNotice.remove();
+                    this.renderMessages(data.messages);
+                }
             } else {
                 console.error("Server returned error:", data.error);
             }
@@ -194,7 +282,12 @@ class ChatController {
                         <div class="message-bubble ${msg.is_unsent ? 'unsent' : ''}">
                             ${replyHtml}
                             ${content}
-                            <div class="msg-time">${msg.pretty_time}</div>
+                            <div class="msg-time">
+                                ${msg.pretty_time}
+                                ${isMe ? `<span class="msg-read-receipt ${msg.read ? 'read' : 'unread'}">
+                                    <i class="fas ${msg.read ? 'fa-check-double' : 'fa-check'}"></i>
+                                </span>` : ''}
+                            </div>
                         </div>
                         ${actionsHtml}
                     </div>
@@ -204,8 +297,8 @@ class ChatController {
             addedNew = true;
         });
         
-        if (addedNew) {
-            this.scrollToBottom();
+        if (addedNew || this.isFirstLoad) {
+            this.scrollToBottom(this.isFirstLoad);
         }
     }
 
@@ -255,7 +348,8 @@ class ChatController {
         formData.append('message_id', msgId);
 
         try {
-            const res = await fetch(`${BASE_URL}handlers/unsend_message.php`, {
+            const baseUrl = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
+            const res = await fetch(`${baseUrl}handlers/unsend_message.php`, {
                 method: 'POST',
                 body: formData
             });
@@ -309,23 +403,66 @@ class ChatController {
         this.inputArea.style.height = 'auto';
         
         this.clearReply();
+        this.onTypingStop();
 
         try {
-            const res = await fetch(`${BASE_URL}handlers/send_message_ajax.php`, { method: 'POST', body: formData });
+            const baseUrl = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
+            const res = await fetch(`${baseUrl}handlers/send_message_ajax.php`, { method: 'POST', body: formData });
+            if (!res.ok) {
+                const errText = await res.text();
+                console.error("Server HTTP Error:", res.status, errText);
+                throw new Error(`HTTP ${res.status}`);
+            }
             const data = await res.json();
             if (data.success) {
+                const emptyNotice = this.chatMessages.querySelector('.empty-chat-placeholder');
+                if (emptyNotice) emptyNotice.remove();
                 this.renderMessages([data.message]);
+                this.scrollToBottom(true);
             } else {
-                alert("Failed to send: " + data.error);
+                alert("Failed to send: " + (data.error || "Unknown server error"));
             }
-        } catch (e) { alert("Communication error."); }
+        } catch (e) { 
+            console.error("Chat communication error:", e);
+            alert("Communication error: " + (e.message || "Failed to connect to server")); 
+        }
     }
 
-    scrollToBottom() {
-        if (this.chatMessages) {
+    scrollToBottom(force = false) {
+        if (!this.chatMessages) this.chatMessages = document.getElementById('chatMessages');
+        if (!this.chatMessages) return;
+
+        const isNearBottom = (this.chatMessages.scrollHeight - this.chatMessages.scrollTop - this.chatMessages.clientHeight) < 120;
+
+        if (force || isNearBottom || this.isFirstLoad) {
+            const prevBehavior = this.chatMessages.style.scrollBehavior;
+            if (this.isFirstLoad || force) {
+                this.chatMessages.style.scrollBehavior = 'auto';
+            }
+
             this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+            requestAnimationFrame(() => {
+                if (this.chatMessages) this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            });
+
+            setTimeout(() => {
+                if (this.chatMessages) {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                    if (this.isFirstLoad || force) {
+                        this.chatMessages.style.scrollBehavior = prevBehavior || '';
+                    }
+                }
+            }, 60);
+
+            setTimeout(() => {
+                if (this.chatMessages) {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }
+            }, 200);
         }
+
+        this.isFirstLoad = false;
     }
 
     escapeHtml(t) {
@@ -344,7 +481,7 @@ class ChatController {
             const lb = document.createElement('div');
             lb.id = 'lightboxOverlay';
             lb.className = 'lightbox-overlay';
-            lb.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);cursor:zoom-out;";
+            lb.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:999999;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);cursor:zoom-out;";
             lb.innerHTML = '<img id="lightboxContent" style="max-width:90%;max-height:90%;border-radius:12px;box-shadow:0 30px 60px rgba(0,0,0,0.5);transform:scale(0.9);transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);" src="">';
             document.body.appendChild(lb);
             lb.onclick = () => {

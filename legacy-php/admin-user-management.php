@@ -381,7 +381,7 @@ try {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     <!-- Fonts handled by base.css (Phase 2) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -421,6 +421,44 @@ try {
         }
         table { min-width: 800px !important; display: table !important; }
         .grid, .tab-buttons { display: flex; flex-direction: column; }
+    }
+    @media (max-width: 768px) {
+        .mgmt-hero {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 16px !important;
+        }
+        .mgmt-hero-right {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+        }
+        .mgmt-hero-right .btn-premium-add {
+            width: 100% !important;
+            justify-content: center !important;
+            margin: 0 !important;
+        }
+        .profile-card-footer {
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+        .profile-card-footer .inline-form:first-child {
+            flex: 1 1 100% !important;
+            width: 100% !important;
+        }
+        .profile-card-footer .card-role-select {
+            width: 100% !important;
+        }
+    }
+    @media (max-width: 480px) {
+        .profile-card-footer .card-action {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            flex: 0 0 auto !important;
+        }
     }
     </style>
 </head>
@@ -615,26 +653,9 @@ document.addEventListener('DOMContentLoaded', function() {
         function upd(){const l=Math.max(0,min*86400000-(Date.now()-dMs));if(l<=0){btn.removeAttribute('disabled');if(chip)chip.textContent='';return true;}btn.setAttribute('disabled','disabled');if(chip)chip.textContent='Available in '+fmt(Math.floor(l/1000));return false;}
         upd(); const iv=setInterval(()=>{if(upd())clearInterval(iv);},1000);
     });
-    document.getElementById('logoutBtn')?.addEventListener('click',e=>{e.preventDefault();document.getElementById('logoutModal')?.classList.add('active');});
-    document.getElementById('cancelLogout')?.addEventListener('click',()=>document.getElementById('logoutModal')?.classList.remove('active'));
-    document.getElementById('confirmLogout')?.addEventListener('click',()=>window.location.href='login-logout/logout.php');
-    window.addEventListener('click',e=>{if(e.target===document.getElementById('logoutModal'))document.getElementById('logoutModal').classList.remove('active');});
 });
 </script>
-<!-- Global Logout Modal -->
-<div class="logout-modal" id="logoutModal" style="z-index: 10001;">
-    <div class="logout-modal-content">
-        <div class="logout-icon">
-            <i class="fas fa-sign-out-alt"></i>
-        </div>
-        <h3>Are you sure?</h3>
-        <p>You will be logged out and redirected to the login page.</p>
-        <div class="logout-modal-actions">
-            <button class="btn btn-secondary" id="cancelLogout">Cancel</button>
-            <button class="btn btn-primary" id="confirmLogout">Yes, Logout</button>
-        </div>
-    </div>
-</div>
 </body>
 </html>
+
 

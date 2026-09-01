@@ -29,6 +29,7 @@ if (!$user_id || !$log_date || !$report_content) {
 try {
     $db = new Database();
     $conn = $db->getConnection();
+    AuditLogger::init($conn);
 
     // Create table if not exists
     $createTableSql = "CREATE TABLE IF NOT EXISTS clinical_reports (
@@ -48,6 +49,11 @@ try {
     $conn->exec($createTableSql);
 
     // Generate a unique report ID if it doesn't exist for this log
+    $patientName = class_exists('Encryption') ? Encryption::encryptIfExists($patient_name) : $patient_name;
+    $dieticianName = class_exists('Encryption') ? Encryption::encryptIfExists($dietician_name) : $dietician_name;
+    $encryptedContent = class_exists('Encryption') ? Encryption::encryptIfExists($report_content) : $report_content;
+
+    // Generate a unique report ID if it doesn't exist for this log
     $report_id = 'REP-' . strtoupper(bin2hex(random_bytes(4)));
 
     // Check if a report already exists for this user and date
@@ -57,7 +63,6 @@ try {
     $existing = $checkStmt->fetch();
 
     if ($existing) {
-        // Update existing report
         $sql = "UPDATE clinical_reports SET 
                 staff_id = ?, 
                 dietician_name = ?, 
@@ -66,14 +71,15 @@ try {
                 created_at = CURRENT_TIMESTAMP
                 WHERE id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([$staff_id, $dietician_name, $patient_name, $report_content, $existing['id']]);
+        $stmt->execute([$staff_id, $dieticianName, $patientName, $encryptedContent, $existing['id']]);
     } else {
-        // Insert new report
         $sql = "INSERT INTO clinical_reports (user_id, staff_id, log_date, dietician_name, patient_name, report_id, report_content) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->execute([$user_id, $staff_id, $log_date, $dietician_name, $patient_name, $report_id, $report_content]);
+        $stmt->execute([$user_id, $staff_id, $log_date, $dieticianName, $patientName, $report_id, $encryptedContent]);
     }
+
+    AuditLogger::log('clinical_report_save', 'clinical_reports', $report_id, $user_id, $_SESSION['user_role'] ?? 'staff');
 
     echo json_encode(['success' => true, 'message' => 'Report saved successfully']);
 } catch (Exception $e) {

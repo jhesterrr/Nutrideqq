@@ -80,7 +80,7 @@ $pdo = $database->getConnection();
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NutriDeq - <?php echo getDashboardTitle($user_role); ?></title>
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     <link
@@ -1736,6 +1736,13 @@ $pdo = $database->getConnection();
                                 <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Linked to 30-day logs</span>
                             </div>
                             
+                             <?php if (!empty($user_ai_data['insights']) || $user_ai_data['score'] > 1 || $user_ai_data['flag']): ?>
+                                <div style="background: rgba(245, 156, 11, 0.08); border: 1.5px solid rgba(245, 156, 11, 0.3); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.72rem; color: #78350f; display: flex; align-items: flex-start; gap: 8px;">
+                                    <i class="fas fa-exclamation-triangle" style="margin-top: 2px; color: #d97706;"></i>
+                                    <span><b>NON-THERAPEUTIC NOTICE:</b> These AI-generated nutritional markers are for educational insight only. They are not a substitute for professional medical or nutritional diagnosis. All recommendations must be reviewed and validated by a qualified Registered Dietitian before implementation.</span>
+                                </div>
+                            <?php endif; ?>
+
                             <?php if (!empty($user_ai_data['insights'])): ?>
                                 <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                                     <?php foreach ($user_ai_data['insights'] as $insight): ?>
@@ -2405,3 +2412,4 @@ $pdo = $database->getConnection();
 
 </body>
 </html>
+

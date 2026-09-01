@@ -34,7 +34,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Nutrition Calculator | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -389,7 +389,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                                  <div class="pill-item" data-val="hamwi">Hamwi</div>
                              </div>
                              <div id="methodDesc" style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 8px; line-height: 1.3; font-style: italic;">
-                                 <b>Tannhauser:</b> A standard clinical formula calculating weight based on height (cm) minus 100, with a 10% adjustment.
+                                 <b>Tannhauser:</b> A standard clinical formula calculating ideal body weight based on height (cm) minus 100, with a 10% adjustment.
                              </div>
                              <div style="display: flex; align-items: baseline; gap: 12px; margin-top: 12px;">
                                 <div class="hud-val-main" id="dbwResult" style="color: var(--primary); font-size: 3rem;">--</div>
@@ -451,10 +451,10 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
             let currentActivity = document.querySelector('#activityToggle .active')?.dataset.val || 'sedentary';
             let currentMethod = document.querySelector('#methodToggle .active')?.dataset.val || 'tannhauser';
 
-            const methodDescriptions = {
-                tannhauser: "<b>Tannhauser:</b> A standard clinical formula calculating weight based on height (cm) minus 100, with a 10% adjustment.",
-                hamwi: "<b>Hamwi:</b> A more specific formula that uses 5 feet (152.4 cm) as a base and adds weight for every additional inch."
-            };
+             const methodDescriptions = {
+                 tannhauser: "<b>Tannhauser:</b> A standard clinical formula calculating ideal body weight based on height (cm) minus 100, with a 10% adjustment.",
+                 hamwi: "<b>Hamwi:</b> A more specific formula that uses 5 feet (152.4 cm) as a base and adds weight for every additional inch."
+             };
 
             const activityDescriptions = {
                 sedentary: "Mostly resting with little or no activity.",
@@ -575,23 +575,20 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 
                 updateRing('bmiRing', bmi, 40);
 
-                // TDEE using DBW Method
-                let dbw = 0;
+                // --- BMR / TDEE Calculation via Desirable Body Weight ---
+                // Estimated kcal/day based on DBW × activity kcal/kg (from Tannhauser/Hamwi)
+                const kcalPerKgMap = { sedentary: 30, light: 35, moderate: 40, very: 45 };
+                const kcalPerKg = kcalPerKgMap[currentActivity] || 30;
                 const heightIn = heightCm / 2.54;
                 const inchesOver5ft = Math.max(0, heightIn - 60);
-
+                let dbw = 0;
                 if (currentMethod === 'tannhauser') {
                     dbw = (heightCm - 100) * 0.9;
                 } else if (currentMethod === 'hamwi') {
                     dbw = currentSex === 'male' ? 48 + (2.7 * inchesOver5ft) : 45 + (2.2 * inchesOver5ft);
                 }
-
-                // Step 2: Apply kcal/kg of DBW based on activity level
-                // (Standard Philippine clinical nutrition values)
-                const kcalPerKgMap = { sedentary: 30, light: 35, moderate: 40, very: 45 };
-                const kcalPerKg = kcalPerKgMap[currentActivity] || 30;
-
-                const tdee = Math.round(dbw * kcalPerKg);
+                // TDEE directly from DBW + activity multiplier (standard DBW practice)
+                const tdee = dbw > 0 ? Math.round(dbw * kcalPerKg) : 0;
                 const tdeeEl = document.getElementById('tdeeResult');
 
                 if (!isNaN(tdee) && tdee > 0) {
@@ -600,7 +597,8 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
                 } else {
                     tdeeEl.textContent = 'Err';
                 }
-                
+
+                // DBW display already calculated above (reuse the variable)
                 // Add reactive persist sync for dashboard
                 const macroGoals = {
                     calories: tdee,
@@ -685,3 +683,4 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
     </script>
 </body>
 </html>
+

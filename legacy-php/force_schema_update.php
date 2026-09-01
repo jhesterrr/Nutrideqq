@@ -35,6 +35,7 @@ try {
             user_id INT NOT NULL,
             dietitian_id INT NULL,
             recommendation_text TEXT NOT NULL,
+            data_points_used JSON NULL,
             trigger_source VARCHAR(100) NOT NULL COMMENT 'e.g., burnout_alert, symptom_match',
             status ENUM('pending_review', 'approved', 'rejected') DEFAULT 'pending_review',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -76,11 +77,18 @@ try {
         ]
     ];
 
+    $allowedTables = ['wellness_messages', 'internal_thread_messages', 'internal_threads', 'conversations', 'ai_recommendations'];
+
     foreach ($alterations as $table => $queries) {
+        if (!in_array($table, $allowedTables)) {
+            echo "❌ Blocked: invalid table name '$table'.<br>";
+            continue;
+        }
+        $quotedTable = $pdo->quote($table);
         echo "<h3>Checking table: <code>$table</code></h3>";
         foreach ($queries as $query) {
             try {
-                $pdo->exec("ALTER TABLE $table $query");
+                $pdo->exec("ALTER TABLE $quotedTable $query");
                 echo "✅ Applied: <code>ALTER TABLE $table $query</code><br>";
             } catch (Exception $e) {
                 if (strpos($e->getMessage(), 'Duplicate column name') !== false || strpos($e->getMessage(), 'Column already exists') !== false) {

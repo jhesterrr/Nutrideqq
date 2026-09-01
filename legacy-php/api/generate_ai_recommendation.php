@@ -22,6 +22,7 @@ if (!$user_id) {
 try {
     $database = new Database();
     $pdo = $database->getConnection();
+    AuditLogger::init($pdo);
 
     // 1. GATHER DATA POINTS
     
@@ -67,9 +68,11 @@ try {
         'symptoms' => $symptoms
     ]);
 
-    $stmt = $pdo->prepare("INSERT INTO ai_recommendations (user_id, staff_id, recommendation_text, data_points_used, status) VALUES (?, ?, ?, ?, 'draft')");
+    $stmt = $pdo->prepare("INSERT INTO ai_recommendations (user_id, dietitian_id, recommendation_text, data_points_used, trigger_source, status) VALUES (?, ?, ?, ?, 'symptom_match', 'pending_review')");
     $stmt->execute([$user_id, $staff_id, $recommendation, $data_points]);
     $rec_id = $pdo->lastInsertId();
+
+    AuditLogger::log('ai_recommendation_generate', 'ai_recommendations', (string)$rec_id, $user_id, 'staff');
 
     echo json_encode([
         'success' => true,

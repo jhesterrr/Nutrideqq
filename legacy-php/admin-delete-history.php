@@ -96,7 +96,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NutriDeq - Delete History</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap"
@@ -581,3 +581,4 @@ $deleted_clients = $dbHelper->getDeletedClients();
 </body>
 
 </html>
+

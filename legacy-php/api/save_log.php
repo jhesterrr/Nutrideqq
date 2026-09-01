@@ -28,6 +28,7 @@ if (!$meal_type || (!$batch_data && empty($_POST['food_item_ids']))) {
 try {
     $db = new Database();
     $conn = $db->getConnection();
+    AuditLogger::init($conn);
     $fct = new FCTHelper();
     
     $conn->beginTransaction();
@@ -78,7 +79,7 @@ try {
         $stmt->execute([
             ':user_id' => $user_id,
             ':food_id' => $food['food_id'],
-            ':food_name' => $food['food_name'],
+            ':food_name' => class_exists('Encryption') ? Encryption::encryptIfExists($food['food_name']) : $food['food_name'],
             ':calories' => $base_calories * $ratio,
             ':protein' => $base_protein * $ratio,
             ':carbs' => $base_carbs * $ratio,
@@ -92,6 +93,7 @@ try {
     }
 
     $conn->commit();
+    AuditLogger::log('food_log_create', 'food_logs', $user_id, $user_id);
     echo json_encode(['success' => true, 'message' => 'Food(s) logged successfully']);
 
 } catch (Exception $e) {

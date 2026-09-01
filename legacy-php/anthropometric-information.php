@@ -289,7 +289,7 @@ if (isset($_GET['tab'])) {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NutriDeq – Anthropometric Information</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1419,7 +1419,13 @@ if (isset($_GET['tab'])) {
                     .then(r => r.json())
                     .then(res => {
                         if (res.success && res.recommendation) {
-                            container.innerHTML = `<div class="ai-report-container" style="animation: fadeIn 0.4s ease-out; font-family:'Outfit', sans-serif;">${res.recommendation}</div>`;
+                            const reportDiv = document.createElement('div');
+                            reportDiv.className = 'ai-report-container';
+                            reportDiv.style.animation = 'fadeIn 0.4s ease-out';
+                            reportDiv.style.fontFamily = "'Outfit', sans-serif";
+                            reportDiv.textContent = res.recommendation;
+                            container.innerHTML = '';
+                            container.appendChild(reportDiv);
                         } else {
                             container.innerHTML = `
                                 <div style="text-align: center; padding: 40px 20px; color: #ef4444; display: flex; flex-direction: column; align-items: center; gap: 12px;">

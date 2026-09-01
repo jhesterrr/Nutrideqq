@@ -8,6 +8,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || ($_SESS
 
 require_once 'navigation.php';
 require_once 'database.php';
+require_once __DIR__ . '/includes/ai_symptom_kb.php';
 
 $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['user_name'];
@@ -89,6 +90,25 @@ if ($selected_staff_id) {
         }
     }
 }
+
+// ── Fetch AI Insights for the Logged-In User ──
+$ai_data = ['score' => 1, 'flag' => false, 'symptoms' => []];
+if (isset($user_id)) {
+    try {
+        $stmt = $pdo->prepare("SELECT sentiment_score, burnout_flag FROM ai_burnout_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
+        $stmt->execute([$user_id]);
+        if ($row = $stmt->fetch()) {
+            $ai_data['score'] = $row['sentiment_score'];
+            $ai_data['flag']  = (bool)$row['burnout_flag'];
+        }
+
+        $stmt = $pdo->prepare("SELECT symptom_keyword, mapped_nutrient, MAX(created_at) AS max_created FROM ai_extracted_symptoms WHERE user_id = ? GROUP BY symptom_keyword, mapped_nutrient ORDER BY max_created DESC LIMIT 5");
+        $stmt->execute([$user_id]);
+        $ai_data['symptoms'] = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Exception $e) {
+        error_log('NutriDeq (user-messages AI fetch): ' . $e->getMessage());
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -96,14 +116,14 @@ if ($selected_staff_id) {
 <head>
     <script src="scripts/theme-toggle.js"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>My Wellness Chat | NutriDeq</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/modern-messages.css?v=102">
+    <link rel="stylesheet" href="css/modern-messages.css?v=110">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <!-- Platform Specific Styles -->
@@ -193,19 +213,18 @@ if ($selected_staff_id) {
                 <div class="msg-container">
                     <?php if ($selected_staff): ?>
                         <div class="chat-header">
-                            <div style="display: flex; align-items: center;">
+                            <div class="chat-header-user">
                                 <button class="icon-btn" id="backToInbox"
-                                    style="<?= $selected_staff_id ? 'display: inline-flex;' : 'display: none;' ?> margin-right: 10px; color: var(--primary);"
-                                    onclick="window.location.href='user-messages.php'">
+                                    style="<?= $selected_staff_id ? 'display: inline-flex;' : 'display: none;' ?> margin-right: 8px; color: var(--primary);"
+                                    onclick="window.location.href='user-messages.php'"
+                                    title="Back to inbox">
                                     <i class="fas fa-arrow-left"></i>
                                 </button>
-                            </div>
-                            <div class="chat-header-user">
                                 <div class="contact-avatar"
-                                    style="background: var(--accent-light); color: var(--primary-green); width:40px; height:40px; font-size:0.9rem;">
+                                    style="background: var(--accent-light); color: var(--primary-green); width:40px; height:40px; font-size:0.9rem; flex-shrink:0;">
                                     <?= getInitials($selected_staff['name']) ?>
                                 </div>
-                                <div>
+                                <div style="min-width:0;">
                                     <div class="header-name"><?= htmlspecialchars($selected_staff['name']) ?> -
                                         <?= getUserRoleText('staff') ?>
                                     </div>
@@ -220,6 +239,144 @@ if ($selected_staff_id) {
                                 <div class="info-chip"><i class="fas fa-file-invoice"></i> <span>Plan: Active</span></div>
                             </div>
                         </div>
+
+                        <!-- User's Wellness Insights (Education Only) -->
+                        <?php if (!empty($ai_data['symptoms'])): ?>
+                        <?php
+                            $total_syms = count($ai_data['symptoms']);
+                            $nutrientIcons = [
+                                'iron' => '🩸', 'Iron' => '🩸',
+                                'b12' => '💉', 'B12' => '💉', 'B-12' => '💉',
+                                'potassium' => '🍌', 'Potassium' => '🍌',
+                                'magnesium' => '🔮', 'Magnesium' => '🔮',
+                                'calcium' => '🥛', 'Calcium' => '🥛',
+                                'vitamin d' => '☀️', 'Vitamin D' => '☀️',
+                                'zinc' => '🔩', 'Zinc' => '🔩',
+                                'vitamin c' => '🍊', 'Vitamin C' => '🍊',
+                            ];
+                            $prepped = [];
+                            foreach($ai_data['symptoms'] as $sym) {
+                                $kb = nd_lookup_symptom($sym['symptom_keyword']);
+                                $nutrients = explode(',', $sym['mapped_nutrient'] ?? '');
+                                $nutrientTags = [];
+                                foreach ($nutrients as $n) {
+                                    $n = trim($n);
+                                    if (empty($n)) continue;
+                                    $icon = $nutrientIcons[$n] ?? '⚛️';
+                                    $nutrientTags[] = ['icon' => $icon, 'name' => htmlspecialchars($n)];
+                                }
+                                $prepped[] = [
+                                    'sym' => $sym,
+                                    'kb'  => $kb,
+                                    'nutrientTags' => $nutrientTags,
+                                ];
+                            }
+                        ?>
+                        <div class="clinical-indicators-card ci-user ci-collapsed" id="userIndicatorsCard" role="region" aria-label="My wellness insights">
+                            <div class="ci-card-header ci-user-header">
+                                <div class="ci-card-title">
+                                    <div class="ci-icon-badge">
+                                        <i class="fas fa-spa" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="ci-title-text">
+                                        <h3>My Wellness Insights</h3>
+                                        <p>Personal patterns from your records — educational only</p>
+                                    </div>
+                                </div>
+                                <div class="ci-header-actions">
+                                    <div class="ci-badge-count ci-user-badge" title="<?= $total_syms ?> insights">
+                                        <span class="ci-count-num"><?= $total_syms ?></span>
+                                        <span class="ci-count-label">insights</span>
+                                    </div>
+                                    <button type="button" class="ci-toggle-btn ci-user-toggle" id="userCiToggleBtn" aria-expanded="false" aria-controls="userCiCardBody" onclick="toggleUserIndicators()" title="Expand">
+                                        <i class="fas fa-chevron-down"></i>
+                                        <span class="ci-toggle-label">Expand</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="ci-card-body" id="userCiCardBody">
+                                <?php foreach($prepped as $p):
+                                    $sym = $p['sym']; $kb = $p['kb']; $nutrientTags = $p['nutrientTags'];
+                                ?>
+                                    <div class="ci-indicator-card ci-indicator-rich" 
+                                         title="Seen: <?= htmlspecialchars($sym['max_created']) ?>">
+                                        <div class="ci-indicator-top">
+                                            <div class="ci-symptom-row">
+                                                <span class="ci-symptom-icon"><?= $kb['icon'] ?></span>
+                                                <div class="ci-symptom-info">
+                                                    <span class="ci-symptom-name"><?= htmlspecialchars(ucfirst($sym['symptom_keyword'])) ?></span>
+                                                    <span class="ci-symptom-cat"><?= htmlspecialchars($kb['category']) ?></span>
+                                                </div>
+                                            </div>
+                                            <?php if (!empty($nutrientTags)): ?>
+                                                <div class="ci-arrow-divider">
+                                                    <i class="fas fa-arrow-right"></i>
+                                                </div>
+                                                <div class="ci-nutrient-row">
+                                                    <?php foreach ($nutrientTags as $nt): ?>
+                                                        <span class="ci-nutrient-tag">
+                                                            <span class="ci-nutrient-icon"><?= $nt['icon'] ?></span>
+                                                            <span class="ci-nutrient-name"><?= $nt['name'] ?></span>
+                                                        </span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="ci-indicator-short">
+                                            <i class="fas fa-info-circle ci-detail-icon"></i>
+                                            <span><?= htmlspecialchars($kb['short_desc']) ?></span>
+                                        </div>
+                                        <details class="ci-details">
+                                            <summary class="ci-details-summary">
+                                                <span>Learn more &amp; simple steps</span>
+                                                <i class="fas fa-angle-down"></i>
+                                            </summary>
+                                            <div class="ci-details-body">
+                                                <div class="ci-section">
+                                                    <div class="ci-section-label"><i class="fas fa-book-open"></i> What this could mean</div>
+                                                    <div class="ci-section-text"><?= htmlspecialchars($kb['full_desc']) ?></div>
+                                                </div>
+                                                <div class="ci-section">
+                                                    <div class="ci-section-label"><i class="fas fa-seedling"></i> Simple steps to try at home</div>
+                                                    <ul class="ci-action-list">
+                                                        <?php foreach($kb['recommended'] as $rec): ?>
+                                                            <li><span class="ci-bullet">✓</span><?= htmlspecialchars($rec) ?></li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                                <div class="ci-section ci-cta">
+                                                    <div class="ci-section-label"><i class="fas fa-user-md"></i> When to talk to your dietitian</div>
+                                                    <div class="ci-section-text"><?= htmlspecialchars($kb['when_to_ask']) ?></div>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="ci-collapsed-summary ci-user-summary" id="userCiCollapsedSummary" onclick="toggleUserIndicators()" role="button" tabindex="0" title="Click to expand">
+                                <div class="ci-summary-text">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span><?= $total_syms ?> personal wellness <?= $total_syms === 1 ? 'insight' : 'insights' ?> — Expand for guidance</span>
+                                </div>
+                                <div class="ci-summary-chips">
+                                    <?php foreach(array_slice($prepped, 0, 5) as $p): ?>
+                                        <span class="ci-summary-chip">
+                                            <span><?= $p['kb']['icon'] ?></span>
+                                            <span><?= htmlspecialchars(ucfirst($p['sym']['symptom_keyword'])) ?></span>
+                                        </span>
+                                    <?php endforeach; ?>
+                                    <?php if ($total_syms > 5): ?>
+                                        <span class="ci-summary-chip ci-summary-more">+<?= $total_syms - 5 ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Non-therapeutic reminder (user view) -->
+                        <div class="user-insight-disclaimer">
+                            <i class="fas fa-shield-halved"></i>
+                            <div><b>NOT MEDICAL ADVICE.</b> These AI-generated insights are for awareness &amp; education only. Always confirm with your dietitian before making changes.</div>
+                        </div>
+                        <?php endif; ?>
 
                         <div class="chat-messages" id="chatMessages">
                             <div style="text-align:center; margin-top:50px; color:var(--text-tertiary);">
@@ -293,6 +450,40 @@ if ($selected_staff_id) {
             <?php endif; ?>
         </div>
     </div>
+
+    <script>
+        // ── Collapse/Expand User Wellness Insights Card ──
+        function toggleUserIndicators() {
+            const card   = document.getElementById('userIndicatorsCard');
+            const btn    = document.getElementById('userCiToggleBtn');
+            if (!card) return;
+
+            const isCollapsing = card.classList.contains('ci-expanded');
+            const icon   = btn ? btn.querySelector('i') : null;
+            const label  = btn ? btn.querySelector('.ci-toggle-label') : null;
+
+            if (isCollapsing) {
+                card.classList.remove('ci-expanded');
+                card.classList.add('ci-collapsed');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.title = 'Expand for details';
+                }
+                if (icon) icon.className = 'fas fa-chevron-down';
+                if (label) label.textContent = 'Expand';
+            } else {
+                card.classList.remove('ci-collapsed');
+                card.classList.add('ci-expanded');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', 'true');
+                    btn.title = 'Minimize to focus on chat';
+                }
+                if (icon) icon.className = 'fas fa-chevron-up';
+                if (label) label.textContent = 'Collapse';
+            }
+        }
+    </script>
 </body>
 
 </html>
+

@@ -1,4 +1,9 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ob_start();
+
 require_once dirname(__DIR__) . '/session_bootstrap.php';
 
 header('Content-Type: application/json');
@@ -7,6 +12,7 @@ require_once '../database.php';
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     http_response_code(401);
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
@@ -15,6 +21,7 @@ $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? 'regular';
 
 if ($user_role === 'admin') {
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Admins are read-only']);
     exit;
 }
@@ -26,6 +33,7 @@ if ($reply_to_id <= 0) $reply_to_id = null;
 
 // Validation: Message can be empty IF an attachment exists
 if ($recipient_id <= 0 || (empty($message_text) && !isset($_FILES['attachment']))) {
+    ob_end_clean();
     echo json_encode(['success' => false, 'error' => 'Invalid input']);
     exit;
 }
@@ -33,6 +41,11 @@ if ($recipient_id <= 0 || (empty($message_text) && !isset($_FILES['attachment'])
 try {
     $database = new Database();
     $pdo = $database->getConnection();
+    try {
+        AuditLogger::init($pdo);
+    } catch (Throwable $e) {
+        error_log("AuditLogger init skipped: " . $e->getMessage());
+    }
 
     // 1. Handle Attachment Upload
     $attachment_path = null;
@@ -95,9 +108,17 @@ try {
     // If sender is staff, sender_id is $user_id (from users table)
     $final_sender_id = ($sender_type === 'client') ? $client_id : $user_id;
 
+    $encryptedContent = class_exists('Encryption') ? Encryption::encryptIfExists($message_text) : $message_text;
+
     $ins_msg = $pdo->prepare("INSERT INTO wellness_messages (conversation_id, sender_type, sender_id, content, attachment_path, message_type, reply_to_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
-    $ins_msg->execute([$conv_id, $sender_type, $final_sender_id, $message_text, $attachment_path, $msg_type, $reply_to_id]);
+    $ins_msg->execute([$conv_id, $sender_type, $final_sender_id, $encryptedContent, $attachment_path, $msg_type, $reply_to_id]);
     $new_msg_id = $pdo->lastInsertId();
+    
+    try {
+        AuditLogger::log('message_send', 'wellness_messages', (string)$new_msg_id, $user_id, $user_role);
+    } catch (Throwable $e) {
+        error_log("AuditLogger log skipped: " . $e->getMessage());
+    }
 
     // Fetch reply parent details if applicable
     $reply_message = null;
@@ -127,13 +148,26 @@ try {
         }
     }
 
-    // --- 5. NLP AI Integration (Passive Monitoring) ---
+    // --- 5. NLP AI Integration (Passive Monitoring - Non-blocking) ---
     if ($sender_type === 'client' && !empty($message_text)) {
-        require_once '../api/ai_service.php';
-        $ai = new NutriDeqAI();
-        // Analyzing the text for burnout and symptoms
-        $ai->analyzeMessage($user_id, $new_msg_id, $message_text);
+        try {
+            if (file_exists('../api/ai_service.php')) {
+                require_once '../api/ai_service.php';
+                if (class_exists('NutriDeqAI')) {
+                    $ai = new NutriDeqAI();
+                    $ai->analyzeMessage($user_id, $new_msg_id, $message_text);
+                }
+            }
+        } catch (Throwable $aiEx) {
+            error_log("NutriDeq AI passive analysis skipped: " . $aiEx->getMessage());
+        }
     }
+
+    // Clear any accidental output before sending JSON
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json');
 
     echo json_encode([
         'success' => true,
@@ -154,5 +188,9 @@ try {
     ]);
 
 } catch (Throwable $e) {
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
