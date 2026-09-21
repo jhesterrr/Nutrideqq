@@ -343,8 +343,10 @@ try {
     <link rel="stylesheet" href="css/logout-modal.css">
     <link rel="stylesheet" href="css/mobile-style.css">
     <link rel="stylesheet" href="css/premium-management.css">
+    <link rel="stylesheet" href="css/client-cards.css">
     <script src="scripts/dashboard.js" defer></script>
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 <body>
 <div class="main-layout">
@@ -377,48 +379,90 @@ try {
             <?php if(empty($clients)): ?>
             <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-users"></i></div><h3>No clients</h3><p>Clients appear here after registration.</p></div>
             <?php else: ?>
-            <div class="dashboard-grid" id="clientGrid">
-                <?php foreach($clients as $client): ?>
-                <div class="profile-card role-regular status-<?php echo $client['status']??'active'; ?>" data-search="<?php echo strtolower(($client['name']??'').' '.($client['email']??'')); ?>">
-                    <div class="profile-card-accent"></div>
-                    <div class="profile-card-body">
-                        <div class="profile-avatar role-regular"><?php echo getInitials($client['name']??'?'); ?><span class="status-dot <?php echo ($client['status']??'active')==='active'?'active-dot':''; ?>"></span></div>
-                        <div class="profile-name"><?php echo htmlspecialchars($client['name']??'Unknown'); ?></div>
-                        <div class="profile-id">#CLT-<?php echo str_pad($client['id'],3,'0',STR_PAD_LEFT); ?></div>
-                        <div class="profile-email"><i class="fas fa-envelope"></i><?php echo htmlspecialchars($client['email']??'N/A'); ?></div>
-                        <div class="profile-badges">
-                            <span class="profile-badge badge-role-regular"><i class="fas fa-user"></i> Client</span>
-                            <span class="profile-badge badge-<?php echo $client['status']??'active'; ?>"><i class="fas fa-circle"></i> <?php echo ucfirst($client['status']??'active'); ?></span>
+            <div class="client-card-grid" id="clientGrid">
+                <?php foreach($clients as $client): 
+                    $cStatus = $client['status'] ?? 'active';
+                    $cName = $client['name'] ?? 'Unknown';
+                    $cEmail = $client['email'] ?? 'N/A';
+                    $cId = $client['id'];
+                    $isActive = $cStatus === 'active';
+                ?>
+                <div class="client-card <?php echo $isActive ? 'is-active' : 'is-inactive'; ?>" data-search="<?php echo strtolower($cName.' '.$cEmail); ?>">
+                    <div class="client-card__accent"></div>
+                    <div class="client-card__header">
+                        <div class="client-card__avatar">
+                            <?php echo getInitials($cName); ?>
+                            <span class="client-card__status-dot <?php echo $isActive ? 'online' : ''; ?>"></span>
                         </div>
-                        <div class="profile-meta staff-assignment-wrapper">
-                            <i class="fas fa-user-shield"></i>
-                            <select class="staff-assignment-dropdown" data-client-id="<?php echo $client['id']; ?>">
-                                <option value="">-- Unassigned --</option>
-                                <?php foreach($available_staff as $staff): ?>
-                                    <option value="<?php echo $staff['id']; ?>" <?php echo (isset($client['staff_id']) && $client['staff_id'] == $staff['id']) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($staff['name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="assign-feedback" id="feedback-<?php echo $client['id']; ?>"></div>
+                        <div class="client-card__identity">
+                            <h3 class="client-card__name"><?php echo htmlspecialchars($cName); ?></h3>
+                            <span class="client-card__id">#CLT-<?php echo str_pad($cId,3,'0',STR_PAD_LEFT); ?></span>
                         </div>
-                        <div class="profile-meta"><i class="fas fa-calendar-alt"></i> Joined <?php echo date('M j, Y',strtotime($client['created_at']??'now')); ?></div>
+                        <div class="client-card__status-badge <?php echo $isActive ? 'status--active' : 'status--inactive'; ?>">
+                            <i class="fas fa-circle"></i> <?php echo ucfirst($cStatus); ?>
+                        </div>
                     </div>
-                    <div class="profile-card-footer">
-                         <form method="POST" class="inline-form">
-                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="toggle_client_status"><input type="hidden" name="client_id" value="<?php echo $client['id']; ?>">                    <button type="submit" class="card-action toggle"><i class="fas fa-power-off"></i><?php echo ($client['status']??'active')==='active'?'Deactivate':'Activate'; ?></button></form>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Delete this client?')">
-                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="delete_client"><input type="hidden" name="client_id" value="<?php echo $client['id']; ?>"><button type="submit" class="card-action delete"><i class="fas fa-trash"></i></button></form>
+                    <div class="client-card__body">
+                        <div class="client-card__detail">
+                            <i class="fas fa-envelope"></i>
+                            <span><?php echo htmlspecialchars($cEmail); ?></span>
+                        </div>
+                        <div class="client-card__detail">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Joined <?php echo date('M j, Y', strtotime($client['created_at'] ?? 'now')); ?></span>
+                        </div>
+                        <div class="client-card__staff-assign">
+                            <label class="client-card__assign-label"><i class="fas fa-user-md"></i> Assigned Staff</label>
+                            <div class="client-card__assign-select-wrap">
+                                <select class="client-card__assign-select staff-assignment-dropdown" data-client-id="<?php echo $cId; ?>">
+                                    <option value="">— Unassigned —</option>
+                                    <?php foreach($available_staff as $staff): ?>
+                                        <option value="<?php echo $staff['id']; ?>" <?php echo (isset($client['staff_id']) && $client['staff_id'] == $staff['id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($staff['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down client-card__assign-chevron"></i>
+                            </div>
+                            <div class="assign-feedback" id="feedback-<?php echo $cId; ?>"></div>
+                        </div>
+                    </div>
+                    <div class="client-card__footer">
+                        <button type="button" class="client-card__btn client-card__btn--edit" onclick="openEditModal(<?php echo $cId; ?>, '<?php echo addslashes(htmlspecialchars($cName)); ?>', '<?php echo addslashes(htmlspecialchars($cEmail)); ?>', '<?php echo $cStatus; ?>')">
+                            <i class="fas fa-pen"></i> Edit
+                        </button>
+                        <form method="POST" class="inline-form">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="toggle_client_status">
+                            <input type="hidden" name="client_id" value="<?php echo $cId; ?>">
+                            <button type="submit" class="client-card__btn client-card__btn--toggle <?php echo $isActive ? 'is-on' : 'is-off'; ?>">
+                                <i class="fas fa-power-off"></i> <?php echo $isActive ? 'Deactivate' : 'Activate'; ?>
+                            </button>
+                        </form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this client? They will be moved to the delete history.')">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="delete_client">
+                            <input type="hidden" name="client_id" value="<?php echo $cId; ?>">
+                            <button type="submit" class="client-card__btn client-card__btn--delete" title="Delete client">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </form>
                     </div>
                 </div>
                 <?php endforeach; ?>
             </div>
+            <div class="client-grid-empty" id="clientGridEmpty">
+                <i class="fas fa-search"></i>
+                <span>No clients match your search</span>
+            </div>
             <?php endif; ?>
         </div>
+
+        <!-- Delete History Tab -->
         <div class="mgmt-tab-panel <?php echo $current_tab==='delete_history'?'active':''; ?>">
             <div class="mgmt-section-label mgmt-section-label--mb"><i class="fas fa-history"></i> Deleted Client Archive</div>
             <?php if(empty($deleted_clients)): ?>
-            <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No deleted clients</h3></div>
+            <div class="mgmt-empty"><div class="mgmt-empty-icon"><i class="fas fa-history"></i></div><h3>No deleted clients</h3><p>Clients you remove will appear here for 30 days.</p></div>
             <?php else: ?>
             <div class="deleted-grid">
                 <?php foreach($deleted_clients as $dc): $age=floor((time()-strtotime($dc['deleted_at']))/86400); $canPerm=$age>=10; ?>
@@ -427,16 +471,26 @@ try {
                     <div class="deleted-info">
                         <div class="deleted-name"><?php echo htmlspecialchars($dc['name']??'Unknown'); ?></div>
                         <div class="deleted-meta">
-                            <span><?php echo htmlspecialchars($dc['email']??''); ?></span>
-                            <div class="deleted-by-chip"><i class="fas fa-user-times"></i><?php echo htmlspecialchars($dc['deleted_by_name']??'Admin'); ?></div>
-                            <span><?php echo date('M j, Y',strtotime($dc['deleted_at'])); ?></span>
+                            <span><i class="fas fa-envelope" style="margin-right:4px;font-size:0.7rem;opacity:0.6"></i><?php echo htmlspecialchars($dc['email']??''); ?></span>
+                            <div class="deleted-by-chip"><i class="fas fa-user-times"></i> <?php echo htmlspecialchars($dc['deleted_by_name']??'Admin'); ?></div>
+                            <span><i class="fas fa-calendar" style="margin-right:4px;font-size:0.7rem;opacity:0.6"></i><?php echo date('M j, Y',strtotime($dc['deleted_at'])); ?></span>
                         </div>
                     </div>
                     <div class="deleted-actions">
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore?')">
-                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="restore_client"><input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>"><button type="submit" class="card-action restore"><i class="fas fa-undo"></i></button></form>
-                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete?')">
-                    <?php echo csrf_field(); ?><input type="hidden" name="action" value="permanent_delete_client"><input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>"><button type="submit" class="card-action delete perm-delete-btn" data-deleted-at="<?php echo $dc['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?>><i class="fas fa-skull"></i></button></form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Restore this client?')">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="restore_client">
+                            <input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>">
+                            <button type="submit" class="client-card__btn client-card__btn--restore"><i class="fas fa-undo"></i> Restore</button>
+                        </form>
+                        <form method="POST" class="inline-form" onsubmit="return confirm('Permanently delete this client? This action cannot be undone.')">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="permanent_delete_client">
+                            <input type="hidden" name="deleted_client_id" value="<?php echo $dc['id']; ?>">
+                            <button type="submit" class="client-card__btn client-card__btn--danger perm-delete-btn" data-deleted-at="<?php echo $dc['deleted_at']; ?>" data-min-days="10" <?php echo $canPerm?'':'disabled'; ?>>
+                                <i class="fas fa-skull-crossbones"></i> Purge
+                            </button>
+                        </form>
                         <span class="countdown-chip perm-countdown" data-deleted-at="<?php echo $dc['deleted_at']; ?>" data-min-days="10"></span>
                     </div>
                 </div>
@@ -447,9 +501,90 @@ try {
     </div>
     </main>
 </div>
+
+<!-- Edit Client Modal -->
+<div class="edit-client-overlay" id="editClientOverlay">
+    <div class="edit-client-modal">
+        <div class="edit-client-modal__header">
+            <div class="edit-client-modal__icon"><i class="fas fa-user-edit"></i></div>
+            <h2>Edit Client</h2>
+            <button type="button" class="edit-client-modal__close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST" id="editClientForm">
+            <?php echo csrf_field(); ?>
+            <input type="hidden" name="action" value="edit_user">
+            <input type="hidden" name="user_id" id="editClientId">
+            <input type="hidden" name="role" value="user">
+            <div class="edit-client-modal__body">
+                <div class="edit-client-field">
+                    <label for="editClientName">Full Name</label>
+                    <input type="text" id="editClientName" name="name" required>
+                </div>
+                <div class="edit-client-field">
+                    <label for="editClientEmail">Email Address</label>
+                    <input type="email" id="editClientEmail" name="email" required>
+                </div>
+                <div class="edit-client-field-row">
+                    <div class="edit-client-field">
+                        <label for="editClientStatus">Status</label>
+                        <select id="editClientStatus" name="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="edit-client-field">
+                        <label for="editClientPassword">New Password <small>(leave blank to keep)</small></label>
+                        <input type="password" id="editClientPassword" name="password" autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="edit-client-field">
+                    <label for="editClientConfirmPassword">Confirm Password</label>
+                    <input type="password" id="editClientConfirmPassword" name="confirm_password" autocomplete="new-password">
+                </div>
+            </div>
+            <div class="edit-client-modal__footer">
+                <button type="button" class="edit-client-modal__cancel" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="edit-client-modal__save"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-function filterCards(term,gridId){term=term.toLowerCase();document.querySelectorAll('#'+gridId+' .profile-card').forEach(c=>{c.style.display=(c.dataset.search||'').includes(term)?'':'none';});}
-document.addEventListener('DOMContentLoaded',function(){
+/* ── Search/Filter ─── */
+function filterCards(term, gridId) {
+    term = term.toLowerCase();
+    let visible = 0;
+    document.querySelectorAll('#' + gridId + ' .client-card').forEach(c => {
+        const show = (c.dataset.search || '').includes(term);
+        c.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    const emptyEl = document.getElementById(gridId + 'Empty');
+    if (emptyEl) emptyEl.style.display = visible ? 'none' : 'flex';
+}
+
+/* ── Edit Modal ─── */
+function openEditModal(id, name, email, status) {
+    document.getElementById('editClientId').value = id;
+    document.getElementById('editClientName').value = name;
+    document.getElementById('editClientEmail').value = email;
+    document.getElementById('editClientStatus').value = status;
+    document.getElementById('editClientPassword').value = '';
+    document.getElementById('editClientConfirmPassword').value = '';
+    document.getElementById('editClientOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeEditModal() {
+    document.getElementById('editClientOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+document.getElementById('editClientOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
+
+/* ── Staff Assignment ─── */
+document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.staff-assignment-dropdown').forEach(dropdown => {
         dropdown.addEventListener('change', function() {
             const clientId = this.dataset.clientId;
@@ -457,40 +592,58 @@ document.addEventListener('DOMContentLoaded',function(){
             const feedbackEl = document.getElementById('feedback-' + clientId);
             
             feedbackEl.style.display = 'block';
-            feedbackEl.style.color = 'var(--text-color)';
+            feedbackEl.style.color = '#64748b';
             feedbackEl.textContent = 'Saving...';
             
             fetch('handlers/assign_staff.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    client_user_id: clientId,
-                    staff_id: staffId
-                })
+                body: JSON.stringify({ client_user_id: clientId, staff_id: staffId })
             })
             .then(res => res.json())
             .then(data => {
-                if(data.success) {
+                if (data.success) {
                     feedbackEl.style.color = '#10b981';
-                    feedbackEl.textContent = 'Saved!';
-                    setTimeout(() => { feedbackEl.style.display = 'none'; }, 2000);
+                    feedbackEl.textContent = '✓ Saved!';
+                    setTimeout(() => { feedbackEl.style.display = 'none'; }, 2500);
                 } else {
                     feedbackEl.style.color = '#ef4444';
                     feedbackEl.textContent = data.message || 'Error saving';
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 feedbackEl.style.color = '#ef4444';
                 feedbackEl.textContent = 'Network error';
             });
         });
     });
 
-    function fmt(s){const d=Math.floor(s/86400);s-=d*86400;const h=Math.floor(s/3600);s-=h*3600;const m=Math.floor(s/60);const sec=Math.floor(s-m*60);return d+'d '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
-    document.querySelectorAll('.perm-delete-btn').forEach(btn=>{const dMs=Date.parse((btn.dataset.deletedAt||'').replace(' ','T'));const min=parseInt(btn.dataset.minDays||'10',10);const chip=btn.closest('.deleted-actions')?.querySelector('.perm-countdown');function upd(){const l=Math.max(0,min*86400000-(Date.now()-dMs));if(l<=0){btn.removeAttribute('disabled');if(chip)chip.textContent='';return true;}btn.setAttribute('disabled','disabled');if(chip)chip.textContent='Available in '+fmt(Math.floor(l/1000));return false;}upd();const iv=setInterval(()=>{if(upd())clearInterval(iv);},1000);});
+    /* ── Permanent Delete Countdown ─── */
+    function fmt(s) {
+        const d = Math.floor(s / 86400); s -= d * 86400;
+        const h = Math.floor(s / 3600); s -= h * 3600;
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s - m * 60);
+        return d + 'd ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+    }
+    document.querySelectorAll('.perm-delete-btn').forEach(btn => {
+        const dMs = Date.parse((btn.dataset.deletedAt || '').replace(' ', 'T'));
+        const min = parseInt(btn.dataset.minDays || '10', 10);
+        const chip = btn.closest('.deleted-actions')?.querySelector('.perm-countdown');
+        function upd() {
+            const l = Math.max(0, min * 86400000 - (Date.now() - dMs));
+            if (l <= 0) { btn.removeAttribute('disabled'); if (chip) chip.textContent = ''; return true; }
+            btn.setAttribute('disabled', 'disabled');
+            if (chip) chip.textContent = 'Available in ' + fmt(Math.floor(l / 1000));
+            return false;
+        }
+        upd();
+        const iv = setInterval(() => { if (upd()) clearInterval(iv); }, 1000);
+    });
 });
 </script>
 </body>
 </html>
+
 
 

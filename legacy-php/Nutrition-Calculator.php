@@ -210,6 +210,7 @@ $nav_links_array = getNavigationLinks($user_role, 'Nutrition-Calculator.php');
         }
     </style>
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

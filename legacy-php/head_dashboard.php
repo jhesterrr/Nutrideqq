@@ -117,6 +117,7 @@ $pdo = $database->getConnection();
             observer.observe(document.body, config);
         });
     </script>
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

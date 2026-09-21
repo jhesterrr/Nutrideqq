@@ -1449,6 +1449,7 @@ if ($selected_thread_id) {
     <link rel="stylesheet" href="css/desktop-style.css" media="all and (min-width: 1025px)">
     <link rel="stylesheet" href="css/mobile-style.css" media="all and (max-width: 1024px)">
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

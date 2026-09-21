@@ -403,6 +403,7 @@ try {
             }
         }
     </style>
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 <body>
 <div class="main-layout">

@@ -166,6 +166,7 @@ if ($selected_client) {
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/modern-messages.css?v=110">
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 <body>
     <div class="nd-app">

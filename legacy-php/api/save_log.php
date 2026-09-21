@@ -10,6 +10,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+verify_csrf();
+
 $user_role = strtolower($_SESSION['role'] ?? $_SESSION['user_role'] ?? '');
 if ($user_role !== 'user' && $user_role !== 'regular') {
     echo json_encode(['success' => false, 'message' => 'Forbidden: Only users can log food to the diary. Detected role: ' . $user_role]);

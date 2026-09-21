@@ -1,0 +1,1762 @@
+{
+    "harness_version": "2.1.0",
+    "generated_at": "2026-09-22T02:15:39+08:00",
+    "mode": "mock",
+    "model": null,
+    "prompt_hash": "22f81eb3ebfbf28553730abbc8e7c63f6f299901ca073e7dbc2d02fe1e446d9d",
+    "mapping": {
+        "version": "1.2.0",
+        "released": "2026-09-22",
+        "citation": "Symptom classes: NutriDeq clinical knowledge base (includes\/ai_symptom_kb.php). Nutrient keys: DOST-FNRI Food Composition Table (fct_nutrients). Reference values: Philippine Dietary Reference Intakes 2015, FNRI-DOST (Revised Sept 2018).",
+        "table_path": "legacy-php\/config\/symptom_nutrient_mapping.json"
+    },
+    "corpus": {
+        "version": "3.0.0",
+        "path": "legacy-php\/dev-tools\/gold_set.php",
+        "updated": "2026-09-22",
+        "known_limitations": [
+            "Substring matching cannot handle negation (\"no headache\", \"hindi napagod\"). Three limitation cases document this; a negation-aware matcher (v1.3) should clear them."
+        ]
+    },
+    "prompt": {
+        "source": "NutriDeqAI::buildExtractionPrompt()",
+        "identical_to_production": true
+    },
+    "dataset": {
+        "total": 113,
+        "evaluated": 113,
+        "skipped": 0
+    },
+    "per_class": [
+        {
+            "class_id": "SC-CRAMP",
+            "nutrient_name": "Potassium, K",
+            "tp": 17,
+            "fp": 0,
+            "fn": 0,
+            "support": 17,
+            "precision": 1,
+            "recall": 1,
+            "f1": 1
+        },
+        {
+            "class_id": "SC-FATIGUE",
+            "nutrient_name": "Iron",
+            "tp": 23,
+            "fp": 1,
+            "fn": 0,
+            "support": 23,
+            "precision": 0.9583333333333334,
+            "recall": 1,
+            "f1": 0.9787234042553191
+        },
+        {
+            "class_id": "SC-DIZZY",
+            "nutrient_name": "Sodium",
+            "tp": 16,
+            "fp": 0,
+            "fn": 0,
+            "support": 16,
+            "precision": 1,
+            "recall": 1,
+            "f1": 1
+        },
+        {
+            "class_id": "SC-HEADACHE",
+            "nutrient_name": "Calcium",
+            "tp": 16,
+            "fp": 1,
+            "fn": 0,
+            "support": 16,
+            "precision": 0.9411764705882353,
+            "recall": 1,
+            "f1": 0.9696969696969697
+        },
+        {
+            "class_id": "SC-NAUSEA",
+            "nutrient_name": "Vitamin C",
+            "tp": 13,
+            "fp": 0,
+            "fn": 0,
+            "support": 13,
+            "precision": 1,
+            "recall": 1,
+            "f1": 1
+        },
+        {
+            "class_id": "SC-BLOAT",
+            "nutrient_name": "Fiber, total dietary",
+            "tp": 16,
+            "fp": 1,
+            "fn": 0,
+            "support": 16,
+            "precision": 0.9411764705882353,
+            "recall": 1,
+            "f1": 0.9696969696969697
+        }
+    ],
+    "macro_avg": {
+        "precision": 0.9734477124183006,
+        "recall": 1,
+        "f1": 0.9863528906082096
+    },
+    "micro_avg": {
+        "precision": 0.9711538461538461,
+        "recall": 1,
+        "f1": 0.9853658536585366
+    },
+    "subset_accuracy": 0.9734513274336283,
+    "per_language": {
+        "EN": {
+            "cases": 41,
+            "exact_matches": 41,
+            "exact_rate": 1
+        },
+        "TL": {
+            "cases": 34,
+            "exact_matches": 34,
+            "exact_rate": 1
+        },
+        "BIS": {
+            "cases": 17,
+            "exact_matches": 17,
+            "exact_rate": 1
+        }
+    },
+    "taglish_slice": {
+        "cases": 34,
+        "exact_matches": 34,
+        "exact_rate": 1,
+        "micro_f1": 1
+    },
+    "negative_cases": {
+        "cases": 12,
+        "false_positive_cases": 0,
+        "false_positive_rate": 0
+    },
+    "distractors": {
+        "cases": 9,
+        "misses": 3,
+        "limitation_misses": 3
+    },
+    "target_f1": 0.8,
+    "passed": true,
+    "cases": [
+        {
+            "message": "I constantly feel exhausted and weak",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "fatigue",
+                "weakness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I get tired easily after minimal exertion",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "tiredness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I feel fatigued all the time, even after rest",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "fatigue"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "My energy levels are very low lately",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "fatigue"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "By mid-afternoon I am completely drained and exhausted",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "exhaustion"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Climbing the stairs leaves me weak and out of breath",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "weakness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Simple tasks wipe me out, the tiredness never stops",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "tiredness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I have low energy before lunch every day",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "low energy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Ang pagod ko na talaga these past few days",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pagod"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Walang lakas ang katawan ko kahit kakakain ko lang",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "walang lakas"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Napakapagod ako after ng shift ko",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pagod"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kapaguran levels through the roof this week",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kapaguran"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Parang hina ng katawan ko na talaga these days",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hina ng katawan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Grabe ang low energy ko simula Monday",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "low energy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kapoy kaayo ko ron, gusto ko na matulog",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kapoy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Walay lain akong gibati gawas kapoy",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kapoy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Pagkapoy nako oi, sige rako tulog pero dili gihapon maayo",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kapoy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kapoy kaayo akong lawas inig buntag",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kapoy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I experience muscle cramps in my legs at night",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "muscle cramps"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "My calves keep cramping, especially after exercise",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "calf cramps"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I have muscle spasms that come and go",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "muscle spasms"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "My fingers spasm when I write for too long",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hand spasms"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Charley horses wake me up at night with painful cramps",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "leg cramps"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "After long runs my feet cramp badly",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "foot cramps"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sobrang pulikat ng binti ko tuwing gabi",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pulikat"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "May kalampos ako sa hita minsan",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kalampos"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kabag sa kalamnan ang naramdaman ko after mag-gym",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kabag sa kalamnan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Pulikat na naman sa binti ko, grabe",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pulikat"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Muscle spasms ako sa likod pagkatapos magbuhat ng mabigat",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "muscle spasms"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Grabe ka pulikat sa akong tiil kagabi",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pulikat"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "May kalampos sa akong paa kada buntag",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kalampos"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Pulikat-pulikat na lang akong legs sa gabii",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-CRAMP"
+            ],
+            "expected_classes": [
+                "SC-CRAMP"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pulikat"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I feel dizzy when I stand up quickly",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "dizziness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I get lightheaded spells throughout the day",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "lightheadedness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "The room spins when I stand, and I get dizzy spells",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "dizziness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nearly fainted at the mall from feeling lightheaded",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "lightheadedness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Everything goes blurry and dizzy when I skip meals",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "dizziness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Dizziness hits me every afternoon",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "dizziness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nahihilo ako kapag tumatayo ako agad",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nahihilo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Bigla akong nahihilo ngayon lang",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hilo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Hilo na naman, parang iikot ang paligid",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hilo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Ang lula lula ko kanina sa jeep",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "lula"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Lightheaded ako buong maghapon, kulang tulog siguro",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "lightheadedness"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nahilo ko gabii, grabe kaayo",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nahilo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Dili ko ganahan magtindog dayon kay mahilo ko",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-DIZZY"
+            ],
+            "expected_classes": [
+                "SC-DIZZY"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hilo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I have frequent headaches that won't go away",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "headache"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I get throbbing headaches every morning",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "headache"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Migraines knock me out twice a week",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "migraine"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "A dull headache sits behind my eyes all day",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "headache"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Pressure-like headache after long screen time",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "headache"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "My daily headaches pound behind my forehead",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "headache"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Ang sakit ng ulo ko simula pa kahapon",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ng ulo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sakit ng ulo nanaman, pangatlong araw na",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ng ulo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Barado ang ulo ko sa kakaisip sa thesis",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "barado"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Migraine attack nanaman, hindi ako makatayo",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "migraine"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Ang sakit ng ulo ko kapag umaga, laging ganyan",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ng ulo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sakit ug ulo kaayo nako ron",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ug ulo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sakit ug ulo gikan pa sa umaga",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ug ulo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I feel nauseous after meals",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nausea"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I have been feeling queasy and nauseous",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nausea"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "The smell of fried food makes me nauseous",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nausea"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Morning queasy spells last until noon",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "queasy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I keep retching and feel nauseous after taking supplements",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nausea"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nausea waves hit me during car rides",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nausea"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sukang-suka ako after kumain, parang maiinit ang sikmura",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "susuka",
+                "naiinit"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Naiinit ako, parang masusuka na",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "naiinit"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nauseous ako sa amoy ng fish sauce",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nauseous"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sa byahe kanina, naiinit at nauseous ako the whole ride",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "naiinit",
+                "nauseous"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Queasy ako tuwing umaga after ng pills ko",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "queasy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nauseous kaayo akong gibati human mokaon ug tambok",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nauseous"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I feel bloated and gassy after eating",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "bloating"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "My stomach feels swollen and bloated",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "bloating"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Constant gas and a distended belly after meals",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "gas",
+                "bloating"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "My jeans feel tight from bloating every dinner",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "bloating"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I look six months pregnant from the gas buildup",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "gas",
+                "bloating"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Belching and gas pains all afternoon",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "gas"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Ang kabag ko, sikip na sikip ang tiyan ko",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kabag",
+                "sikip ng tiyan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Namamaga ang tiyan ko tuwing gabi",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "namamaga ang tiyan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Grabe ang gas ko after ng beans",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "gas"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kabag nanaman, hindi ako makatino",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kabag"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sikip ng tiyan ko buong araw, ang uncomfortable",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sikip ng tiyan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Naay hangin sa tiyan nga ako gibati karon",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hangin sa tiyan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kabag kaayo ako human mokaon ug kamote",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [
+                "SC-BLOAT"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kabag"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I feel exhausted AND get muscle cramps at night",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-CRAMP",
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-CRAMP",
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "fatigue",
+                "muscle cramps"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I am dizzy and fatigued",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-DIZZY",
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-DIZZY",
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "dizziness",
+                "fatigue"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Headache plus bloated stomach after lunch",
+            "lang": "EN",
+            "predicted_classes": [
+                "SC-BLOAT",
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-BLOAT",
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "headache",
+                "bloating"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Pagod na pagod ako tas pulikat pa ang binti",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-CRAMP",
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-CRAMP",
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "pagod",
+                "pulikat"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sakit ng ulo ko tapos kabag pa",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-BLOAT",
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-BLOAT",
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ng ulo",
+                "kabag"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sukang-suka ako tapos hilo pa sa byahe",
+            "lang": "TL",
+            "predicted_classes": [
+                "SC-DIZZY",
+                "SC-NAUSEA"
+            ],
+            "expected_classes": [
+                "SC-DIZZY",
+                "SC-NAUSEA"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "susuka",
+                "hilo"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Kapoy kaayo ko ug naa pay pulikat sa akong legs",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-CRAMP",
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-CRAMP",
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "kapoy",
+                "pulikat"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Nahilo ko ganina ug kapoy pa jud",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-DIZZY",
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [
+                "SC-DIZZY",
+                "SC-FATIGUE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "nahilo",
+                "kapoy"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Sakit ug ulo ug naay hangin sa tiyan",
+            "lang": "BIS",
+            "predicted_classes": [
+                "SC-BLOAT",
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [
+                "SC-BLOAT",
+                "SC-HEADACHE"
+            ],
+            "exact_match": true,
+            "raw_symptoms": [
+                "sakit ug ulo",
+                "hangin sa tiyan"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "I had a great workout today",
+            "lang": "EN-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "I enjoyed my lunch and feel satisfied",
+            "lang": "EN-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "The weather is nice today",
+            "lang": "EN-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Finally finished my module, feeling productive",
+            "lang": "EN-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Booked our tickets for the beach trip",
+            "lang": "EN-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Team lunch later to celebrate the win",
+            "lang": "EN-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Ang ganda ng sunset kagabi grabe",
+            "lang": "TL-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Tapos ko na ang laundry, tagumpay",
+            "lang": "TL-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Nanood kami ng sine, ang ganda ng plot",
+            "lang": "TL-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Lami kaayo ang luto ni mama kagabi",
+            "lang": "BIS-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Kaligo nako unya, init kaayo ang panahon",
+            "lang": "BIS-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Nagdula mi basketball, lipay kaayo",
+            "lang": "BIS-neg",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Nag dumblrak ako, ang sarap ng hangin sa bundok",
+            "lang": "TL-distr",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [
+                "hangin sa bundok"
+            ],
+            "limitation": null
+        },
+        {
+            "message": "Hindi ako napagod sa lakad ngayon",
+            "lang": "TL-distr",
+            "predicted_classes": [
+                "SC-FATIGUE"
+            ],
+            "expected_classes": [],
+            "exact_match": false,
+            "raw_symptoms": [
+                "napagod"
+            ],
+            "limitation": "negation"
+        },
+        {
+            "message": "I hit my head on the cabinet but no headache",
+            "lang": "EN-distr",
+            "predicted_classes": [
+                "SC-HEADACHE"
+            ],
+            "expected_classes": [],
+            "exact_match": false,
+            "raw_symptoms": [
+                "headache"
+            ],
+            "limitation": "negation"
+        },
+        {
+            "message": "My stomach is fine now, no bloating at all",
+            "lang": "EN-distr",
+            "predicted_classes": [
+                "SC-BLOAT"
+            ],
+            "expected_classes": [],
+            "exact_match": false,
+            "raw_symptoms": [
+                "bloating"
+            ],
+            "limitation": "negation"
+        },
+        {
+            "message": "Ang bagal ng wifi kanina, nakakainis",
+            "lang": "TL-distr",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Nag-schedule ako ng checkup next week",
+            "lang": "TL-distr",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "I feel strong after a full night of rest",
+            "lang": "EN-distr",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Wala moy hilanat? Bugnaw ra kaayo ang panahon diri",
+            "lang": "BIS-distr",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        },
+        {
+            "message": "Dako na kaayo ang progress sa akong diet this month",
+            "lang": "BIS-distr",
+            "predicted_classes": [],
+            "expected_classes": [],
+            "exact_match": true,
+            "raw_symptoms": [],
+            "limitation": null
+        }
+    ]
+}

@@ -8,6 +8,8 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'staff' && $_SES
     exit();
 }
 
+verify_csrf();
+
 $data = json_decode(file_get_contents('php://input'), true);
 
 $log_id = $data['log_id'] ?? null;

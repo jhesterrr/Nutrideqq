@@ -11,6 +11,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+verify_csrf();
+
 $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'] ?? '';
 $log_id = $_POST['id'] ?? 0;

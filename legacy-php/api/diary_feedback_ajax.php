@@ -18,6 +18,12 @@ if ($action === 'fetch') {
     $user_id = intval($_GET['user_id'] ?? $_GET['client_user_id'] ?? 0);
     $log_date = $_GET['log_date'];
 
+    // Admin: any client. The client themself: own diary. Staff: only assigned clients.
+    if (!user_can_access_client($user_id)) {
+        echo json_encode(['success' => false, 'message' => "Forbidden: You do not have access to this client's diary."]);
+        exit();
+    }
+
     try {
         $sql = "SELECT df.*, u.name as staff_name 
                 FROM diary_feedback df
@@ -33,6 +39,7 @@ if ($action === 'fetch') {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 } elseif ($action === 'save') {
+    verify_csrf();
     $user_role = $_SESSION['role'] ?? $_SESSION['user_role'] ?? '';
     if ($user_role !== 'staff' && $user_role !== 'admin') {
         echo json_encode(['success' => false, 'message' => 'Permission denied']);

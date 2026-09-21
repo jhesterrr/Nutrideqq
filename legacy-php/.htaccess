@@ -1,0 +1,16 @@
+# NutriDeq — Apache hardening (applies to this directory and below)
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Session storage must never be served (contains raw PHP sessions)
+    RewriteRule "(^|/)api/sessions/" - [F,L]
+
+    # Developer/migration tools are not part of the deployed app
+    RewriteRule "(^|/)dev-tools/" - [F,L]
+
+    # Never expose log files (e.g. api/ai_error.log)
+    RewriteRule "\.log$" - [F,L]
+</IfModule>

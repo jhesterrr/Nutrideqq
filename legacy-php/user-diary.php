@@ -51,6 +51,48 @@ $totals = [
     'fat' => 0
 ];
 
+$TRACKED_MICRO = ['Iron','Potassium, K','Calcium','Sodium','Fiber, total dietary','Vitamin C'];
+$MICRO_UNITS = [
+    'Iron' => 'mg', 'Potassium, K' => 'mg', 'Calcium' => 'mg',
+    'Sodium' => 'mg', 'Fiber, total dietary' => 'g', 'Vitamin C' => 'mg'
+];
+$MICRO_THRESHOLDS = [
+    'Iron' => 7.0, 'Potassium, K' => 1500.0, 'Calcium' => 500.0,
+    'Sodium' => 500.0, 'Fiber, total dietary' => 10.0, 'Vitamin C' => 30.0
+];
+$meal_micros = [];
+foreach (array_keys($grouped_logs) as $mt) {
+    $meal_micros[$mt] = [];
+    foreach ($TRACKED_MICRO as $n) $meal_micros[$mt][$n] = 0.0;
+}
+$day_micros = [];
+foreach ($TRACKED_MICRO as $n) $day_micros[$n] = 0.0;
+
+if (!empty($logs)) {
+    $log_ids = array_column($logs, 'id');
+    if (!empty($log_ids)) {
+        $ph = implode(',', array_fill(0, count($log_ids), '?'));
+        $nph = implode(',', array_fill(0, count($TRACKED_MICRO), '?'));
+        $params = array_merge($TRACKED_MICRO, $log_ids);
+        $sql = "SELECT fl.id as log_id, fl.meal_type, fn.nutrient_name,
+                       SUM(fn.value * (fl.serving_size / 100)) as val
+                FROM food_logs fl
+                JOIN fct_food_items ffi ON fl.food_id = ffi.food_id
+                JOIN fct_nutrients fn ON ffi.id = fn.food_item_id
+                WHERE fn.nutrient_name IN ($nph) AND fl.id IN ($ph)
+                GROUP BY fl.id, fl.meal_type, fn.nutrient_name";
+        $stmt2 = $conn->prepare($sql);
+        $stmt2->execute($params);
+        foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $n = $row['nutrient_name'];
+            $mt = $row['meal_type'];
+            $v = (float)$row['val'];
+            if (isset($meal_micros[$mt]) && isset($meal_micros[$mt][$n])) $meal_micros[$mt][$n] += $v;
+            if (isset($day_micros[$n])) $day_micros[$n] += $v;
+        }
+    }
+}
+
 foreach ($logs as $log) {
     if (isset($grouped_logs[$log['meal_type']])) {
         $grouped_logs[$log['meal_type']][] = $log;
@@ -113,6 +155,7 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="css/logout-modal.css">
     <script src="scripts/dashboard.js" defer></script>
+    <script src="scripts/dashboard-store.js" defer></script>
     <style>
         :root {
             --primary: #10b981;
@@ -504,6 +547,7 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
     </style>
     <script>const BASE_URL = '';</script>
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 <body>
     <div class="main-layout">
@@ -528,13 +572,16 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                         <a href="?date=<?php echo $next_date; ?>"><i class="fas fa-chevron-right"></i></a>
                     </div>
 
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <?php if ($saved_report): ?>
                             <button class="btn-primary" onclick="viewClinicalReport()" style="background: #10b981; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: white; cursor: pointer;">
                                 <i class="fas fa-file-medical"></i> View Clinical Report
                             </button>
                         <?php endif; ?>
-                     
+                        <button class="btn-primary" onclick="window.analyzeTodayIntake({outputId:'todayAnalysisResult', date:'<?php echo $selected_date; ?>'})"
+                                style="background: #0ea5e9; border: none; border-radius: 12px; padding: 10px 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: white; cursor: pointer; transition: all 0.2s;">
+                            <i class="fas fa-magnifying-glass-chart"></i> Analyze Food Today
+                        </button>
                         <button class="btn-primary" onclick="openFctModal('Breakfast')" style="background: var(--primary); color: white; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 600; cursor: pointer;">
                             <i class="fas fa-plus"></i> Add Log
                         </button>
@@ -564,7 +611,13 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                     </div>
                 </div>
 
-                <?php foreach ($grouped_logs as $meal => $items): ?>
+                <div id="todayAnalysisResult" style="display:none; margin-bottom:24px;"></div>
+
+                <?php foreach ($grouped_logs as $meal => $items):
+                    $mm = $meal_micros[$meal] ?? [];
+                    $meal_has_micro = false;
+                    foreach ($mm as $v) { if ($v > 0) { $meal_has_micro = true; break; } }
+                ?>
                     <section class="meal-section">
                         <div class="meal-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
@@ -634,6 +687,47 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </div>
+
+                        <?php if (!empty($items) && $meal_has_micro): ?>
+                        <div style="margin-top:10px;">
+                            <button type="button" onclick="toggleMealMicro('mm_<?php echo md5($meal); ?>')"
+                                    style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.15);border-radius:10px;font-size:0.8rem;font-weight:600;color:#0369a1;cursor:pointer;">
+                                <span><i class="fas fa-flask-vial" style="margin-right:6px;"></i> Show Micronutrient Breakdown (<?php echo count($TRACKED_MICRO); ?> tracked)</span>
+                                <i class="fas fa-chevron-down mm_toggle" id="mm_toggle_<?php echo md5($meal); ?>" style="transition:transform .25s ease;"></i>
+                            </button>
+                            <div id="mm_<?php echo md5($meal); ?>" style="display:none;padding:14px 6px 0 6px;">
+                                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                                <?php foreach ($TRACKED_MICRO as $n):
+                                    $v = $mm[$n] ?? 0;
+                                    if ($v <= 0) {
+                                        echo '<div style="padding:10px;border-radius:10px;background:#f8fafc;border:1px dashed #e2e8f0;opacity:.75;">
+                                            <div style="font-size:0.72rem;color:#94a3b8;font-weight:600;">'.htmlspecialchars($n).'</div>
+                                            <div style="font-weight:700;color:#94a3b8;margin-top:2px;">0 '.$MICRO_UNITS[$n].'</div>
+                                        </div>';
+                                        continue;
+                                    }
+                                    $th = $MICRO_THRESHOLDS[$n] ?? 0;
+                                    $pct = $th > 0 ? min(100, round(($v/$th)*100, 0)) : 0;
+                                    $below = ($th > 0 && $v < $th);
+                                    $col = $below ? ($pct<40?'#ef4444':'#f59e0b') : '#10b981';
+                                ?>
+                                    <div style="padding:10px 12px;border-radius:10px;background:<?php echo $below ? 'rgba(239,68,68,0.04)' : 'rgba(16,185,129,0.04)'; ?>;border:1px solid <?php echo $below ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'; ?>;">
+                                        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                                            <div style="font-size:0.72rem;color:#475569;font-weight:600;"><?php echo htmlspecialchars($n); ?></div>
+                                            <div style="font-size:0.65rem;font-weight:700;color:<?php echo $col; ?>;"><?php echo $pct; ?>%</div>
+                                        </div>
+                                        <div style="font-weight:700;color:<?php echo $col; ?>;font-size:0.9rem;margin:2px 0 6px 0;">
+                                            <?php echo number_format($v, 1); ?> <span style="font-size:0.7rem;font-weight:500;color:#94a3b8;">/ <?php echo $th.$MICRO_UNITS[$n]; ?></span>
+                                        </div>
+                                        <div style="height:4px;background:#e2e8f0;border-radius:20px;overflow:hidden;">
+                                            <div style="width:<?php echo $pct; ?>%;height:100%;background:<?php echo $col; ?>;"></div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
                     </section>
                 <?php endforeach; ?>
 
@@ -864,6 +958,8 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
             </form>
         </div>
     </div>
+
+
 
     <!-- FCT Library Modal -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -1264,6 +1360,37 @@ $nav_links = getNavigationLinks($user_role, 'user-diary.php');
                 alert('An error occurred during deletion');
             }
         }
+
+        function toggleMealMicro(id) {
+            const el = document.getElementById(id);
+            const tog = document.getElementById('mm_toggle_' + id.replace('mm_', ''));
+            if (!el) return;
+            const show = el.style.display === 'none' || el.style.display === '';
+            el.style.display = show ? 'block' : 'none';
+            if (tog) tog.style.transform = show ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+
+
+
+        (function () {
+            const ps = new URLSearchParams(window.location.search);
+            const tab = ps.get('tab');
+            if (tab === 'nutrient-analysis') {
+                document.addEventListener('DOMContentLoaded', function () {
+                    const el = document.getElementById('todayAnalysisResult');
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        if (typeof window.analyzeTodayIntake === 'function') {
+                            setTimeout(() => window.analyzeTodayIntake({
+                                outputId: 'todayAnalysisResult',
+                                date: '<?php echo $selected_date; ?>'
+                            }), 100);
+                        }
+                    }
+                });
+            }
+        })();
     </script>
 </body>
 </html>

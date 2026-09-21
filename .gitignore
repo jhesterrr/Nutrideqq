@@ -29,3 +29,11 @@ legacy-php/uploads/reports/
 
 # IDE/tool directories
 .kilo/
+
+# Local agent/workspace artifacts (never deploy)
+.freebuff/
+.trae/
+
+# Temp verification scripts (_prefix convention)
+_*.php
+_*.js

@@ -171,6 +171,7 @@ if (isset($user_id)) {
     </style>
     <script src="scripts/dashboard.js" defer></script>
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

@@ -691,6 +691,7 @@ $nav_links_array = getNavigationLinks($user_role, 'user-management-staff.php');
             .ndq-field.full { grid-column:span 1; }
         }
     </style>
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 <body>
 <div class="main-layout">

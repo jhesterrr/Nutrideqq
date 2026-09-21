@@ -8,6 +8,8 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+verify_csrf();
+
 $user_id = $_SESSION['user_id'];
 $food_name = $_POST['food_name'] ?? '';
 $meal_type = $_POST['meal_type'] ?? '';

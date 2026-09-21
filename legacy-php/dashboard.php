@@ -72,6 +72,43 @@ function getDashboardDescription($role)
 require_once 'database.php';
 $database = new Database();
 $pdo = $database->getConnection();
+
+$staff_client_list = [];
+if (in_array($user_role, ['staff', 'admin'], true)) {
+    $sid = (int)($_SESSION['user_id'] ?? 0);
+    try {
+        if ($user_role === 'admin') {
+            $cstmt = $pdo->prepare("
+                SELECT c.id as client_id, c.user_id, c.name, c.email, c.goals
+                FROM clients c
+                ORDER BY c.name ASC
+            ");
+            $cstmt->execute();
+        } else {
+            $cstmt = $pdo->prepare("
+                SELECT c.id as client_id, c.user_id, c.name, c.email, c.goals
+                FROM clients c
+                WHERE c.staff_id = ? OR c.staff_id IS NULL
+                ORDER BY c.name ASC
+            ");
+            $cstmt->execute([$sid]);
+        }
+        $rows = $cstmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as $r) {
+            if (!empty($r['user_id'])) {
+                $staff_client_list[] = [
+                    'client_id' => (int)$r['client_id'],
+                    'user_id' => (int)$r['user_id'],
+                    'name' => $r['name'],
+                    'email' => $r['email'],
+                    'goals' => $r['goals'] ?? ''
+                ];
+            }
+        }
+    } catch (Exception $e) {
+        error_log('staff_client_list error: ' . $e->getMessage());
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -280,6 +317,7 @@ $pdo = $database->getConnection();
     <script>
         const BASE_URL = '';
     </script>
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>
@@ -1109,6 +1147,31 @@ $pdo = $database->getConnection();
                                 <p style="color: #64748b;">Internal tickets & clinical support.</p>
                             </div>
                         </a>
+
+                        <div class="command-tile nutri-glass" style="cursor:pointer;text-decoration:none;" onclick="openBulkClientAnalysisModal()">
+                            <div class="command-tile-icon" style="background:rgba(234,88,12,0.08);color:#ea580c;"><i class="fas fa-layer-group"></i></div>
+                            <div class="command-tile-info">
+                                <h3 style="color:#1e293b;font-weight:700;">Bulk Client Analysis</h3>
+                                <p style="color:#64748b;">Ranked micronutrient debt table.</p>
+                            </div>
+                            <canvas class="bento-sparkline" width="110" height="50"></canvas>
+                        </div>
+                        <div class="command-tile nutri-glass" style="cursor:pointer;text-decoration:none;" onclick="openQuickAiReportModal()">
+                            <div class="command-tile-icon" style="background:rgba(124,58,237,0.08);color:#7c3aed;"><i class="fas fa-robot"></i></div>
+                            <div class="command-tile-info">
+                                <h3 style="color:#1e293b;font-weight:700;">Quick AI Report</h3>
+                                <p style="color:#64748b;">Groq AI + save to client files.</p>
+                            </div>
+                            <canvas class="bento-sparkline" width="110" height="50"></canvas>
+                        </div>
+                        <div class="command-tile nutri-glass" style="cursor:pointer;text-decoration:none;" onclick="openDeficitSummaryModal()">
+                            <div class="command-tile-icon" style="background:rgba(220,38,38,0.08);color:#dc2626;"><i class="fas fa-chart-simple"></i></div>
+                            <div class="command-tile-info">
+                                <h3 style="color:#1e293b;font-weight:700;">Deficit Summary</h3>
+                                <p style="color:#64748b;">Per-client deficit cards.</p>
+                            </div>
+                            <canvas class="bento-sparkline" width="110" height="50"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -1226,6 +1289,326 @@ $pdo = $database->getConnection();
                 }
                 window.onclick = function(event) {
                     if (event.target == document.getElementById('modalOverlay')) closeModal();
+                }
+
+                const STAFF_NOTICE = `<div style="background:rgba(245,156,11,0.08);border:1.5px solid rgba(245,156,11,0.3);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#78350f;display:flex;align-items:flex-start;gap:8px;">
+                    <i class="fas fa-exclamation-triangle" style="margin-top:2px;color:#d97706;flex-shrink:0;"></i>
+                    <span><b>NON-THERAPEUTIC NOTICE:</b> AI-generated content is for clinical decision support and must be reviewed by a Registered Dietitian before patient implementation. Not a substitute for professional medical advice.</span>
+                </div>`;
+
+                const STAFF_CLIENTS = <?php echo json_encode($staff_client_list); ?>;
+
+                function _buildClientOptionsHtml(withEmpty = true, multi = false) {
+                    const rows = Array.isArray(STAFF_CLIENTS) ? STAFF_CLIENTS : [];
+                    if (rows.length === 0) return '<option value="">No clients assigned.</option>';
+                    const opts = (withEmpty ? '<option value="">-- Select client --</option>' : '') + rows.map(r =>
+                        `<option value="${r.user_id}" data-client-id="${r.client_id}" data-name="${r.name.replace(/"/g,'&quot;')}">${r.name} (User ID: ${r.user_id})</option>`
+                    ).join('');
+                    return opts;
+                }
+
+                function openBulkClientAnalysisModal() {
+                    const modal = document.getElementById('modalOverlay');
+                    const title = document.getElementById('modalTitle');
+                    const content = document.getElementById('modalContent');
+                    title.innerHTML = '<i class="fas fa-layer-group" style="color:#ea580c;margin-right:10px;"></i>Bulk Client Micronutrient Debt Analysis';
+                    content.innerHTML = STAFF_NOTICE + `
+                        <div style="margin-bottom:14px;">
+                            <p style="margin:0 0 8px 0;font-size:0.85rem;color:#475569;">
+                                <i class="fas fa-info-circle" style="color:#ea580c;"></i> Runs 14-day debt detection across your active clients. Results ranked by number of deficits (most severe first).
+                            </p>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <button class="btn btn-primary" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;background:#ea580c;border:none;"
+                                        onclick="runBulkClientAnalysis('bulkAnalysisResult')">
+                                    <i class="fas fa-play"></i> Run Bulk Analysis
+                                </button>
+                                <span style="font-size:0.75rem;color:#64748b;"><i class="fas fa-clock"></i> N+1 queries · ~1-3s per client</span>
+                            </div>
+                        </div>
+                        <div id="bulkAnalysisResult" style="max-height:55vh;overflow:auto;padding-right:6px;">
+                            <div style="padding:40px;text-align:center;color:#94a3b8;border:1.5px dashed #cbd5e1;border-radius:14px;">
+                                <i class="fas fa-layer-group" style="font-size:2rem;margin-bottom:10px;opacity:0.5;color:#ea580c;"></i>
+                                <p style="margin:0;">Click <b>"Run Bulk Analysis"</b> to rank clients by 14-day micronutrient debt.</p>
+                            </div>
+                        </div>
+                    `;
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+
+                async function runBulkClientAnalysis(targetId) {
+                    const rows = STAFF_CLIENTS.filter(r => r && r.user_id > 0);
+                    const out = document.getElementById(targetId);
+                    if (!rows.length) {
+                        if (out) out.innerHTML = '<div style="padding:20px;background:#fef2f2;border-radius:12px;color:#b91c1c;">No clients found. Assign or create clients first.</div>';
+                        return;
+                    }
+                    if (out) out.innerHTML = `<div style="padding:30px;text-align:center;color:#64748b;">
+                        <i class="fas fa-circle-notch fa-spin" style="font-size:1.8rem;"></i>
+                        <p style="margin-top:8px;">Analyzing 0/${rows.length} clients…</p>
+                        <div style="width:100%;height:6px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin-top:14px;"><div id="bulkProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#ea580c,#f59e0b);transition:width .4s ease;"></div></div>
+                    </div>`;
+                    const results = [];
+                    for (let i = 0; i < rows.length; i++) {
+                        try {
+                            const qs = `?user_id=${encodeURIComponent(rows[i].user_id)}`;
+                            const resp = await fetch('api/analyze_micronutrients.php' + qs);
+                            const j = await resp.json();
+                            results.push({ client: rows[i], data: j || null });
+                        } catch (e) {
+                            results.push({ client: rows[i], err: e.message });
+                        }
+                        const pct = Math.round(((i + 1) / rows.length) * 100);
+                        const pb = document.getElementById('bulkProgressBar');
+                        const statLine = out ? out.querySelector('p') : null;
+                        if (pb) pb.style.width = pct + '%';
+                        if (statLine) statLine.innerText = `Analyzing ${i+1}/${rows.length} clients…`;
+                        await new Promise(r => setTimeout(r, 60));
+                    }
+                    results.sort((a, b) => {
+                        const ca = (a.data && a.data.summary) ? a.data.summary.debt_count : 0;
+                        const cb = (b.data && b.data.summary) ? b.data.summary.debt_count : 0;
+                        return cb - ca;
+                    });
+                    const headers = ['Client', 'Debt Count', 'Iron', 'Potassium', 'Calcium', 'Sodium', 'Fiber', 'Vitamin C', 'Action'];
+                    const nameOf = (o) => o ? (o.client ? o.client.name : '–') : '–';
+                    let rowsHtml = results.map(r => {
+                        const summary = (r.data && r.data.summary) ? r.data.summary : { debt_count: 0, status: 'balanced' };
+                        const nuts = (r.data && Array.isArray(r.data.nutrients)) ? Object.fromEntries(r.data.nutrients.map(n => [n.nutrient, n])) : {};
+                        const pill = (n, lab) => {
+                            const it = nuts[n] || null;
+                            if (!it) return `<td style="padding:8px;font-size:0.8rem;color:#94a3b8;">–</td>`;
+                            const cls = it.is_debt ? 'background:#fef2f2;color:#b91c1c;font-weight:700;' : 'background:#ecfdf5;color:#065f46;font-weight:600;';
+                            return `<td style="padding:8px;"><span style="${cls}padding:3px 9px;border-radius:20px;font-size:0.72rem;">${lab}: ${(it.avg_daily||0).toFixed(1)}</span></td>`;
+                        };
+                        const sev = summary.debt_count === 0 ? '#059669' : (summary.debt_count >= 3 ? '#dc2626' : '#d97706');
+                        const openBtn = r.client && r.client.user_id ?
+                            `<a href="staff-client-diary.php?client_id=${r.client.client_id}&user_id=${r.client.user_id}" target="_blank" class="btn btn-outline" style="border-radius:8px;padding:6px 10px;font-size:0.72rem;">Open Diary</a>` : '';
+                        return `<tr>
+                            <td style="padding:8px;font-weight:600;">${r.client ? r.client.name : 'Err'}<div style="font-size:0.7rem;color:#94a3b8;">${r.client ? r.client.email : ''}</div></td>
+                            <td style="padding:8px;"><b style="background:${sev};color:#fff;padding:4px 10px;border-radius:20px;font-size:0.75rem;">${summary.debt_count} deficits</b></td>
+                            ${pill('Iron','Fe')}
+                            ${pill('Potassium, K','K')}
+                            ${pill('Calcium','Ca')}
+                            ${pill('Sodium','Na')}
+                            ${pill('Fiber, total dietary','Fib')}
+                            ${pill('Vitamin C','C')}
+                            <td style="padding:8px;">${openBtn}</td>
+                        </tr>`;
+                    }).join('');
+                    if (out) out.innerHTML = `
+                        <div style="margin-bottom:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                            <div style="padding:8px 14px;background:#fef3c7;border:1px solid #fde68a;border-radius:10px;font-weight:700;color:#92400e;font-size:0.8rem;"><i class="fas fa-fire"></i> Highest debt count: Top row</div>
+                            <div style="font-size:0.78rem;color:#64748b;">Analyzed ${results.length} clients · ${results.filter(r=>r.data&&r.data.summary&&r.data.summary.debt_count>0).length} have at least one deficit</div>
+                        </div>
+                        <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:auto;">
+                            <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                                <thead style="background:#f8fafc;position:sticky;top:0;">
+                                    <tr>${headers.map(h => `<th style="padding:10px;border-bottom:2px solid #e2e8f0;text-align:left;font-weight:700;color:#475569;">${h}</th>`).join('')}</tr>
+                                </thead>
+                                <tbody>${rowsHtml}</tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                function openQuickAiReportModal() {
+                    const modal = document.getElementById('modalOverlay');
+                    const title = document.getElementById('modalTitle');
+                    const content = document.getElementById('modalContent');
+                    const today = new Date().toISOString().slice(0,10);
+                    title.innerHTML = '<i class="fas fa-robot" style="color:#7c3aed;margin-right:10px;"></i>Quick AI Report (Staff)';
+                    content.innerHTML = STAFF_NOTICE + `
+                        <div style="margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <label style="font-weight:600;font-size:0.8rem;color:#475569;margin-bottom:5px;display:block;">Client</label>
+                                <select id="qaiClientId" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e2e8f0;">${_buildClientOptionsHtml(true)}</select>
+                            </div>
+                            <div>
+                                <label style="font-weight:600;font-size:0.8rem;color:#475569;margin-bottom:5px;display:block;">Report Date</label>
+                                <input type="date" id="qaiDate" value="${today}" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #e2e8f0;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                            <button class="btn btn-primary" style="border-radius:10px;padding:10px 18px;font-weight:700;background:#7c3aed;border:none;"
+                                    onclick="generateQuickAiStaffReport('qaiResultBody')"><i class="fas fa-wand-magic-sparkles"></i> Generate AI Report</button>
+                            <button class="btn btn-primary" style="border-radius:10px;padding:10px 18px;font-weight:700;background:#10b981;border:none;"
+                                    onclick="saveStaffAiReportToClinical()"><i class="fas fa-floppy-disk"></i> Save to Clinical Reports</button>
+                            <button class="btn btn-outline" style="border-radius:10px;padding:10px 18px;font-weight:700;"
+                                    onclick="downloadStaffAiReport()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                        </div>
+                        <div id="qaiResultBody" style="max-height:52vh;overflow:auto;padding-right:6px;border-radius:12px;">
+                            <div style="padding:40px;text-align:center;color:#94a3b8;border:1.5px dashed #cbd5e1;border-radius:14px;">
+                                <i class="fas fa-robot" style="font-size:2rem;margin-bottom:10px;opacity:0.5;color:#7c3aed;"></i>
+                                <p style="margin:0;">Select a client and click <b>"Generate AI Report"</b>.</p>
+                            </div>
+                        </div>
+                        <div id="qaiHiddenPdf" style="display:none;"></div>
+                    `;
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+
+                async function generateQuickAiStaffReport(targetId) {
+                    const out = document.getElementById(targetId);
+                    const sel = document.getElementById('qaiClientId');
+                    const dateEl = document.getElementById('qaiDate');
+                    if (!sel || !sel.value) { alert('Please select a client first.'); return; }
+                    const userId = sel.value;
+                    const clientId = sel.options[sel.selectedIndex]?.getAttribute('data-client-id') || '';
+                    const patientName = sel.options[sel.selectedIndex]?.getAttribute('data-name') || 'Client';
+                    const logDate = dateEl ? dateEl.value : new Date().toISOString().slice(0,10);
+                    if (out) out.innerHTML = `<div style="padding:30px;text-align:center;color:#64748b;"><i class="fas fa-circle-notch fa-spin" style="font-size:1.8rem;"></i><p style="margin-top:8px;">Calling Groq AI for ${patientName}…</p></div>`;
+                    try {
+                        const qs = `?client_id=${encodeURIComponent(clientId)}&user_id=${encodeURIComponent(userId)}&date=${encodeURIComponent(logDate)}&format=json&_t=${Date.now()}`;
+                        const resp = await fetch('handlers/generate_ai_recommendation.php' + qs, { method: 'GET', credentials: 'include' });
+                        const ct = resp.headers.get('Content-Type') || '';
+                        let reportHtml = '';
+                        if (ct.includes('application/json')) {
+                            const j = await resp.json();
+                            if (j && j.success && j.recommendation) reportHtml = j.recommendation;
+                            else if (j && j.report_html) reportHtml = j.report_html;
+                            else if (j && j.message) reportHtml = `<div style="padding:20px;background:#fef2f2;border-radius:12px;color:#b91c1c;"><b>Error:</b> ${j.message}</div>`;
+                        } else {
+                            reportHtml = await resp.text();
+                        }
+                        if (reportHtml) {
+                            if (out) out.innerHTML = reportHtml;
+                            window._lastStaffAiReport = {
+                                report_content: reportHtml,
+                                user_id: userId,
+                                client_id: clientId,
+                                patient_name: patientName,
+                                log_date: logDate,
+                                dietician_name: '<?php echo addslashes($_SESSION['user_name'] ?? ''); ?>'
+                            };
+                        }
+                    } catch (e) {
+                        if (out) out.innerHTML = `<div style="padding:20px;background:#fef2f2;border-radius:12px;color:#b91c1c;"><b>Network error:</b> ${e.message}. Falling back to direct self-service endpoint…</div>`;
+                        try {
+                            const qs2 = `?user_id=${encodeURIComponent(userId)}`;
+                            const r2 = await fetch('api/generate_user_recommendation.php' + qs2, { method: 'POST', credentials: 'include', headers: {'Content-Type':'application/json'}, body: JSON.stringify({}) });
+                            if (r2.ok) {
+                                const j2 = await r2.json();
+                                if (j2 && j2.success) {
+                                    if (out) out.innerHTML = j2.recommendation;
+                                    window._lastStaffAiReport = {
+                                        report_content: j2.recommendation,
+                                        user_id: userId,
+                                        client_id: clientId,
+                                        patient_name: patientName,
+                                        log_date: logDate,
+                                        dietician_name: '<?php echo addslashes($_SESSION['user_name'] ?? ''); ?>'
+                                    };
+                                }
+                            }
+                        } catch (e2) {
+                            if (out) out.innerHTML += `<div style="padding:14px;background:#fee2e2;border-radius:10px;color:#991b1b;margin-top:10px;"><b>Final error:</b> ${e2.message}</div>`;
+                        }
+                    }
+                }
+
+                async function saveStaffAiReportToClinical() {
+                    const last = window._lastStaffAiReport;
+                    if (!last || !last.report_content) { alert('Generate a report first, then save it.'); return; }
+                    try {
+                        const fd = new URLSearchParams();
+                        fd.append('user_id', last.user_id);
+                        fd.append('log_date', last.log_date);
+                        fd.append('patient_name', last.patient_name || '');
+                        fd.append('dietician_name', last.dietician_name || '');
+                        fd.append('report_content', last.report_content);
+                        const r = await fetch('api/save_clinical_report.php', {
+                            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString(), credentials: 'include'
+                        });
+                        const j = await r.json();
+                        if (j && j.success) {
+                            if (typeof window.showToast === 'function') window.showToast('Saved to clinical reports', 'success');
+                            else alert('Saved to clinical reports successfully.');
+                        } else {
+                            alert(j.message || 'Save failed.');
+                        }
+                    } catch (e) {
+                        alert('Network: ' + e.message);
+                    }
+                }
+
+                function downloadStaffAiReport() {
+                    const last = window._lastStaffAiReport;
+                    const body = document.getElementById('qaiResultBody');
+                    const pdf = document.getElementById('qaiHiddenPdf');
+                    if (!body || !body.innerHTML || !last) { alert('Generate a report first.'); return; }
+                    pdf.innerHTML = `<div style="padding:40px;max-width:800px;margin:0 auto;background:#fff;font-family:Inter,Arial;">
+                        <div style="border-bottom:3px solid #7c3aed;padding-bottom:14px;margin-bottom:20px;">
+                            <h1 style="color:#7c3aed;margin:0;font-size:1.3rem;"><i class="fas fa-robot"></i> NutriDeq Quick AI Clinical Report</h1>
+                            <p style="margin:4px 0 0 0;color:#64748b;font-size:0.78rem;">Client: ${last.patient_name||''} · Date: ${last.log_date||''} · Dietitian: ${last.dietician_name||''}</p>
+                        </div>
+                        ${body.innerHTML}
+                    </div>`;
+                    if (typeof generateClinicalReport === 'function') {
+                        generateClinicalReport('#qaiHiddenPdf', `NutriDeq-Staff-AI-${(last.patient_name||'client').replace(/\W+/g,'-')}-${last.log_date||''}.pdf`);
+                    } else if (typeof html2pdf !== 'undefined') {
+                        html2pdf().from(pdf).set({ margin: 10, filename: 'NutriDeq-Staff-AI-Report.pdf', image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} }).save();
+                    } else alert('PDF library loading. Retry in 2s.');
+                }
+
+                function openDeficitSummaryModal() {
+                    const modal = document.getElementById('modalOverlay');
+                    const title = document.getElementById('modalTitle');
+                    const content = document.getElementById('modalContent');
+                    title.innerHTML = '<i class="fas fa-chart-simple" style="color:#dc2626;margin-right:10px;"></i>Deficit Summary — Per Client Cards';
+                    content.innerHTML = STAFF_NOTICE + `
+                        <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                            <button class="btn btn-primary" style="border-radius:10px;padding:10px 18px;font-weight:700;background:#dc2626;border:none;"
+                                    onclick="buildDeficitCards('deficitCardWrap')"><i class="fas fa-sync"></i> Load All Deficit Cards</button>
+                            <span style="font-size:0.75rem;color:#64748b;"><i class="fas fa-info-circle"></i> Per-client nutrient deficits with quick actions.</span>
+                        </div>
+                        <div id="deficitCardWrap" style="max-height:55vh;overflow:auto;padding-right:6px;">
+                            <div style="padding:40px;text-align:center;color:#94a3b8;border:1.5px dashed #cbd5e1;border-radius:14px;">
+                                <i class="fas fa-chart-simple" style="font-size:2rem;margin-bottom:10px;opacity:0.5;color:#dc2626;"></i>
+                                <p style="margin:0;">Click <b>"Load All Deficit Cards"</b> to see per-client deficits.</p>
+                            </div>
+                        </div>
+                    `;
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+
+                async function buildDeficitCards(targetId) {
+                    const clients = STAFF_CLIENTS.filter(c => c && c.user_id > 0);
+                    const out = document.getElementById(targetId);
+                    if (!clients.length) { if (out) out.innerHTML = '<div style="padding:20px;background:#fef2f2;border-radius:12px;color:#b91c1c;">No clients.</div>'; return; }
+                    if (out) out.innerHTML = `<div style="padding:30px;text-align:center;color:#64748b;"><i class="fas fa-circle-notch fa-spin" style="font-size:1.8rem;"></i><p>Loading deficits for ${clients.length} clients…</p></div>`;
+                    const full = [];
+                    for (const c of clients) {
+                        try {
+                            const r = await fetch('api/analyze_micronutrients.php?user_id=' + encodeURIComponent(c.user_id));
+                            const j = await r.json();
+                            full.push({ client: c, data: j });
+                        } catch(e) { full.push({ client: c, err: e }); }
+                        await new Promise(r => setTimeout(r, 30));
+                    }
+                    const cards = full.map(r => {
+                        const debts = (r.data && r.data.nutrients) ? r.data.nutrients.filter(n => n && n.is_debt) : [];
+                        const noBalanced = debts.length === 0 && r.data;
+                        const topClass = noBalanced ? '#ecfdf5' : '#fef2f2';
+                        const debtChips = debts.map(d => `<span style="display:inline-block;padding:3px 10px;background:#fee2e2;color:#991b1b;border-radius:20px;font-size:0.7rem;font-weight:700;margin:0 4px 4px 0;">${d.nutrient} · gap ${(Math.max(0,(d.threshold||0)-(d.avg_daily||0))).toFixed(1)}</span>`).join('');
+                        const actionOpen = `<a href="staff-client-diary.php?client_id=${r.client.client_id}&user_id=${r.client.user_id}" target="_blank" class="btn btn-outline" style="border-radius:8px;padding:6px 10px;font-size:0.72rem;margin-top:8px;display:inline-block;text-decoration:none;"><i class="fas fa-arrow-up-right-from-square"></i> Open Client Diary</a>`;
+                        return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:10px;">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                                <div>
+                                    <div style="font-weight:700;color:#111827;">${r.client.name}</div>
+                                    <div style="font-size:0.72rem;color:#64748b;">${r.client.email || ''} · UID: ${r.client.user_id}</div>
+                                </div>
+                                <span style="background:${noBalanced ? '#059669' : '#dc2626'};color:#fff;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;">${debts.length} deficit${debts.length===1?'':'s'}</span>
+                            </div>
+                            <div style="margin-top:4px;background:${topClass};border-radius:10px;padding:8px 10px;">
+                                ${noBalanced ? `<div style="color:#065f46;font-size:0.8rem;font-weight:600;"><i class="fas fa-check-circle"></i> No 14-day micronutrient deficits detected.</div>` : debtChips}
+                            </div>
+                            ${actionOpen}
+                        </div>`;
+                    }).join('');
+                    if (out) out.innerHTML = cards;
                 }
             </script>
 
@@ -1520,27 +1903,27 @@ $pdo = $database->getConnection();
             <!-- ── Management Section (Quick Actions) ── -->
             <div class="management-section stagger d-2" style="margin-top: 30px; margin-bottom: 30px;">
                 <div class="command-tiles">
+                    <a href="user-diary.php" class="command-tile nutri-glass" style="--sc: #059669; --sb: rgba(5, 150, 105, 0.08); --sc-rgb: 5, 150, 105;">
+                        <div class="command-tile-icon"><i class="fas fa-book-medical"></i></div>
+                        <div class="command-tile-info">
+                            <h3>Food Diary</h3>
+                            <p>Track meals & daily nutrition</p>
+                        </div>
+                        <canvas class="bento-sparkline" width="110" height="50"></canvas>
+                    </a>
                     <a href="Nutrition-Calculator.php" class="command-tile nutri-glass" style="--sc: #4f46e5; --sb: rgba(79, 70, 229, 0.08); --sc-rgb: 79, 70, 229;">
                         <div class="command-tile-icon"><i class="fas fa-calculator"></i></div>
                         <div class="command-tile-info">
                             <h3>Calculator</h3>
-                            <p>Daily macro needs</p>
+                            <p>Daily calories & macro needs</p>
                         </div>
                         <canvas class="bento-sparkline" width="110" height="50"></canvas>
                     </a>
                     <a href="food-exchange.php" class="command-tile nutri-glass" style="--sc: #d946ef; --sb: rgba(217, 70, 239, 0.08); --sc-rgb: 217, 70, 239;">
                         <div class="command-tile-icon"><i class="fas fa-exchange-alt"></i></div>
                         <div class="command-tile-info">
-                            <h3>Exchange</h3>
-                            <p>Healthy alternatives</p>
-                        </div>
-                        <canvas class="bento-sparkline" width="110" height="50"></canvas>
-                    </a>
-                    <a href="user-health-tracker.php" class="command-tile nutri-glass" style="--sc: #0d9488; --sb: rgba(13, 148, 136, 0.08); --sc-rgb: 13, 148, 136;">
-                        <div class="command-tile-icon"><i class="fas fa-book-medical"></i></div>
-                        <div class="command-tile-info">
-                            <h3>Log Food</h3>
-                            <p>Daily Tracking</p>
+                            <h3>Food Exchange</h3>
+                            <p>Healthy portion alternatives</p>
                         </div>
                         <canvas class="bento-sparkline" width="110" height="50"></canvas>
                     </a>
@@ -1548,7 +1931,7 @@ $pdo = $database->getConnection();
                         <div class="command-tile-icon"><i class="fas fa-comment-dots"></i></div>
                         <div class="command-tile-info">
                             <h3>Messages</h3>
-                            <p id="unreadMsgCount"><?php echo $unread_count; ?> unread</p>
+                            <p id="unreadMsgCount"><?php echo $unread_count; ?> unread with dietitian</p>
                         </div>
                         <canvas class="bento-sparkline" width="110" height="50"></canvas>
                     </a>
@@ -2254,6 +2637,130 @@ $pdo = $database->getConnection();
                 });
             }
         });
+    </script>
+
+    <script>
+    <?php if ($user_role === 'regular'): ?>
+    const NUTRI_NOTICE = `<div style="background:rgba(245,156,11,0.08);border:1.5px solid rgba(245,156,11,0.3);border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:0.78rem;color:#78350f;display:flex;align-items:flex-start;gap:8px;">
+        <i class="fas fa-exclamation-triangle" style="margin-top:2px;color:#d97706;flex-shrink:0;"></i>
+        <span><b>NON-THERAPEUTIC NOTICE:</b> This AI-generated information is for educational insight only. It is not a substitute for professional medical or nutritional diagnosis. All recommendations should be reviewed and validated by a qualified Registered Dietitian before implementation.</span>
+    </div>`;
+
+    function openNutrientAnalyzerModal() {
+        const modal = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const content = document.getElementById('modalContent');
+        title.innerHTML = '<i class="fas fa-flask-vial" style="color:#14b8a6;margin-right:10px;"></i>Nutrient Analyzer — 14-Day Debt Status';
+        content.innerHTML = NUTRI_NOTICE + `
+            <div style="margin-bottom:12px;">
+                <p style="margin:0 0 6px 0;font-size:0.85rem;color:#475569;">
+                    <i class="fas fa-info-circle" style="color:#14b8a6;"></i> Using the DOST-FNRI 14-day rolling-average algorithm against 6 tracked micronutrients.
+                </p>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <button class="btn btn-primary" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;background:#14b8a6;border:none;" onclick="window.analyzeMicronutrients({targetId:'analyzerResultList'})">
+                        <i class="fas fa-play"></i> Run Analysis
+                    </button>
+                    <span style="font-size:0.75rem;color:#64748b;"><i class="fas fa-clock"></i> Takes 1-2 seconds depending on log volume</span>
+                </div>
+            </div>
+            <div id="analyzerResultList">
+                <div style="padding:40px;text-align:center;color:#94a3b8;border:1px dashed #cbd5e1;border-radius:14px;">
+                    <i class="fas fa-flask" style="font-size:2rem;margin-bottom:10px;opacity:0.5;"></i>
+                    <p style="margin:0;">Click <b>"Run Analysis"</b> to detect 14-day micronutrient deficits.</p>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function openSmartRecommendationsModal() {
+        const modal = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const content = document.getElementById('modalContent');
+        title.innerHTML = '<i class="fas fa-lightbulb" style="color:#6366f1;margin-right:10px;"></i>Smart Recommendations (Groq AI)';
+        content.innerHTML = NUTRI_NOTICE + `
+            <div style="margin-bottom:14px;">
+                <p style="margin:0 0 8px 0;font-size:0.85rem;color:#475569;">
+                    <i class="fas fa-robot" style="color:#6366f1;"></i> 4-section personalized clinical report: Clinical Assessment, Critical Nutrient Targets, Suggested FCT Food Strategies, and Lifestyle & Meal Timing Guidance. Result saves to your AI Recommendations history for your dietitian to review.
+                </p>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button class="btn btn-primary" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;background:#6366f1;border:none;" onclick="generateSmartRecommendations({outputId:'smartRecResult'})">
+                        <i class="fas fa-wand-magic-sparkles"></i> Generate Personal Report
+                    </button>
+                    <button class="btn btn-outline" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;" onclick="if(typeof generateClinicalReport==='function'){document.getElementById('pdfRenderTarget').innerHTML=document.getElementById('smartRecResult').innerHTML;generateClinicalReport('pdfRenderTarget');}else{alert('PDF rendering library loading… please retry.');}">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                </div>
+                <div id="pdfRenderTarget" style="display:none;"></div>
+            </div>
+            <div id="smartRecResult" style="max-height:55vh;overflow:auto;padding-right:6px;">
+                <div style="padding:40px;text-align:center;color:#94a3b8;border:1px dashed #cbd5e1;border-radius:14px;">
+                    <i class="fas fa-lightbulb" style="font-size:2rem;margin-bottom:10px;opacity:0.5;"></i>
+                    <p style="margin:0;">Click <b>"Generate Personal Report"</b> to receive your Groq AI powered recommendation.</p>
+                </div>
+            </div>
+            <div id="recommendationCardList" style="margin-top:14px;"></div>
+        `;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function openDailyIntakeReviewModal() {
+        const modal = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const content = document.getElementById('modalContent');
+        title.innerHTML = '<i class="fas fa-chart-column" style="color:#0ea5e9;margin-right:10px;"></i>Daily Intake Review — Today';
+        content.innerHTML = NUTRI_NOTICE + `
+            <div style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <button class="btn btn-primary" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;background:#0ea5e9;border:none;" onclick="window.analyzeTodayIntake({outputId:'intakeReviewBody'})">
+                    <i class="fas fa-refresh"></i> Refresh Today's Totals
+                </button>
+                <a href="user-diary.php?tab=nutrient-analysis" class="btn btn-outline" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;text-decoration:none;">
+                    <i class="fas fa-book-open"></i> Open Full Diary
+                </a>
+            </div>
+            <div id="intakeReviewBody" style="max-height:55vh;overflow:auto;padding-right:6px;">
+                <div style="padding:40px;text-align:center;color:#94a3b8;border:1px dashed #cbd5e1;border-radius:14px;">
+                    <i class="fas fa-chart-pie" style="font-size:2rem;margin-bottom:10px;opacity:0.5;"></i>
+                    <p style="margin:0;">Click <b>"Refresh Today's Totals"</b> to aggregate today's macro & micronutrients.</p>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function openFoodSuggestionsModal() {
+        const modal = document.getElementById('modalOverlay');
+        const title = document.getElementById('modalTitle');
+        const content = document.getElementById('modalContent');
+        title.innerHTML = '<i class="fas fa-carrot" style="color:#f59e0b;margin-right:10px;"></i>Food Suggestions — Deficit Remedies';
+        content.innerHTML = NUTRI_NOTICE + `
+            <div style="margin-bottom:12px;">
+                <p style="margin:0 0 8px 0;font-size:0.85rem;color:#475569;">
+                    <i class="fas fa-leaf" style="color:#f59e0b;"></i> Maps each 14-day deficit to a set of FCT-aligned local food remedies. Includes the nutrient gap size to help you prioritize.
+                </p>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button class="btn btn-primary" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;background:#f59e0b;border:none;" onclick="window.getFoodSuggestionsForDebts({outputId:'foodSuggestResult'})">
+                        <i class="fas fa-magnifying-glass"></i> Match Deficits to Foods
+                    </button>
+                    <a href="fct-library.php" class="btn btn-outline" style="flex:0 0 auto;border-radius:10px;padding:10px 18px;font-weight:700;text-decoration:none;">
+                        <i class="fas fa-book"></i> Browse FCT Library
+                    </a>
+                </div>
+            </div>
+            <div id="foodSuggestResult" style="max-height:55vh;overflow:auto;padding-right:6px;">
+                <div style="padding:40px;text-align:center;color:#94a3b8;border:1px dashed #cbd5e1;border-radius:14px;">
+                    <i class="fas fa-bowl-food" style="font-size:2rem;margin-bottom:10px;opacity:0.5;"></i>
+                    <p style="margin:0;">Click <b>"Match Deficits to Foods"</b> to generate your personalized food remedy list.</p>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    <?php endif; ?>
     </script>
 
     <script src="scripts/dashboard.js"></script>

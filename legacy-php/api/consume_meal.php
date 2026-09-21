@@ -14,6 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || !isset(
 $user_id = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
     $tracking_id = $_POST['tracking_id'] ?? null;
     $meal_type = $_POST['meal_type'] ?? null; // Breakfast, Lunch, Dinner, Snack
 

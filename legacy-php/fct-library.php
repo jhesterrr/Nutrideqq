@@ -413,6 +413,7 @@ function getFoodIcon(string $category): array
             }
         }
     </style>
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

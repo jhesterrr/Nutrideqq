@@ -14,6 +14,14 @@ $user_id = $_SESSION['user_id'];
 $log_date = date('Y-m-d');
 $action = $_REQUEST['action'] ?? 'get';
 
+// Mutating requests sent as POST must carry the CSRF token.
+// NOTE: the dashboard currently also triggers add/sub via GET links
+// (scripts/dashboard-store.js); until that moves to POST, GET mutations
+// remain allowed for compatibility.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf();
+}
+
 try {
     $database = new Database();
     $pdo = $database->getConnection();

@@ -25,6 +25,7 @@ switch ($action) {
         break;
 
     case 'save':
+        verify_csrf();
         if (!FCTHelper::canManage($_SESSION['user_role'])) {
             echo json_encode(['success' => false, 'message' => 'Permission denied']);
             break;

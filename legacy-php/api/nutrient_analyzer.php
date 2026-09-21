@@ -1,18 +1,12 @@
 <?php
 // api/nutrient_analyzer.php
-// Nutrient debt thresholds derived from Philippine DOST-FNRI FCT daily adequate intakes (not USDA).
+// Nutrient debt thresholds resolved per-demographic from the FNRI PDRI 2015
+// standards (nutrient_standards table; static official snapshot as fallback).
 require_once __DIR__ . '/../database.php';
+require_once __DIR__ . '/../includes/NutrientStandards.php';
 
 class NutrientAnalyzer {
     private $pdo;
-    private $thresholds = [
-        'Iron' => 7.0,
-        'Potassium, K' => 1500.0,
-        'Calcium' => 500.0,
-        'Sodium' => 500.0,
-        'Fiber, total dietary' => 10.0,
-        'Vitamin C' => 30.0
-    ];
 
     public function __construct() {
         $database = new Database();
@@ -21,12 +15,20 @@ class NutrientAnalyzer {
 
     /**
      * Checks if a user has a "Micronutrient Debt" for a specific nutrient
-     * based on their last 14 days of food logs.
+     * based on their last 14 days of food logs, compared against the
+     * PDRI 2015 reference value for the user's age/sex. Also flags when the
+     * 14-day average exceeds the PDRI Tolerable Upper Intake Level (UL).
      */
     public function getNutrientDebtStatus($userId, $nutrientName) {
-        if (!isset($this->thresholds[$nutrientName])) return null;
+        if (!in_array($nutrientName, NutrientStandards::TRACKED, true)) return null;
 
         try {
+            $age = NutrientStandards::resolveUserAge($this->pdo, $userId);
+            $sex = NutrientStandards::resolveUserSex($this->pdo, $userId);
+            $std = NutrientStandards::get($nutrientName, $age, $sex);
+            $threshold = (float)$std['target'];
+            $ul = $std['ul_value'];
+
             // Get last 14 days intake
             // We join food_logs -> fct_food_items -> fct_nutrients
             $sql = "
@@ -44,13 +46,26 @@ class NutrientAnalyzer {
             $total = (float)$stmt->fetchColumn();
             
             $dailyAvg = $total / 14;
-            $isDebt = ($dailyAvg < $this->thresholds[$nutrientName]);
+            $isDebt = ($threshold > 0 && $dailyAvg < $threshold);
 
             return [
                 'nutrient' => $nutrientName,
                 'avg_daily' => round($dailyAvg, 2),
-                'threshold' => $this->thresholds[$nutrientName],
-                'is_debt' => $isDebt
+                // Original key kept for backward compatibility:
+                'threshold' => $threshold,
+                'is_debt' => $isDebt,
+                // Standards detail (new, additive):
+                'unit' => $std['unit'],
+                'upper_limit' => $ul,
+                'exceeds_upper_limit' => ($ul !== null && $dailyAvg > $ul),
+                'source_type' => $std['source_type'],
+                'source_note' => $std['source_note'],
+                'standard_source' => $std['source'],
+                'demographics' => [
+                    'age' => $age,
+                    'sex' => $sex,
+                    'bracket' => NutrientStandards::bracketLabel($age, $sex),
+                ],
             ];
         } catch (Exception $e) {
             return null;

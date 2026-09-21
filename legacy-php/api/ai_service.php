@@ -1,7 +1,10 @@
 <?php
 // /api/ai_service.php
-// Data source: symptom-to-nutrient mapping keys reference Philippine DOST-FNRI FCT (not USDA).
+// Data source: symptom-to-nutrient mapping is versioned data
+// (config/symptom_nutrient_mapping.json, applied by includes/SymptomMapper.php);
+// nutrient keys reference the Philippine DOST-FNRI FCT (not USDA).
 require_once __DIR__ . '/../database.php';
+require_once __DIR__ . '/../includes/SymptomMapper.php';
 
 class NutriDeqAI {
     private $apiKey;
@@ -10,7 +13,7 @@ class NutriDeqAI {
     private $pdo;
 
     public function __construct() {
-        $this->apiKey = getenv('GROQ_API_KEY') ?: $_ENV['GROQ_API_KEY'];
+        $this->apiKey = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? null);
         if (!$this->apiKey) {
             throw new Exception('GROQ_API_KEY environment variable is not set');
         }
@@ -19,10 +22,14 @@ class NutriDeqAI {
     }
 
     /**
-     * The NLP Module: Analyzes chat text for burnout sentiment and physical symptoms.
+     * Shared extraction prompt — the single source of the production prompt.
+     * The evaluation harness (dev-tools/test_ai.php --live) reuses this so the
+     * evaluated prompt is byte-identical to the one used in production.
+     * Taglish-aware: clients may write English, Tagalog, or mixed Taglish;
+     * the engine must normalize Tagalog symptom words to English labels.
      */
-    public function analyzeMessage($userId, $messageId, $text) {
-        $prompt = "You are the NutriDeq Clinical NLP Engine. Analyze the following message from a diet client.
+    public static function buildExtractionPrompt($text) {
+        return "You are the NutriDeq Clinical NLP Engine. Analyze the following message from a diet client.
 Return ONLY a valid JSON object with no markdown formatting, no explanation, no extra text.
 Format:
 {
@@ -34,8 +41,16 @@ Rules:
 - sentiment_score: 1-10 (1=motivated/happy, 10=extremely stressed/exhausted/quitting)
 - burnout_flag: true if sentiment_score >= 8
 - symptoms: array of physical symptoms mentioned (e.g. fatigue, cramps, headaches, nausea, dizziness). Empty array [] if none.
+- The client may write in English, Tagalog, or Taglish (mixed). Tagalog symptom words include: pagod / kapaguran (tired, fatigued), walang lakas / mahina (weak), hilo / nahihilo (dizzy), sakit ng ulo (headache), pulikat / kalampos (muscle cramps), kabag (bloating, gas), susuka / naiinit (nauseous). Normalize them to their English symptom terms in the output (e.g. \"pagod\" -> \"fatigue\", \"hilo\" -> \"dizziness\"). Output symptom labels in English only.
 
 Client Message: \"$text\"";
+    }
+
+    /**
+     * The NLP Module: Analyzes chat text for burnout sentiment and physical symptoms.
+     */
+    public function analyzeMessage($userId, $messageId, $text) {
+        $prompt = self::buildExtractionPrompt($text);
 
         $data = [
             "model"    => $this->model,
@@ -84,21 +99,16 @@ Client Message: \"$text\"";
                     $stmt = $this->pdo->prepare("INSERT INTO ai_burnout_logs (user_id, message_id, sentiment_score, burnout_flag, analysis_text) VALUES (?, ?, ?, ?, ?)");
                     $stmt->execute([$userId, $messageId, $score, $flag, $text]);
 
-                    // 2. Save Extracted Symptoms with nutrient mapping
+                    // 2. Save Extracted Symptoms with nutrient mapping from the
+                    //    versioned mapping table. Every row records WHICH mapping
+                    //    version + class produced the assignment (audit columns,
+                    //    migration 003); unmatched symptoms map to NULL and are
+                    //    retained for dietitian review.
                     foreach ($symptoms as $symptom) {
-                        $mappedNutrient = null;
-                        $lower = strtolower(trim($symptom));
-                        // Mapping to exact keys in fct_nutrients table
-                        if (str_contains($lower, 'cramp') || str_contains($lower, 'spasm'))  $mappedNutrient = 'Potassium, K';
-                        elseif (str_contains($lower, 'fatigue') || str_contains($lower, 'tired') || str_contains($lower, 'exhausted')) $mappedNutrient = 'Iron';
-                        elseif (str_contains($lower, 'dizz'))                     $mappedNutrient = 'Sodium';
-                        elseif (str_contains($lower, 'headache'))                 $mappedNutrient = 'Calcium'; // Proxy for missing Magnesium
-                        elseif (str_contains($lower, 'nausea'))                   $mappedNutrient = 'Vitamin C'; // General wellness proxy
-                        elseif (str_contains($lower, 'weak'))                     $mappedNutrient = 'Iron';
-                        elseif (str_contains($lower, 'bloat'))                    $mappedNutrient = 'Fiber, total dietary';
+                        [$mappedNutrient, $mappingClassId] = SymptomMapper::mapWithClass($symptom);
 
-                        $stmtS = $this->pdo->prepare("INSERT INTO ai_extracted_symptoms (user_id, message_id, symptom_keyword, mapped_nutrient) VALUES (?, ?, ?, ?)");
-                        $stmtS->execute([$userId, $messageId, $symptom, $mappedNutrient]);
+                        $stmtS = $this->pdo->prepare("INSERT INTO ai_extracted_symptoms (user_id, message_id, symptom_keyword, mapped_nutrient, mapping_version, mapping_class_id) VALUES (?, ?, ?, ?, ?, ?)");
+                        $stmtS->execute([$userId, $messageId, $symptom, $mappedNutrient, SymptomMapper::getVersion(), $mappingClassId]);
                     }
 
                     return $result;

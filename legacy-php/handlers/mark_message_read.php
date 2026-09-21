@@ -8,6 +8,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
     exit();
 }
 
+verify_csrf();
+
 $data = json_decode(file_get_contents('php://input'), true);
 $message_id = $data['message_id'] ?? 0;
 

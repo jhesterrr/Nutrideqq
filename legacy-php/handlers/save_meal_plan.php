@@ -11,6 +11,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
     exit();
 }
 
+verify_csrf();
+
 try {
     $database = new Database();
     $pdo = $database->getConnection();

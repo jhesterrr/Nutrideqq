@@ -213,6 +213,7 @@ $deleted_clients = $dbHelper->getDeletedClients();
         }
     </style>
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

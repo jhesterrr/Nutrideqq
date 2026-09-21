@@ -453,6 +453,7 @@ if (isset($_GET['tab'])) {
     </style>
     <script>const BASE_URL = '';</script>
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>
@@ -1423,7 +1424,7 @@ if (isset($_GET['tab'])) {
                             reportDiv.className = 'ai-report-container';
                             reportDiv.style.animation = 'fadeIn 0.4s ease-out';
                             reportDiv.style.fontFamily = "'Outfit', sans-serif";
-                            reportDiv.textContent = res.recommendation;
+                            reportDiv.innerHTML = res.recommendation;
                             container.innerHTML = '';
                             container.appendChild(reportDiv);
                         } else {
@@ -1431,7 +1432,7 @@ if (isset($_GET['tab'])) {
                                 <div style="text-align: center; padding: 40px 20px; color: #ef4444; display: flex; flex-direction: column; align-items: center; gap: 12px;">
                                     <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem;"></i>
                                     <div style="font-weight: 700; font-size:0.9rem;">Analysis Timeout</div>
-                                    <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 220px; line-height: 1.5;">${res.error || 'The NLP engine could not gather sufficient client telemetry. Please verify that the client has valid body stats.'}</p>
+                                    <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 260px; line-height: 1.5;">${res.message || res.error || 'The clinical engine could not gather sufficient client telemetry.'}</p>
                                 </div>
                             `;
                         }
@@ -1442,7 +1443,7 @@ if (isset($_GET['tab'])) {
                             <div style="text-align: center; padding: 40px 20px; color: #ef4444; display: flex; flex-direction: column; align-items: center; gap: 12px;">
                                 <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem;"></i>
                                 <div style="font-weight: 700; font-size:0.9rem;">Intelligence Pipeline Offline</div>
-                                <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 220px; line-height: 1.5;">Failed to reach clinical recommendations server. Please verify your connection.</p>
+                                <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 260px; line-height: 1.5;">${err.message || 'Failed to reach clinical recommendations server. Please verify your connection.'}</p>
                             </div>
                         `;
                     });

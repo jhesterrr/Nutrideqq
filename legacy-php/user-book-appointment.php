@@ -112,6 +112,7 @@ try {
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <link rel="stylesheet" href="css/premium-revamp.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 
 <body>

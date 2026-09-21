@@ -215,6 +215,12 @@ function getNavigationLinks($user_role, $current_page = '')
                 'icon' => 'fas fa-book-medical',
                 'text' => 'Food Database',
                 'active' => ($current_page === 'fct-library.php' ? true : null)
+            ],
+            'user_nutrient_analysis' => [
+                'href' => 'user-diary.php?tab=nutrient-analysis',
+                'icon' => 'fas fa-flask-vial',
+                'text' => 'Nutrient Analysis',
+                'active' => ($current_page === 'user-diary.php' && ($_GET['tab'] ?? '') === 'nutrient-analysis' ? true : null)
             ]
         ];
     }

@@ -1,0 +1,71 @@
+{
+  "$schema_note": "Versioned, citable symptom-class to nutrient mapping for the NutriDeq NLP engine. Keywords are case-insensitive substring matchers applied to lowercased extracted symptom text. Classes are evaluated in array order; first match wins. nutrient_name values are exact fct_nutrients.nutrient_name keys (DOST-FNRI Food Composition Table).",
+  "version": "1.2.0",
+  "released": "2026-09-22",
+  "citation": "Symptom classes: NutriDeq clinical knowledge base (includes/ai_symptom_kb.php). Nutrient keys: DOST-FNRI Food Composition Table (fct_nutrients). Reference values: Philippine Dietary Reference Intakes 2015, FNRI-DOST (Revised Sept 2018).",
+  "language_note": "Keywords cover English, Tagalog/Taglish, and verified Cebuano/Bisaya terms. Regional terms are added ONLY after linguistic verification (see dev-tools/EVAL_RUNBOOK.md, corpus governance): unverified candidates are deliberately excluded to protect annotation integrity — Ilocano terms are pending verification and are intentionally absent in this version.",
+  "changelog": [
+    "1.2.0 (2026-09-22): Added verified Cebuano/Bisaya terms (kapoy; sakit ug ulo). Fixed SC-BLOAT keyword error: 'hininga' (breath) corrected to 'hangin' (gas/wind, as in 'may hangin ang tiyan'). Stemmed 'exhausted' to 'exhaust' so exhaustion/exhausted both match. Documented the deliberate SC-CRAMP 'kabag sa kalamnan' vs SC-BLOAT 'kabag' precedence rule.",
+    "1.1.0 (2026-09-22): Initial versioned extraction from the hardcoded ai_service.php chain; added Tagalog keywords."
+  ],
+  "classes": [
+    {
+      "class_id": "SC-CRAMP",
+      "label": "Muscle cramps / spasms",
+      "nutrient_name": "Potassium, K",
+      "priority": 10,
+      "rationale": "Hypokalemia presents classically with muscle cramps and spasms; potassium AI is 2000 mg/day for ages 10+ (PDRI 2015).",
+      "notes": "Deliberate precedence: 'kabag sa kalamnan' (muscle spasm) must be evaluated BEFORE SC-BLOAT's general 'kabag' (digestive gas). Class order in this array implements this.",
+      "keywords": ["cramp", "spasm", "kalampos", "pulikat", "kabag sa kalamnan"]
+    },
+    {
+      "class_id": "SC-FATIGUE",
+      "label": "Fatigue / low energy / weakness",
+      "nutrient_name": "Iron",
+      "priority": 20,
+      "rationale": "Fatigue and weakness are hallmark presentations of iron-deficiency anemia; iron inadequacy prevalence among Filipino adults is 97-99% (Angeles-Agdeppa et al., 2019, NNS 2013).",
+      "keywords": ["fatigue", "tired", "exhaust", "weak", "pagod", "kapaguran", "walang lakas", "hina ng katawan", "low energy", "kapoy"]
+    },
+    {
+      "class_id": "SC-DIZZY",
+      "label": "Dizziness / lightheadedness",
+      "nutrient_name": "Sodium",
+      "priority": 30,
+      "rationale": "Orthostatic dizziness is associated with low sodium/volume status; PDRI 2015 sets the sodium AI at 500 mg (WHO limit < 2000 mg/day).",
+      "keywords": ["dizz", "lightheaded", "hilo", "nahihilo", "lula"]
+    },
+    {
+      "class_id": "SC-HEADACHE",
+      "label": "Headache",
+      "nutrient_name": "Calcium",
+      "priority": 40,
+      "rationale": "Headache is used as a proxy indicator for calcium/magnesium shortfall in the NutriDeq clinical KB; calcium RNI is 750 mg/day for adults (PDRI 2015).",
+      "keywords": ["headache", "sakit ng ulo", "barado", "migraine", "sakit ug ulo"]
+    },
+    {
+      "class_id": "SC-NAUSEA",
+      "label": "Nausea",
+      "nutrient_name": "Vitamin C",
+      "priority": 50,
+      "rationale": "General wellness proxy per NutriDeq clinical KB; vitamin C inadequacy among Filipino adults is 96-98% (NNS 2013).",
+      "keywords": ["nausea", "nauseous", "queasy", "nanghihina sa sikmura", "naiinit", "susuka", "madaling magsuka"]
+    },
+    {
+      "class_id": "SC-BLOAT",
+      "label": "Bloating / gas",
+      "nutrient_name": "Fiber, total dietary",
+      "priority": 60,
+      "rationale": "Bloating is the classic presentation of low dietary fiber intake and gut-adjustment to fiber; PDRI 2015 AI is 20-25 g/day for adults.",
+      "notes": "v1.2.0 keyword fix: 'hininga' (breath) was a v1.1.0 error, corrected to 'hangin' (gas/wind).",
+      "keywords": ["bloat", "gas", "kabag", "namamaga ang tiyan", "sikip ng tiyan", "utot", "hangin sa tiyan"]
+    },
+    {
+      "class_id": "SC-NO-MAP",
+      "label": "Unmapped symptom (retained for clinician review only)",
+      "nutrient_name": null,
+      "priority": 900,
+      "keyword_policy": "no-keywords",
+      "rationale": "Explicit fallback class so extraction never silently drops symptoms; unmapped entries are stored with NULL mapped_nutrient for dietitian triage instead of forcing a false mapping."
+    }
+  ]
+}

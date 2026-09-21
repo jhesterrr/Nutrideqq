@@ -14,6 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+verify_csrf();
+
 $user_id = $_POST['user_id'] ?? null;
 $log_date = $_POST['log_date'] ?? null;
 $patient_name = $_POST['patient_name'] ?? '';
@@ -23,6 +25,12 @@ $staff_id = $_SESSION['user_id'];
 
 if (!$user_id || !$log_date || !$report_content) {
     echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+    exit();
+}
+
+// Staff may only file reports for clients assigned to them (admin: any client)
+if (!user_can_access_client($user_id)) {
+    echo json_encode(['success' => false, 'message' => 'Forbidden: client not assigned to you']);
     exit();
 }
 

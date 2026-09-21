@@ -9,6 +9,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     exit;
 }
 
+verify_csrf();
+
 $user_id = $_SESSION['user_id'];
 $user_email = $_SESSION['user_email'] ?? '';
 $data = json_decode(file_get_contents('php://input'), true);

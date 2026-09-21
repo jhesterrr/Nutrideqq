@@ -897,4 +897,78 @@
     }
 }
 
+/* ══ AI Clinical Guidance Report Styling ══ */
+.clinical-report-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 10px 4px;
+}
+.clinical-section {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+}
+.clinical-section h3 {
+    margin: 0 0 12px 0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.96rem;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.clinical-section h3 i {
+    color: #10b981;
+    font-size: 0.95rem;
+}
+.clinical-stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.clinical-stat-row .stat-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+}
+.clinical-stat-row .stat-box .label {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.clinical-stat-row .stat-box .value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    color: #1e293b;
+    margin-top: 3px;
+}
+.nutrient-pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.nutrient-pill {
+    background: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+
 

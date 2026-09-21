@@ -10,6 +10,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
     exit();
 }
 
+verify_csrf();
+
 $data = json_decode(file_get_contents('php://input'), true);
 $client_user_id = $data['client_user_id'] ?? null;
 $staff_id = $data['staff_id'] ?? null;

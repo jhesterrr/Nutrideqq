@@ -345,6 +345,7 @@ if ($selected_thread_id) {
     </style>
     <link rel="stylesheet" href="css/premium-revamp.css">
     <link rel="stylesheet" href="css/layout.css">
+    <script src="scripts/csrf-fetch.js"></script>
 </head>
 <body>
     <div class="main-layout">
