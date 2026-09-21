@@ -1,6 +1,10 @@
 <?php
 require_once dirname(__DIR__) . '/session_bootstrap.php';
 
+// Capture any stray warnings/notices so JSON responses stay parseable.
+// (ob_end_clean() calls below discard the buffer contents before each JSON echo.)
+ob_start();
+
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../database.php';
