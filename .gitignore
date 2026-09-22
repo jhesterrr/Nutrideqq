@@ -6,6 +6,7 @@ node_modules/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Logs and databases
 *.log
@@ -37,3 +38,7 @@ legacy-php/uploads/reports/
 # Temp verification scripts (_prefix convention)
 _*.php
 _*.js
+
+# Deployment artifacts (local build outputs, never commit)
+deploy/
+tools/

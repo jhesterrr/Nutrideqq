@@ -1,4 +1,4 @@
-# NutriDeq — Apache hardening (applies to this directory and below)
+# NutriDeq — Apache/LiteSpeed hardening (applies to this directory and below)
 
 Options -Indexes
 
@@ -11,6 +11,31 @@ Options -Indexes
     # Developer/migration tools are not part of the deployed app
     RewriteRule "(^|/)dev-tools/" - [F,L]
 
-    # Never expose log files (e.g. api/ai_error.log)
-    RewriteRule "\.log$" - [F,L]
+    # Secrets and server-side config (PHP reads these from disk, not HTTP)
+    RewriteRule "(^|/)\.env" - [F,L]
+    RewriteRule "(^|/)config/" - [F,L]
+    RewriteRule "(^|/)migrations/" - [F,L]
+
+    # Never expose log files, raw SQL dumps, or sensitive source formats
+    RewriteRule "\.(log|sql|sqlite|sqlite3|db|md|phar|txt|ini|conf)$" - [F,L]
+
+    # Version control metadata (if a repo copy is ever uploaded)
+    RewriteRule "(^|/)\.git" - [F,L]
 </IfModule>
+
+# Shared-hosting PHP overrides (LiteSpeed honors php_value in .htaccess)
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value memory_limit 256M
+    php_value date.timezone "Asia/Manila"
+</IfModule>
+<IfModule lsapi_module.c>
+    php_flag display_errors Off
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value memory_limit 256M
+    php_value date.timezone "Asia/Manila"
+</IfModule>
+

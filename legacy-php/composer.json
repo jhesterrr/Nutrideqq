@@ -11,5 +11,14 @@
         "psr-4": {
             "Nutrideq\\": "src/"
         }
+    },
+    "scripts": {
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+    },
+    "extra": {
+        "google/apiclient-services": [
+            "Oauth2"
+        ]
     }
 }
+

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/config/env.php';
+
 $session_path = __DIR__ . '/api/sessions';
 if (!is_dir($session_path)) {
     mkdir($session_path, 0777, true);
