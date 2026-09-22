@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // /api/ai_service.php
 // Data source: symptom-to-nutrient mapping is versioned data
 // (config/symptom_nutrient_mapping.json, applied by includes/SymptomMapper.php);
@@ -9,7 +9,7 @@ require_once __DIR__ . '/../includes/SymptomMapper.php';
 class NutriDeqAI {
     private $apiKey;
     private $apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    private $model  = 'llama-3.1-8b-instant';
+    private $model  = 'openai/gpt-oss-20b';
     private $pdo;
 
     public function __construct() {
@@ -22,7 +22,7 @@ class NutriDeqAI {
     }
 
     /**
-     * Shared extraction prompt — the single source of the production prompt.
+     * Shared extraction prompt â€” the single source of the production prompt.
      * The evaluation harness (dev-tools/test_ai.php --live) reuses this so the
      * evaluated prompt is byte-identical to the one used in production.
      * Taglish-aware: clients may write English, Tagalog, or mixed Taglish;

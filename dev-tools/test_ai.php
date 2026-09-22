@@ -1,7 +1,7 @@
-<?php
+﻿<?php
 
 /**
- * NutriDeq NLP Symptom-to-Nutrient Mapping — Gold-Set Evaluation Harness
+ * NutriDeq NLP Symptom-to-Nutrient Mapping â€” Gold-Set Evaluation Harness
  *
  * Evaluates the NLP pipeline (LLM symptom extraction + versioned mapping table)
  * with per-class Precision / Recall / F1 over the curated gold corpus
@@ -9,7 +9,7 @@
  * distractor handling, and a negative-case false-positive rate.
  *
  * The symptom-to-nutrient mapping under test is versioned citable data
- * (config/symptom_nutrient_mapping.json) loaded through includes/SymptomMapper.php —
+ * (config/symptom_nutrient_mapping.json) loaded through includes/SymptomMapper.php â€”
  * the exact same code path production uses (api/ai_service.php), including the
  * byte-identical extraction prompt via NutriDeqAI::buildExtractionPrompt().
  *
@@ -54,10 +54,10 @@ $mappingDoc = SymptomMapper::getDocument();
 $mappingVersion = SymptomMapper::getVersion();
 
 if ($showMapping) {
-    echo "Symptom-to-Nutrient Mapping Table — version {$mappingVersion}\n";
+    echo "Symptom-to-Nutrient Mapping Table â€” version {$mappingVersion}\n";
     echo "Citation: " . ($mappingDoc['citation'] ?? 'n/a') . "\n\n";
     foreach ($mappingDoc['classes'] as $c) {
-        printf("%-14s -> %-22s (priority %s)\n", $c['class_id'], $c['nutrient_name'] ?? '(null — review only)', $c['priority'] ?? '-');
+        printf("%-14s -> %-22s (priority %s)\n", $c['class_id'], $c['nutrient_name'] ?? '(null â€” review only)', $c['priority'] ?? '-');
         echo "  label:     " . ($c['label'] ?? '') . "\n";
         echo "  keywords:  " . implode(', ', $c['keywords'] ?? []) . "\n";
         echo "  rationale: " . ($c['rationale'] ?? '') . "\n\n";
@@ -66,7 +66,7 @@ if ($showMapping) {
 }
 
 if ($showCorpus) {
-    echo "Gold Corpus — version {$corpusVersion} (updated " . ($CORPUS['updated'] ?? 'n/a') . ")\n";
+    echo "Gold Corpus â€” version {$corpusVersion} (updated " . ($CORPUS['updated'] ?? 'n/a') . ")\n";
     echo "Languages: " . implode(', ', $CORPUS['languages'] ?? []) . "\n";
     echo "Notes: " . ($CORPUS['notes'] ?? '') . "\n";
     if (!empty($CORPUS['known_limitations'])) {
@@ -82,7 +82,7 @@ if ($showCorpus) {
     exit(0);
 }
 
-// Class-id → nutrient resolution + gold-set validation
+// Class-id â†’ nutrient resolution + gold-set validation
 $classToNutrient = [];
 foreach ($mappingDoc['classes'] as $c) {
     if ($c['nutrient_name'] !== null) $classToNutrient[$c['class_id']] = $c['nutrient_name'];
@@ -118,7 +118,7 @@ function callGroqLive($message)
         exit(2);
     }
     $data = [
-        'model' => 'llama-3.1-8b-instant',
+        'model' => 'openai/gpt-oss-20b',
         'messages' => [
             ['role' => 'system', 'content' => 'You are a clinical NLP engine. Always respond with valid JSON only. No markdown. No explanation.'],
             ['role' => 'user', 'content' => NutriDeqAI::buildExtractionPrompt($message)],
@@ -161,8 +161,8 @@ $distractor = ['cases' => 0, 'misses' => 0];
 $negatives = ['cases' => 0, 'fp_cases' => 0];
 $langStats = []; // base lang (EN|TL|BIS) => [cases, exact]
 
-echo "NutriDeq NLP Symptom-to-Nutrient Mapping — Gold-Set Evaluation\n";
-echo "Harness v" . HARNESS_VERSION . " | Mapping v" . $mappingVersion . " | Corpus v" . $corpusVersion . " | Mode: " . ($useLive ? "LIVE (Groq llama-3.1-8b-instant)" : "Mock (offline)") . "\n";
+echo "NutriDeq NLP Symptom-to-Nutrient Mapping â€” Gold-Set Evaluation\n";
+echo "Harness v" . HARNESS_VERSION . " | Mapping v" . $mappingVersion . " | Corpus v" . $corpusVersion . " | Mode: " . ($useLive ? "LIVE (Groq openai/gpt-oss-20b)" : "Mock (offline)") . "\n";
 echo "Prompt hash: $promptHash\n";
 $negCount = count(array_filter($GOLD_SET, fn($c) => str_ends_with($c['lang'], '-neg') || str_ends_with($c['lang'], '-distr')));
 echo "Dataset: " . count($GOLD_SET) . " cases (" . (count($GOLD_SET) - $negCount) . " positive, $negCount negative/distractor)\n";
@@ -313,12 +313,12 @@ echo "Taglish slice: " . number_format(($tlCasesCount > 0 ? $tlExact / $tlCasesC
 echo "Negative cases: " . $negatives['fp_cases'] . "/" . $negatives['cases'] . " triggered false mappings (FPR " . number_format($negFpRate * 100, 2) . "%)\n";
 echo "Distractors: " . $distractor['misses'] . "/" . $distractor['cases'] . " missed";
 if (!empty($limitationMisses)) {
-    echo " — of which " . count($limitationMisses) . " are documented negation limitations:";
+    echo " â€” of which " . count($limitationMisses) . " are documented negation limitations:";
     foreach ($limitationMisses as $lm) echo ' "' . substr($lm['message'], 0, 40) . '"';
 }
 echo "\n";
 echo "Target micro-F1: " . (TARGET_F1 * 100) . "%\n";
-echo "Result: " . ($microF1 >= TARGET_F1 ? "PASS" : "BELOW TARGET — review mapping keywords or prompt") . "\n";
+echo "Result: " . ($microF1 >= TARGET_F1 ? "PASS" : "BELOW TARGET â€” review mapping keywords or prompt") . "\n";
 if ($skipped > 0) echo "Skipped cases: $skipped\n";
 
 // --- JSON export -------------------------------------------------------------
@@ -327,7 +327,7 @@ if ($jsonPath !== null) {
         'harness_version' => HARNESS_VERSION,
         'generated_at' => date('c'),
         'mode' => $useLive ? 'live' : 'mock',
-        'model' => $useLive ? 'llama-3.1-8b-instant' : null,
+        'model' => $useLive ? 'openai/gpt-oss-20b' : null,
         'prompt_hash' => $promptHash,
         'mapping' => [
             'version' => $mappingVersion,
@@ -383,7 +383,7 @@ if ($persist) {
             : null;
         $stmt->execute([
             $runUid, HARNESS_VERSION, $corpusVersion, $mappingVersion,
-            $useLive ? 'live' : 'mock', $useLive ? 'llama-3.1-8b-instant' : null, $promptHash,
+            $useLive ? 'live' : 'mock', $useLive ? 'openai/gpt-oss-20b' : null, $promptHash,
             count($GOLD_SET), $evaluated, $skipped,
             $microP, $microR, $microF1, $macro['precision'], $macro['recall'], $macro['f1'],
             $subsetAccuracy, ($tlCasesCount > 0 ? $tlExact / $tlCasesCount : null), $tlMicroF1, $negFpRate,

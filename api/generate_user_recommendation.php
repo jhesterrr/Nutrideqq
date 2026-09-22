@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once dirname(__DIR__) . '/session_bootstrap.php';
 
 header('Content-Type: application/json');
@@ -145,7 +145,7 @@ try {
         </div>";
     } else {
         $apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-        $model = 'llama-3.1-8b-instant';
+        $model = 'openai/gpt-oss-20b';
 
         $prompt = "You are the NutriDeq Clinical Nutrition AI. Generate a professional, highly detailed clinical nutritional recommendation report for a user reviewing their own self-generated wellness recommendation.
 
@@ -169,7 +169,7 @@ Format the response in clean, semantic, modern HTML. Do not output Markdown wrap
 3. <div class='clinical-section'><h3><i class='fas fa-utensils'></i> Suggested FCT Food Strategies</h3>... Specific DOST-FCT food categories highly recommended, and foods to avoid.
 4. <div class='clinical-section'><h3><i class='fas fa-heartbeat'></i> Lifestyle & Meal Timing Guidance</h3>... Actionable dietician tips for Breakfast, Lunch, Snacks, Dinner.
 
-Design looks like a premium clinical glassmorphic card interface. Use clean professional palette. Keep HTML clean and self-contained. Do NOT include NON-THERAPEUTIC NOTICE inside the HTML output — it will be rendered by the UI wrapper.";
+Design looks like a premium clinical glassmorphic card interface. Use clean professional palette. Keep HTML clean and self-contained. Do NOT include NON-THERAPEUTIC NOTICE inside the HTML output â€” it will be rendered by the UI wrapper.";
 
         $data = [
             "model" => $model,

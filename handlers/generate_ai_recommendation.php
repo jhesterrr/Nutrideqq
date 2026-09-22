@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 require_once dirname(__DIR__) . '/session_bootstrap.php';
 
 header('Content-Type: application/json');
@@ -60,7 +60,7 @@ try {
 
     if ($apiKey) {
         $apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-        $model = 'llama-3.1-8b-instant';
+        $model = 'openai/gpt-oss-20b';
 
         $prompt = "You are the NutriDeq Clinical Nutrition AI. Generate a professional, highly detailed, visually striking clinical nutritional recommendation report for a registered dietician to use when creating a custom meal plan for this client.
 
@@ -188,7 +188,7 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
             return "<span class='nutrient-pill'>$n</span>";
         }, $nutrients));
 
-        $bmiText = $bmi ? "{$bmi} kg/m² ({$bmiCategory})" : "Pending Measurement";
+        $bmiText = $bmi ? "{$bmi} kg/mÂ² ({$bmiCategory})" : "Pending Measurement";
         $whrText = $whr ? "{$whr}" : "Pending Measurement";
 
         $aiOutput = "
@@ -249,10 +249,10 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
             <div class='clinical-section'>
                 <h3><i class='fas fa-heartbeat'></i> Lifestyle & Meal Timing Guidance</h3>
                 <div style='font-size: 0.82rem; color: #334155; line-height: 1.6;'>
-                    <p style='margin: 0 0 6px 0;'><b>• Breakfast (7:00 AM - 8:30 AM):</b> High fiber + lean protein to mitigate mid-morning glycemic spikes.</p>
-                    <p style='margin: 0 0 6px 0;'><b>• Lunch (12:00 PM - 1:30 PM):</b> 50% plate vegetable volume, 25% complex whole grains, 25% protein exchange.</p>
-                    <p style='margin: 0 0 6px 0;'><b>• Mid-Afternoon Fuel (3:30 PM - 4:00 PM):</b> Hydration (calamansi water) + low-GI fruit with handful of peanuts.</p>
-                    <p style='margin: 0;'><b>• Dinner (6:30 PM - 7:30 PM):</b> Lighter digestive load at least 2.5 hours before sleep to support metabolic recovery.</p>
+                    <p style='margin: 0 0 6px 0;'><b>â€¢ Breakfast (7:00 AM - 8:30 AM):</b> High fiber + lean protein to mitigate mid-morning glycemic spikes.</p>
+                    <p style='margin: 0 0 6px 0;'><b>â€¢ Lunch (12:00 PM - 1:30 PM):</b> 50% plate vegetable volume, 25% complex whole grains, 25% protein exchange.</p>
+                    <p style='margin: 0 0 6px 0;'><b>â€¢ Mid-Afternoon Fuel (3:30 PM - 4:00 PM):</b> Hydration (calamansi water) + low-GI fruit with handful of peanuts.</p>
+                    <p style='margin: 0;'><b>â€¢ Dinner (6:30 PM - 7:30 PM):</b> Lighter digestive load at least 2.5 hours before sleep to support metabolic recovery.</p>
                 </div>
             </div>
         </div>
