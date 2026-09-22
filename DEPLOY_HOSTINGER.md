@@ -1,24 +1,31 @@
 # Deploying NutriDeq to Hostinger (Shared / Premium / Business)
 
 > **Target:** Hostinger shared-style hosting (hPanel, LiteSpeed web server, MySQL via phpMyAdmin).
-> **App:** the plain-PHP application in `legacy-php/` (no Node build step required).
+> **App layout:** the PHP app lives **at the repo root** (`Nutrideqq-main/`), so the
+> folder structure mirrors `public_html/` exactly: `index.php`, `.htaccess`, `api/`,
+> `vendor/`, `config/`, etc. are all at the top level. No Node build step required.
 
 ## What is already prepared in this repo
 
 | File | Purpose |
 |---|---|
-| `deploy/nutrideq-deploy.zip` (~4.3 MB) | Production package — `legacy-php/` with dev files stripped and `vendor/` included. Unzips **directly into `public_html/`**. |
+| `deploy/nutrideq-deploy.zip` (~4.9 MB) | Production package — repo root with dev folders/files stripped and `vendor/` included. Unzips **directly into `public_html/`**: `index.php` and `.htaccess` land at the top level. |
 | `deploy/nutrideq-dump.sql` (~2 MB) | Full export of your local XAMPP `nutrideq` DB (38 tables, migrations applied, DEFINER clauses stripped, no `CREATE DATABASE`/`USE` lines — imports into any Hostinger DB name). |
-| `deploy/build-package.ps1` | Rebuilds the ZIP from `legacy-php/` at any time. |
-| `legacy-php/.env.example` | Template for server secrets. |
-| `legacy-php/config/env.php` | Loads `legacy-php/.env` into `getenv()`/`$_ENV` on every request (Hostinger can't set machine-level env vars). Real env vars always win, so XAMPP/Render behavior is unchanged. |
-| `legacy-php/.htaccess` | Hardened: blocks web access to `.env`, `config/`, `migrations/`, `dev-tools/`, `api/sessions/`, `*.log`, `*.sql`; PHP overrides (upload size, timezone, display_errors off). |
+| `deploy/build-package.ps1` | Rebuilds the ZIP at any time (auto-excludes dev folders). |
+| `.env.example` | Template for server secrets (repo root). |
+| `config/env.php` | Loads the root `.env` into `getenv()`/`$_ENV` on every request (Hostinger can't set machine-level env vars). Real env vars always win, so XAMPP behavior is unchanged. |
+| `.htaccess` | Hardened: blocks web access to `.env`, `config/`, `migrations/`, `dev-tools/`, `api/sessions/`, `*.log`, `*.sql`; PHP overrides (upload size, timezone, display_errors off). |
+
+> ⚠️ **Do not upload the whole repo folder manually.** The root also contains
+> development-only folders (`.git`, `frontend`, `dev-tools`, `.freebuff`, `.trae`,
+> `.claude`, `.vscode`, `.github`, `everything-claude-code`, `deploy`, `tools`).
+> Always deploy via the ZIP — it already excludes all of them for you.
 
 ---
 
 ## Step 0 — Fill in your secrets (locally, once)
 
-1. Copy `legacy-php/.env.example` to `legacy-php/.env`.
+1. Copy `.env.example` to `.env` (both at the repo root).
 2. You will fill in the **database values in Step 1** (after Hostinger creates them).
 3. Optional now, required later for those features:
    - `GROQ_API_KEY` — AI recommendation endpoints.
@@ -27,7 +34,7 @@
      ```
      C:\xampp\php\php.exe -r "echo bin2hex(random_bytes(32));"
      ```
-4. Keep `legacy-php/.env` **out of git** (already ignored) and out of the ZIP
+4. Keep `.env` **out of git** (already ignored) and out of the ZIP
    (`build-package.ps1` excludes it — it is uploaded separately in Step 5).
 
 ## Step 1 — Create the MySQL database in hPanel
@@ -69,13 +76,15 @@ hPanel → **Websites → Manage → PHP Configuration**:
 2. Delete Hostinger's default placeholder files (e.g. `default.php`) if present.
 3. **Upload** `deploy/nutrideq-deploy.zip`.
 4. Right-click the ZIP → **Extract** → path `/public_html` → confirm **overwrite**.
-5. After extraction you must see `index.php`, `.htaccess`, `vendor/`, `api/`, `css/`… **directly inside `public_html/`** (not inside a subfolder). If they ended up in `public_html/nutrideq-deploy/`, move the contents up one level and delete the empty folder.
+5. After extraction, `public_html/` must contain **at its top level**: `index.php`,
+   `.htaccess`, `api/`, `vendor/`, `css/`, `config/`, `manifest.json` … If they ended
+   up inside a subfolder, move the contents up one level and delete the empty folder.
 
 ## Step 5 — Upload `.env` (secrets)
 
 1. File Manager → `public_html` → enable **"Show hidden files"** (⋮ menu).
 2. **New File** → name it exactly `.env` → paste your filled-in `.env` contents → Save.
-   - Tip: to avoid copy/paste mangling, you can also upload `legacy-php/.env` and rename it to `.env` in place.
+   - Tip: to avoid copy/paste mangling, you can also upload your local `.env` and rename it to `.env` in place.
 3. Confirm it sits at `/public_html/.env` — the same level as `index.php`.
 4. Web access to it is blocked by `.htaccess` (visit `https://yourdomain/.env` — must be **403**).
 
@@ -122,9 +131,8 @@ In Google Cloud Console → **APIs & Services → Credentials → OAuth client**
 1. Make/test changes locally with XAMPP.
 2. Rebuild the package (re-run `composer install` first if `composer.json`/`composer.lock` changed):
    ```powershell
-   Set-Location legacy-php
-   C:\xampp\php\php.exe ..\tools\composer.phar install --no-dev --optimize-autoloader
-   Set-Location ..
+   # from the repo root
+   C:\xampp\php\php.exe tools\composer.phar install --no-dev --optimize-autoloader
    powershell -ExecutionPolicy Bypass -File deploy\build-package.ps1
    ```
 3. Upload the new ZIP → Extract → overwrite (File Manager replaces existing files).
@@ -141,4 +149,23 @@ In Google Cloud Console → **APIs & Services → Credentials → OAuth client**
 - Sessions live under `api/sessions/` (not the shared /tmp) and are blocked from HTTP.
 - Dev tools (`dev-tools/`) are never uploaded by the package builder.
 - Composer audit is clean as of the last build (`google/apiclient`, `guzzle`, `phpseclib` updated to patched releases; unused Google service classes removed — `vendor/` shrank from 132 MB to ~5 MB).
+
+---
+
+# Quick checklist — do these in order
+
+Print this. Each step maps to the detailed sections above.
+
+- [ ] **1. Secrets** — copy `.env.example` → `.env` at the repo root; leave DB fields for now; fill `GROQ_API_KEY` / Google keys / `NUTRIDEQ_ENC_KEY` if you have them.
+- [ ] **2. Create DB** — hPanel → Databases → Management → create DB `nutrideq` + user + password. Write down the **prefixed** names (`uXXXXXXXX_nutrideq`) and password.
+- [ ] **3. Fill DB secrets** — put those three values into your local `.env` (`MYSQLDATABASE`, `MYSQLUSER`, `MYSQLPASSWORD`; host = `localhost`).
+- [ ] **4. Import DB** — phpMyAdmin → select your `uXXXXXXXX_nutrideq` DB on the left → Import → `deploy/nutrideq-dump.sql` → Go. Verify `users` table has rows.
+- [ ] **5. PHP 8.2** — hPanel → PHP Configuration → set 8.2.
+- [ ] **6. Upload app** — File Manager → `public_html/` → delete Hostinger placeholders → upload `deploy/nutrideq-deploy.zip` → Extract to `/public_html` → overwrite.
+- [ ] **7. Verify structure** — `index.php`, `.htaccess`, `vendor/`, `api/` are at the TOP of `public_html/` (not in a subfolder).
+- [ ] **8. Upload secrets** — File Manager → new file `.env` in `public_html/` → paste your `.env` contents → save (show hidden files must be on).
+- [ ] **9. SSL** — hPanel → SSL → install cert + **Force HTTPS**.
+- [ ] **10. Google OAuth** (optional) — add `https://YOURDOMAIN.com/login-logout/google-callback.php` as an Authorized redirect URI in Google Cloud Console.
+- [ ] **11. Smoke test** — open the site, log in, check dashboard widgets; confirm `https://yourdomain/.env` returns **403**.
+- [ ] **12. (Optional) push** — `git push origin main` after verifying everything works.
 
