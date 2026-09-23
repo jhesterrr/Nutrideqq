@@ -1,12 +1,12 @@
 // service-worker.js
-// NutriDeq PWA Engine v3 - Offline Resilience & Dynamic Caching
-const CACHE_NAME = 'nutrideq-v3';
+// NutriDeq PWA Engine v4 - Offline Resilience & Dynamic Caching
+const CACHE_NAME = 'nutrideq-v4';
 const STATIC_ASSETS = [
     '/css/base.css',
     '/css/dashboard.css',
     '/css/user-premium.css',
     '/css/landing-premium.css',
-    '/scripts/landing-animations.js',
+    '/assets/js/landing-animations.js',
     '/scripts/interactive-effects.js',
     '/scripts/particle-engine.js',
     '/assets/img/logo.png',
@@ -14,14 +14,23 @@ const STATIC_ASSETS = [
     '/offline.html'
 ];
 
-// 1. Install Event - Cache static assets only
+// 1. Install Event - Cache static assets.
+// Each URL is cached individually and failures are tolerated: one missing
+// file can never abort the install and take the whole offline shell down.
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            console.log('NutriDeq - Static Assets & Fallback Primed');
-            return cache.addAll(STATIC_ASSETS);
-        })
+        caches.open(CACHE_NAME).then(cache =>
+            Promise.allSettled(
+                STATIC_ASSETS.map(url => cache.add(new Request(url, { cache: 'reload' })))
+            ).then(results => {
+                results.forEach((r, i) => {
+                    if (r.status === 'rejected') console.warn('NutriDeq SW: precache skipped', STATIC_ASSETS[i]);
+                });
+                console.log('NutriDeq - Static Assets & Fallback Primed');
+            })
+        )
     );
+    self.skipWaiting();
 });
 
 // 2. Fetch Event - Network-First for dynamic PHP, Cache-First for static
