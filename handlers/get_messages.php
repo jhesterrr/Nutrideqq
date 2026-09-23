@@ -180,6 +180,30 @@ try {
             $update = $pdo->prepare("UPDATE wellness_messages SET read_at = NOW(), is_read = 1 WHERE conversation_id = ? AND sender_type != ? AND (read_at IS NULL OR is_read = 0)");
             $update->execute([$conv_id, $my_type_db]);
         }
+
+        // 6. Live Wellness Insights — the card mirrors the client's CURRENT
+        //    state (active symptoms only), so both the client and the
+        //    dietitian see updates every poll without a page reload.
+        $insights = null;
+        try {
+            require_once dirname(__DIR__) . '/includes/SymptomLifecycle.php';
+            require_once dirname(__DIR__) . '/includes/ai_symptom_kb.php';
+            // Resolve the client's users.id: staff/admin get it from the
+            // clients row, client view is always the logged-in user.
+            if ($user_role === 'client' || $user_role === 'regular') {
+                $client_user_id = $user_id;
+            } else {
+                $stmtU = $pdo->prepare("SELECT user_id FROM clients WHERE id = ? LIMIT 1");
+                $stmtU->execute([$client_id]);
+                $client_user_id = $stmtU->fetchColumn();
+            }
+            if ($client_user_id) {
+                require_once __DIR__ . '/insights_payload.php';
+                $insights = nd_build_insights_payload($pdo, (int)$client_user_id);
+            }
+        } catch (Throwable $insEx) {
+            error_log('Live insights skipped: ' . $insEx->getMessage());
+        }
     }
 
     // Fallback: if no messages but we have a valid client, return sample conversation data
@@ -257,7 +281,7 @@ try {
         $messages = $sample_messages;
     }
 
-    echo json_encode(['success' => true, 'messages' => $messages]);
+    echo json_encode(['success' => true, 'messages' => $messages, 'insights' => $insights]);
     exit;
 
 } catch (Throwable $e) {

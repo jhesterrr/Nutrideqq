@@ -428,7 +428,8 @@ if (isset($user_id)) {
 
             <?php if ($selected_staff_id): ?>
                 <script>const BASE_URL = '';</script>
-                <script src="scripts/chat-controller.js?v=102"></script>
+                <script src="scripts/wellness-insights.js?v=100"></script>
+                <script src="scripts/chat-controller.js?v=103"></script>
                 <script>
                     (function() {
                         const initChat = () => {

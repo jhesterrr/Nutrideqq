@@ -149,17 +149,42 @@ try {
     }
 
     // --- 5. NLP AI Integration (Passive Monitoring - Non-blocking) ---
+    $nlp_result = null;
     if ($sender_type === 'client' && !empty($message_text)) {
         try {
             if (file_exists('../api/ai_service.php')) {
                 require_once '../api/ai_service.php';
                 if (class_exists('NutriDeqAI')) {
                     $ai = new NutriDeqAI();
-                    $ai->analyzeMessage($user_id, $new_msg_id, $message_text);
+                    $nlp_result = $ai->analyzeMessage($user_id, $new_msg_id, $message_text);
                 }
             }
         } catch (Throwable $aiEx) {
             error_log("NutriDeq AI passive analysis skipped: " . $aiEx->getMessage());
+        }
+
+        // --- 5b. Symptom lifecycle (real-time resolution) ---
+        // The Wellness Insights card must mirror what the client is saying
+        // RIGHT NOW: new symptoms were just detected above; messages like
+        // "my fatigue is gone" / "hindi na ako pagod" resolve open ones.
+        try {
+            require_once '../includes/SymptomLifecycle.php';
+            SymptomLifecycle::process($user_id, (int)$new_msg_id, $message_text);
+        } catch (Throwable $lifeEx) {
+            error_log("SymptomLifecycle skipped: " . $lifeEx->getMessage());
+        }
+    }
+
+    // --- 5c. Live insights payload for the Wellness Insights card ---
+    $live_insights = null;
+    if ($sender_type === 'client') {
+        try {
+            require_once '../includes/SymptomLifecycle.php';
+            require_once '../includes/ai_symptom_kb.php';
+            require_once __DIR__ . '/insights_payload.php';
+            $live_insights = nd_build_insights_payload($pdo, (int)$user_id);
+        } catch (Throwable $insEx) {
+            error_log("Live insights payload skipped: " . $insEx->getMessage());
         }
     }
 
@@ -184,7 +209,12 @@ try {
             'reply_to_id' => $reply_to_id,
             'reply_message' => $reply_message,
             'reply_sender_name' => $reply_sender_name
-        ]
+        ],
+        'insights' => $live_insights,
+        'nlp' => is_array($nlp_result) ? [
+            'sentiment_score' => (int)($nlp_result['sentiment_score'] ?? 0),
+            'symptoms' => array_values($nlp_result['symptoms'] ?? [])
+        ] : null
     ]);
 
 } catch (Throwable $e) {

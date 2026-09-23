@@ -55,12 +55,15 @@ Client Message: \"$text\"";
         $data = [
             "model"    => $this->model,
             "messages" => [
-                ["role" => "system", "content" => "You are a clinical NLP engine. Always respond with valid JSON only. No markdown. No explanation."],
+                ["role" => "system", "content" => "You are a clinical NLP engine. Always respond with valid JSON only. No markdown. No explanation. Do not output your reasoning."],
                 ["role" => "user",   "content" => $prompt]
             ],
-            "temperature"     => 0.1,
-            "max_tokens"      => 256,
-            "response_format" => ["type" => "json_object"]
+            "temperature" => 0.1,
+            // Reasoning models (gpt-oss-*) spend tokens thinking before the
+            // JSON; 256 truncated them mid-reasoning and Groq's strict
+            // json_object mode then rejected the empty generation. The
+            // prompt already demands raw JSON — we parse defensively below.
+            "max_tokens"  => 1024
         ];
 
         $ch = curl_init($this->apiUrl);
@@ -90,7 +93,15 @@ Client Message: \"$text\"";
             if ($aiOutput) {
                 $result = json_decode($aiOutput, true);
 
-                if ($result) {
+                // Defensive: reasoning models may wrap the JSON in prose or
+                // reasoning fences — extract the first {...} block if needed.
+                if (!is_array($result)) {
+                    if (preg_match('/\{.*\}/s', $aiOutput, $m)) {
+                        $result = json_decode($m[0], true);
+                    }
+                }
+
+                if (is_array($result)) {
                     $score = intval($result['sentiment_score'] ?? 1);
                     $flag  = ($result['burnout_flag'] ?? false) ? 1 : 0;
                     $symptoms = $result['symptoms'] ?? [];

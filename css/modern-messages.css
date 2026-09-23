@@ -3544,3 +3544,19 @@ textarea:focus {
     .ci-arrow-divider { padding-left: 36px; padding-block: 0; }
     .ci-arrow-divider i { font-size: 0.55rem; opacity: 0.7; }
 }
+
+/* Live-update cue: brief pulse on the count badge when the symptom set
+   changes in real time (new detection or resolution). */
+.ci-badge-updated {
+    animation: ciBadgePulse 1.2s ease-out 1;
+}
+
+@keyframes ciBadgePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+    70%  { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ci-badge-updated { animation: none; }
+}

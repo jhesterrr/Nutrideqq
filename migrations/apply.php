@@ -26,6 +26,15 @@ $GUARDS = [
         } catch (Exception $e) { /* run it */ }
         return null;
     },
+    '004_symptom_lifecycle.sql' => function ($pdo) {
+        try {
+            $col = $pdo->query("SHOW COLUMNS FROM ai_extracted_symptoms LIKE 'status'")->fetchColumn();
+            if ($col !== false) {
+                return 'ai_extracted_symptoms already has lifecycle columns';
+            }
+        } catch (Exception $e) { /* run it */ }
+        return null;
+    },
 ];
 
 $migration = $argv[1] ?? '002_nutrient_standards.sql';

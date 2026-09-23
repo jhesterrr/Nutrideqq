@@ -159,6 +159,19 @@ class ChatController {
         this.pollingTimeout = setTimeout(() => this.poll(), 3000);
     }
 
+    // ── Wellness Insights: live update ──
+    // The card must mirror what the client is saying RIGHT NOW: new symptoms
+    // detected by the NLP engine appear, resolved ones ("my fatigue is gone")
+    // disappear — on BOTH the client and dietitian views, without a reload.
+    applyInsights(insights) {
+        if (!insights || typeof window.ndRenderWellnessInsights !== 'function') return;
+        try {
+            window.ndRenderWellnessInsights(insights);
+        } catch (e) {
+            console.error('Wellness insights render failed:', e);
+        }
+    }
+
     async fetchMessages() {
         if (!this.contactId) return;
         try {
@@ -184,6 +197,9 @@ class ChatController {
             }
 
             if (data.success) {
+                // Insights can change any time the client sends a message —
+                // update on every poll for complete real-time accuracy.
+                if (data.insights) this.applyInsights(data.insights);
                 if (!data.messages || data.messages.length === 0) {
                     if (this.chatMessages && this.chatMessages.querySelectorAll('.message-wrapper').length === 0) {
                         this.chatMessages.innerHTML = `
@@ -419,6 +435,9 @@ class ChatController {
                 if (emptyNotice) emptyNotice.remove();
                 this.renderMessages([data.message]);
                 this.scrollToBottom(true);
+                // Server analyzed this message: refresh the insights card
+                // immediately from the authoritative response payload.
+                if (data.insights) this.applyInsights(data.insights);
             } else {
                 alert("Failed to send: " + (data.error || "Unknown server error"));
             }

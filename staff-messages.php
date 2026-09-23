@@ -480,7 +480,8 @@ if ($selected_client) {
             </div>
 
             <?php if ($selected_client_id): ?>
-                <script src="scripts/chat-controller.js?v=102"></script>
+                <script src="scripts/wellness-insights.js?v=100"></script>
+                <script src="scripts/chat-controller.js?v=103"></script>
                 <script>
                     (function() {
                         const initChat = () => {
