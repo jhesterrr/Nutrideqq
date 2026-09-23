@@ -1,0 +1,5 @@
+/* css/desktop-style.css — intentional placeholder.
+   Several pages load this file with media="all and (min-width: 1025px)" but
+   no desktop-only overrides currently ship in it. Kept so those references
+   resolve (no 404 in the console). Add desktop-only enhancements here, or
+   remove the <link> from the pages if this file stays empty. */

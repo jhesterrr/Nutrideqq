@@ -4,6 +4,7 @@ require_once dirname(__DIR__) . '/session_bootstrap.php';
 header('Content-Type: application/json');
 
 require_once '../database.php';
+require_once dirname(__DIR__) . '/includes/ClinicalReportSanitizer.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
@@ -57,6 +58,7 @@ try {
     }
 
     $aiOutput = null;
+    $reportSource = 'fallback';
 
     if ($apiKey) {
         $apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
@@ -77,22 +79,27 @@ Client Information:
 - Goals: $goals
 - Dietician Notes: $notes
 
-Format the response in clean, semantic, modern HTML. Do not output any Markdown tags like ```html ... ``` or conversational greetings/closing remarks. Output ONLY the raw HTML string containing these sections wrapped in a cohesive layout:
-1. <div class='clinical-section'><h3><i class='fas fa-chart-line'></i> Clinical Assessment</h3>...
-   Calculate the BMI and waist-to-hip ratio if height/weight/waist/hip are available, and give clinical interpretation of metabolic risk.
-2. <div class='clinical-section'><h3><i class='fas fa-clipboard-list'></i> Critical Nutrient Targets</h3>...
-   State exactly what nutrients the user needs based on their health conditions, goals, and restrictions. Highlight them in beautiful pill badges (e.g., <span class='nutrient-pill'>Vitamin C</span>).
-3. <div class='clinical-section'><h3><i class='fas fa-utensils'></i> Suggested FCT Food Strategies</h3>...
-   Specific official DOST-FCT food categories (Vegetables, Fruits, Grains, Lean Proteins, Fats) that are highly recommended, and foods to avoid.
-4. <div class='clinical-section'><h3><i class='fas fa-heartbeat'></i> Lifestyle & Meal Timing Guidance</h3>...
-   Actionable dietician tips on structuring breakfast, lunch, snacks, and dinner for optimal metabolic rate and recovery.
+Format the response as ONE self-contained HTML fragment and NOTHING else.
 
-Ensure the design looks like a premium, clinical, glassmorphic card interface, using sleek semantic wrappers, strong bold indicators, and a clean professional palette. Keep the HTML clean and self-contained.";
+STRICT OUTPUT RULES (the host page already provides all styling; breaking any rule makes the report unreadable):
+1. Start with <div class='clinical-report-wrap'> and end with a single closing div tag.
+2. Use ONLY these host CSS classes: clinical-report-wrap, clinical-section, clinical-stat-row, stat-box, label, value (optionally value is-good / is-info / is-watch / is-high for risk coding), clinical-note, clinical-muted, clinical-body, clinical-split, clinical-panel (optionally is-prioritize / is-restrict), clinical-panel-title, clinical-list, nutrient-pill-container, nutrient-pill.
+3. NEVER output <html>, <head>, <body>, <style>, <script>, <link>, <meta>, markdown code fences, HTML comments or any text outside the fragment.
+4. NEVER use inline style attributes, colors, backgrounds, opacity, shadows or fixed/sticky positioning. A light theme (dark text on white cards) is applied automatically by the host.
+5. Icons must be Font Awesome only: <i class='fas fa-...'></i>. Use semantic tags for structure: <h3>, <h4>, <p>, <ul>, <li>, <strong>, <table>.
+
+Required sections (each wrapped in <div class='clinical-section'>):
+1. <h3><i class='fas fa-chart-line'></i> Clinical Assessment</h3> - calculate BMI and waist-to-hip ratio when height/weight/waist/hip are available and interpret the metabolic risk.
+2. <h3><i class='fas fa-clipboard-list'></i> Critical Nutrient Targets</h3> - the exact nutrients needed for the stated health conditions, goals and restrictions, rendered as <span class='nutrient-pill'>Vitamin C</span> badges inside a <div class='nutrient-pill-container'>.
+3. <h3><i class='fas fa-utensils'></i> Suggested FCT Food Strategies</h3> - specific DOST-FCT food categories (Vegetables, Fruits, Grains, Lean Proteins, Fats) that are recommended, plus foods to avoid.
+4. <h3><i class='fas fa-heartbeat'></i> Lifestyle & Meal Timing Guidance</h3> - actionable dietician tips on structuring breakfast, lunch, snacks and dinner for optimal metabolic rate and recovery.
+
+Keep the report concise, clinical and actionable.";
 
         $data = [
             "model" => $model,
             "messages" => [
-                ["role" => "system", "content" => "You are a clinical NLP engine. Always respond with raw semantic HTML only. No Markdown wrapper. No explanation outside the HTML."],
+                ["role" => "system", "content" => "You are a clinical NLP engine. Respond with exactly one HTML fragment using only the host CSS classes listed in the user prompt. Never emit <style>, <script>, markdown fences, inline colors or any text outside the fragment."],
                 ["role" => "user", "content" => $prompt]
             ],
             "temperature" => 0.2,
@@ -119,9 +126,14 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
         if ($httpCode === 200 && $response) {
             $responseData = json_decode($response, true);
             $rawOutput = $responseData['choices'][0]['message']['content'] ?? '';
-            $rawOutput = preg_replace('/^```html\s*/i', '', $rawOutput);
-            $rawOutput = preg_replace('/```$/', '', $rawOutput);
-            $aiOutput = trim($rawOutput);
+            // Flatten the model output: no document chrome, no <style>/<script>,
+            // no unreadable inline colors. Returns '' when nothing usable remains.
+            $aiOutput = ClinicalReportSanitizer::sanitize($rawOutput);
+            if ($aiOutput !== '') {
+                $reportSource = 'ai';
+            } else {
+                $aiOutput = null;
+            }
         }
     }
 
@@ -136,21 +148,23 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
         $bmi = ($h > 0 && $w > 0) ? round($w / (($h / 100) ** 2), 1) : null;
         $whr = ($wc > 0 && $hc > 0) ? round($wc / $hc, 2) : null;
 
+        // Risk coding is expressed with host CSS classes (not inline colors) so it
+        // survives the report sanitizer, which strips inline color/background.
         $bmiCategory = 'Normal';
-        $bmiColor = '#10b981';
+        $bmiClass = 'is-good';
         $bmiRisk = 'Optimal metabolic baseline. Maintain current lean tissue equilibrium.';
         if ($bmi) {
             if ($bmi < 18.5) {
                 $bmiCategory = 'Underweight';
-                $bmiColor = '#3b82f6';
+                $bmiClass = 'is-info';
                 $bmiRisk = 'Risk of nutritional depletion and compromised lean muscle mass.';
             } elseif ($bmi >= 23 && $bmi < 25) { // WHO Asian criteria
                 $bmiCategory = 'Overweight (Pre-Obese)';
-                $bmiColor = '#f59e0b';
+                $bmiClass = 'is-watch';
                 $bmiRisk = 'Elevated visceral adipose risk. Asian cutoffs indicate mild insulin sensitivity concern.';
             } elseif ($bmi >= 25) {
                 $bmiCategory = 'Obese';
-                $bmiColor = '#ef4444';
+                $bmiClass = 'is-high';
                 $bmiRisk = 'Significant cardiovascular and metabolic syndrome risk profile requiring targeted dietary deficit.';
             }
         }
@@ -188,7 +202,7 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
             return "<span class='nutrient-pill'>$n</span>";
         }, $nutrients));
 
-        $bmiText = $bmi ? "{$bmi} kg/mÂ² ({$bmiCategory})" : "Pending Measurement";
+        $bmiText = $bmi ? "{$bmi} kg/m² ({$bmiCategory})" : "Pending Measurement";
         $whrText = $whr ? "{$whr}" : "Pending Measurement";
 
         $aiOutput = "
@@ -198,7 +212,7 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
                 <div class='clinical-stat-row'>
                     <div class='stat-box'>
                         <div class='label'>Calculated BMI</div>
-                        <div class='value' style='color: {$bmiColor};'>{$bmiText}</div>
+                        <div class='value {$bmiClass}'>{$bmiText}</div>
                     </div>
                     <div class='stat-box'>
                         <div class='label'>Waist-to-Hip Ratio</div>
@@ -206,17 +220,17 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
                     </div>
                     <div class='stat-box'>
                         <div class='label'>Target Caloric Baseline</div>
-                        <div class='value' style='color: #059669;'>{$tdee} kcal/day</div>
+                        <div class='value is-info'>{$tdee} kcal/day</div>
                     </div>
                 </div>
-                <p style='margin-top: 10px; font-size: 0.85rem; color: #475569;'>
+                <p class='clinical-note'>
                     <b>Clinical Interpretation:</b> {$bmiRisk} Client goals focused on <em>{$goals}</em> with restrictions noted: <em>{$restrictions}</em>.
                 </p>
             </div>
 
             <div class='clinical-section'>
                 <h3><i class='fas fa-clipboard-list'></i> Critical Nutrient Targets</h3>
-                <p style='font-size: 0.82rem; color: #64748b; margin-bottom: 10px;'>Recommended micronutrient targets prioritized to address biomarker profile:</p>
+                <p class='clinical-muted'>Recommended micronutrient targets prioritized to address biomarker profile:</p>
                 <div class='nutrient-pill-container'>
                     {$nutrientPills}
                 </div>
@@ -224,19 +238,19 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
 
             <div class='clinical-section'>
                 <h3><i class='fas fa-utensils'></i> Suggested DOST-FCT Food Strategies</h3>
-                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 12px;'>
-                    <div style='background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px;'>
-                        <div style='font-weight: 700; color: #166534; font-size: 0.85rem; margin-bottom: 6px;'><i class='fas fa-check-circle'></i> Prioritize (DOST-FCT)</div>
-                        <ul style='margin: 0; padding-left: 18px; font-size: 0.8rem; color: #1e293b; line-height: 1.6;'>
+                <div class='clinical-split'>
+                    <div class='clinical-panel is-prioritize'>
+                        <div class='clinical-panel-title'><i class='fas fa-check-circle'></i> Prioritize (DOST-FCT)</div>
+                        <ul class='clinical-list'>
                             <li><b>Vegetables:</b> Malunggay (leaves), Kangkong, Saluyot, Talbos ng Kamote</li>
                             <li><b>Lean Proteins:</b> Bangus (milkfish), Galunggong, Tokwa (tofu), Skinless Chicken Breast</li>
                             <li><b>Fruits:</b> Papaya, Banana (Latundan/Saba), Calamansi, Guava</li>
                             <li><b>Complex CHO:</b> Brown Rice, Mais grits, Oats, Root crops</li>
                         </ul>
                     </div>
-                    <div style='background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 12px;'>
-                        <div style='font-weight: 700; color: #991b1b; font-size: 0.85rem; margin-bottom: 6px;'><i class='fas fa-ban'></i> Restrict / Moderate</div>
-                        <ul style='margin: 0; padding-left: 18px; font-size: 0.8rem; color: #1e293b; line-height: 1.6;'>
+                    <div class='clinical-panel is-restrict'>
+                        <div class='clinical-panel-title'><i class='fas fa-ban'></i> Restrict / Moderate</div>
+                        <ul class='clinical-list'>
                             <li>Ultra-processed canned goods with excessive sodium nitrites</li>
                             <li>Deep-fried saturated oils and trans-fat street foods</li>
                             <li>Refined sugar sweetened beverages and condensed dairy drinks</li>
@@ -248,11 +262,11 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
 
             <div class='clinical-section'>
                 <h3><i class='fas fa-heartbeat'></i> Lifestyle & Meal Timing Guidance</h3>
-                <div style='font-size: 0.82rem; color: #334155; line-height: 1.6;'>
-                    <p style='margin: 0 0 6px 0;'><b>â€¢ Breakfast (7:00 AM - 8:30 AM):</b> High fiber + lean protein to mitigate mid-morning glycemic spikes.</p>
-                    <p style='margin: 0 0 6px 0;'><b>â€¢ Lunch (12:00 PM - 1:30 PM):</b> 50% plate vegetable volume, 25% complex whole grains, 25% protein exchange.</p>
-                    <p style='margin: 0 0 6px 0;'><b>â€¢ Mid-Afternoon Fuel (3:30 PM - 4:00 PM):</b> Hydration (calamansi water) + low-GI fruit with handful of peanuts.</p>
-                    <p style='margin: 0;'><b>â€¢ Dinner (6:30 PM - 7:30 PM):</b> Lighter digestive load at least 2.5 hours before sleep to support metabolic recovery.</p>
+                <div class='clinical-body'>
+                    <p><b>• Breakfast (7:00 AM - 8:30 AM):</b> High fiber + lean protein to mitigate mid-morning glycemic spikes.</p>
+                    <p><b>• Lunch (12:00 PM - 1:30 PM):</b> 50% plate vegetable volume, 25% complex whole grains, 25% protein exchange.</p>
+                    <p><b>• Mid-Afternoon Fuel (3:30 PM - 4:00 PM):</b> Hydration (calamansi water) + low-GI fruit with handful of peanuts.</p>
+                    <p><b>• Dinner (6:30 PM - 7:30 PM):</b> Lighter digestive load at least 2.5 hours before sleep to support metabolic recovery.</p>
                 </div>
             </div>
         </div>
@@ -261,7 +275,8 @@ Ensure the design looks like a premium, clinical, glassmorphic card interface, u
 
     echo json_encode([
         'success' => true,
-        'recommendation' => $aiOutput
+        'recommendation' => $aiOutput,
+        'source' => $reportSource
     ]);
 
 } catch (Exception $e) {

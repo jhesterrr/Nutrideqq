@@ -33,6 +33,8 @@ uploads/reports/
 # Local agent/workspace artifacts (never deploy)
 .freebuff/
 .trae/
+.claude/
+.agent/
 
 # Temp verification scripts (_prefix convention)
 _*.php

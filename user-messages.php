@@ -123,7 +123,7 @@ if (isset($user_id)) {
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/modern-messages.css?v=110">
+    <link rel="stylesheet" href="css/modern-messages.css?v=112">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <!-- Platform Specific Styles -->

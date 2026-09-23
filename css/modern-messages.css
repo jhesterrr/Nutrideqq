@@ -3007,11 +3007,14 @@ textarea:focus {
         line-height: 1.5 !important;
     }
 
-    /* Chat Container Mobile */
+    /* Chat Container Mobile — must be 100% of the wrapper, NOT 100dvh:
+       the wrapper is calc(100dvh - 72px) with overflow:hidden, so a 100dvh
+       container overflows by the header height and clips the input pill
+       completely out of view (bug: mobile input pill invisible). */
     .msg-container {
         border-radius: 0 !important;
-        height: 100dvh !important;
-        max-height: 100dvh !important;
+        height: 100% !important;
+        max-height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
     }
@@ -3446,4 +3449,98 @@ textarea:focus {
     .header-email {
         max-width: 200px !important;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Wellness Insights — premium elevation (matches NutriDeq AI card)
+   Keeps the violet user-accent theme; adds depth, glass and gloss.
+   ═══════════════════════════════════════════════════════════════ */
+.clinical-indicators-card {
+    background:
+        radial-gradient(120% 90% at 100% 0%, rgba(139, 92, 246, 0.06) 0%, rgba(139, 92, 246, 0) 55%),
+        linear-gradient(180deg, #ffffff 0%, #fdfcff 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 20px;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 12px 32px -12px rgba(15, 23, 42, 0.08);
+}
+
+.clinical-indicators-card::before {
+    height: 2.5px;
+    background: linear-gradient(90deg, #3B82F6 0%, #8B5CF6 55%, #10B981 100%);
+}
+
+.ci-user-header .ci-icon-badge {
+    width: 44px;
+    height: 44px;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 14px;
+    box-shadow:
+        0 8px 18px -6px rgba(99, 102, 241, 0.45),
+        inset 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+}
+
+.ci-title-text h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+}
+
+.ci-title-text p { letter-spacing: 0.01em; }
+
+.ci-user-badge {
+    border-radius: 999px !important;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%) !important;
+    box-shadow:
+        0 6px 14px -4px rgba(99, 102, 241, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.ci-count-num { font-family: 'Outfit', sans-serif; }
+
+.ci-user-toggle {
+    border-radius: 999px !important;
+}
+
+.ci-indicator-card {
+    background: linear-gradient(180deg, #ffffff 0%, #faf9ff 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.ci-indicator-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.3);
+    box-shadow: 0 10px 22px -10px rgba(99, 102, 241, 0.22);
+}
+
+.ci-nutrient-tag {
+    border-radius: 999px;
+}
+
+.ci-user-summary .ci-summary-text i {
+    animation: ciSummaryGlow 2.6s ease-out infinite;
+}
+
+@keyframes ciSummaryGlow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ci-user-summary .ci-summary-text i { animation: none; }
+    .ci-indicator-card,
+    .ci-indicator-card:hover { transform: none; }
+}
+
+/* Narrow widths: symptom → arrow → nutrients flows vertically; tighten it
+   so the arrow hugs the symptom row instead of floating alone. */
+@media (max-width: 639px) {
+    .ci-arrow-divider { padding-left: 36px; padding-block: 0; }
+    .ci-arrow-divider i { font-size: 0.55rem; opacity: 0.7; }
 }

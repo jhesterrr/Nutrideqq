@@ -164,7 +164,7 @@ if ($selected_client) {
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/modern-messages.css?v=110">
+    <link rel="stylesheet" href="css/modern-messages.css?v=112">
     <link rel="stylesheet" href="css/premium-revamp.css">
     <script src="scripts/csrf-fetch.js"></script>
 </head>

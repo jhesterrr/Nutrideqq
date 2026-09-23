@@ -970,5 +970,946 @@
     gap: 5px;
 }
 
+/* ── Rules-engine report primitives ──
+   Class-based (never inline colors) because the report sanitizer strips inline
+   color/background declarations, which would silently erase the risk coding. */
+.clinical-stat-row .stat-box .value.is-good { color: #059669; }
+.clinical-stat-row .stat-box .value.is-info { color: #2563eb; }
+.clinical-stat-row .stat-box .value.is-watch { color: #d97706; }
+.clinical-stat-row .stat-box .value.is-high { color: #dc2626; }
 
+/* The .ai-report-container variants win on specificity (0,2,1) over the later
+   `.ai-report-container :where(p)` default, which is only 0,1,0. */
+.clinical-note,
+.ai-report-container p.clinical-note {
+    margin: 10px 0 0;
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.clinical-muted,
+.ai-report-container p.clinical-muted {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.clinical-body {
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.clinical-body p { margin: 0 0 6px; }
+.clinical-body p:last-child { margin-bottom: 0; }
+
+.clinical-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.clinical-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.clinical-panel.is-prioritize { background: #f0fdf4; border-color: #bbf7d0; }
+.clinical-panel.is-restrict { background: #fef2f2; border-color: #fecaca; }
+
+.clinical-panel-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.clinical-panel.is-prioritize .clinical-panel-title { color: #166534; }
+.clinical-panel.is-restrict .clinical-panel-title { color: #991b1b; }
+
+.clinical-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.8rem;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.clinical-list li { margin-bottom: 4px; }
+.clinical-list li:last-child { margin-bottom: 0; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   ══ CLINICAL NLP INSIGHTS — GENERATION STATES & REPORT SHELL ══
+   The streamed guidance is plain semantic HTML; every rule below
+   keeps it dark-on-light and readable no matter what the model
+   returns (see includes/ClinicalReportSanitizer.php).
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Generate button ──
+   Centered pill: jewel icon tile · label · chevron.
+   Hover = gentle lift + halo; busy = gradient drift + spinner.
+   Every motion here is decorative and removed under
+   prefers-reduced-motion (see the block after the keyframes). */
+.ai-generate-btn {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 22px;
+    border: 1.5px solid rgba(255, 255, 255, 0.36);
+    border-radius: 999px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: 0 4px 16px -6px rgba(5, 150, 105, 0.44);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+/* Leading icon tile */
+.ai-generate-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    font-size: 0.95rem;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    transition: background 0.22s ease, transform 0.22s ease;
+}
+
+/* Central label */
+.ai-generate-btn__label { white-space: nowrap; }
+
+/* Trailing chevron chip */
+.ai-generate-btn__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 0.62rem;
+    color: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.08);
+    transition: transform 0.26s ease, color 0.26s ease, background 0.26s ease;
+}
+
+/* Hover */
+.ai-generate-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.52);
+    box-shadow: 0 8px 22px -6px rgba(5, 150, 105, 0.54);
+}
+
+.ai-generate-btn:hover .ai-generate-btn__icon {
+    background: rgba(255, 255, 255, 0.22);
+    transform: scale(1.05);
+}
+
+.ai-generate-btn:hover .ai-generate-btn__chevron {
+    transform: translateX(3px);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Press */
+.ai-generate-btn:active { transform: translateY(0); }
+
+/* Focus */
+.ai-generate-btn:focus-visible {
+    outline: 3px solid rgba(16, 185, 129, 0.46);
+    outline-offset: 3px;
+}
+
+/* Busy state: the gradient keeps drifting so the pill reads as "working"
+   even before the report container swaps to its skeleton. */
+.ai-generate-btn:disabled { cursor: progress; }
+
+.ai-generate-btn.is-loading,
+.ai-generate-btn:disabled {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.46);
+    background: linear-gradient(135deg, #047857 0%, #10b981 48%, #059669 100%);
+    background-size: 220% 220%;
+    animation: nlpBtnFlow 2.8s ease-in-out infinite alternate;
+    box-shadow: 0 6px 18px -6px rgba(5, 150, 105, 0.46);
+}
+
+.ai-generate-btn:disabled:hover .ai-generate-btn__icon { transform: none; }
+.ai-generate-btn:disabled .ai-generate-btn__chevron { display: none; }
+
+/* ── Report shell ── */
+.nlp-report {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: nlpFadeUp 0.45s ease both;
+}
+
+.nlp-report-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 14px 16px;
+}
+
+.nlp-report-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(16, 185, 129, 0.3);
+}
+
+.nlp-report-heading { flex: 1; min-width: 0; }
+
+.nlp-report-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #065f46;
+    line-height: 1.25;
+}
+
+.nlp-report-sub {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #047857;
+    margin-top: 2px;
+}
+
+.nlp-report-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.nlp-report-badge.is-ai {
+    background: #10b981;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.nlp-report-badge.is-rules {
+    background: #ffffff;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+/* ── Non-therapeutic notice ── */
+.nlp-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 0.74rem;
+    line-height: 1.55;
+    color: #92400e;
+}
+
+.nlp-notice i {
+    color: #d97706;
+    font-size: 0.9rem;
+    margin-top: 2px;
+}
+
+.nlp-notice b { color: #78350f; }
+
+/* ── Report body: readable defaults for arbitrary AI markup ── */
+.ai-report-container {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.84rem;
+    line-height: 1.65;
+    color: #1e293b;
+    background: transparent;
+    overflow-wrap: break-word;
+}
+
+.ai-report-container :where(h1, h2, h3, h4, h5, h6) {
+    font-family: 'Outfit', sans-serif;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+.ai-report-container :where(h1, h2) { font-size: 1.1rem; font-weight: 800; margin: 2px 0 10px; }
+.ai-report-container :where(h4) { font-size: 0.88rem; font-weight: 700; margin: 12px 0 6px; }
+
+.ai-report-container :where(h5, h6) {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 10px 0 5px;
+    color: #334155;
+}
+
+.ai-report-container :where(p) {
+    margin: 0 0 9px;
+    color: #334155;
+}
+
+.ai-report-container :where(ul, ol) {
+    margin: 6px 0 10px;
+    padding-left: 20px;
+}
+
+.ai-report-container :where(li) {
+    margin-bottom: 5px;
+    color: #334155;
+}
+
+.ai-report-container :where(strong, b) { color: #0f172a; font-weight: 700; }
+.ai-report-container :where(em) { color: #1e293b; }
+
+.ai-report-container :where(a) {
+    color: #059669;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.ai-report-container :where(hr) {
+    border: none;
+    border-top: 1px dashed #e2e8f0;
+    margin: 12px 0;
+}
+
+.ai-report-container :where(blockquote) {
+    margin: 10px 0;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-left: 3px solid #10b981;
+    border-radius: 0 10px 10px 0;
+    color: #334155;
+}
+
+.ai-report-container :where(blockquote p:last-child) { margin-bottom: 0; }
+
+/* ── Tables inside AI markup ── */
+.ai-report-container :where(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 12px;
+    font-size: 0.78rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.ai-report-container :where(thead th) {
+    background: #f1f5f9;
+    color: #0f172a;
+    text-align: left;
+    padding: 9px 12px;
+    font-weight: 700;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ai-report-container :where(td) {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+}
+
+.ai-report-container :where(tr:last-child td) { border-bottom: none; }
+
+/* ── Report footer ── */
+.nlp-report-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.nlp-report-foot > span {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.45;
+}
+
+.nlp-report-foot i { color: #10b981; margin-top: 2px; }
+
+.nlp-regen-btn,
+.nlp-retry-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 12px;
+    border: 1.5px solid #a7f3d0;
+    background: #ffffff;
+    color: #047857;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nlp-regen-btn:hover,
+.nlp-retry-btn:hover {
+    background: #ecfdf5;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(16, 185, 129, 0.18);
+}
+
+/* ── Loading state ── */
+.nlp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 46px 18px 30px;
+    text-align: center;
+}
+
+.nlp-loader-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 5px solid rgba(16, 185, 129, 0.16);
+    border-top-color: #10b981;
+    border-right-color: #34d399;
+    animation: nlpSpin 0.9s linear infinite;
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.22);
+}
+
+.nlp-loader-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.nlp-loader-status {
+    margin: 0;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #64748b;
+    min-height: 1.2em;
+}
+
+/* ── Loading skeleton ── */
+.nlp-skeleton {
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 6px;
+}
+
+.nlp-sk {
+    height: 12px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
+    background-size: 400% 100%;
+    animation: nlpShimmer 1.4s ease infinite;
+}
+
+.nlp-sk-head { height: 18px; width: 65%; }
+.nlp-sk-line.short { width: 78%; }
+
+.nlp-sk-chips {
+    display: flex;
+    gap: 8px;
+    margin: 2px 0;
+}
+
+.nlp-sk-chips i {
+    display: block;
+    height: 22px;
+    flex: 1;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
+    background-size: 400% 100%;
+    animation: nlpShimmer 1.4s ease infinite;
+}
+
+/* ── Error state ── */
+.nlp-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 44px 20px 34px;
+    text-align: center;
+    animation: nlpFadeUp 0.35s ease both;
+}
+
+.nlp-error-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #ef4444;
+    font-size: 1.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nlp-error-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #991b1b;
+}
+
+.nlp-error-msg {
+    margin: 0;
+    max-width: 280px;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: #64748b;
+}
+
+.nlp-retry-btn {
+    border-color: #fecaca;
+    color: #b91c1c;
+    margin-top: 4px;
+}
+
+.nlp-retry-btn:hover {
+    background: #fef2f2;
+    box-shadow: 0 6px 14px rgba(239, 68, 68, 0.16);
+}
+
+/* ── Content scrollbar ── */
+#ai-recommendation-content {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+#ai-recommendation-content::-webkit-scrollbar { width: 6px; }
+#ai-recommendation-content::-webkit-scrollbar-track { background: transparent; }
+
+#ai-recommendation-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 99px;
+}
+
+#ai-recommendation-content::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Animations ── */
+@keyframes nlpSpin { to { transform: rotate(360deg); } }
+
+@keyframes nlpShimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+@keyframes nlpFadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(1.35); }
+}
+
+/* Busy button: drift the oversized gradient so the face never looks frozen */
+@keyframes nlpBtnFlow {
+    from { background-position: 0% 50%; }
+    to { background-position: 100% 50%; }
+}
+
+/* ── Reduced motion ──
+   Decorative loops stop; state changes stay instant instead of animated. */
+@media (prefers-reduced-motion: reduce) {
+    .ai-generate-btn,
+    .ai-generate-btn__icon,
+    .ai-generate-btn__chevron,
+    .nlp-report,
+    .nlp-empty,
+    .nlp-empty-icon,
+    .nlp-error,
+    .nlp-loader-ring,
+    .nlp-sk,
+    .nlp-sk-chips i {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .ai-generate-btn:hover { transform: none; }
+    .ai-generate-btn:hover .ai-generate-btn__icon { transform: none; }
+    .ai-generate-btn:hover .ai-generate-btn__chevron { transform: none; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+    .nlp-report-head { flex-wrap: wrap; }
+    .nlp-report-badge { order: 3; margin-left: 54px; }
+    .nlp-report-foot { flex-direction: column; align-items: flex-start; }
+    .nlp-regen-btn { width: 100%; }
+    .clinical-split { grid-template-columns: 1fr; }
+}
+
+
+/* ── Empty / awaiting-assessment state ── */
+.nlp-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+    padding: 42px 20px 34px;
+    border: 1.5px dashed #d1fae5;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fffb 100%);
+    animation: nlpFadeUp 0.4s ease both;
+}
+
+.nlp-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid #d1fae5;
+    color: #10b981;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+.nlp-empty-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.nlp-empty-text {
+    margin: 0;
+    max-width: 250px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NutriDeq AI — Premium panel redesign (v2)
+   Scoped to .ai-recommendations-panel — these classes exist only
+   on anthropometric-information.php (Meal Planner tab).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card shell ── */
+.ai-recommendations-panel {
+    position: relative;
+    flex: 1 1 350px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 22px 22px 20px;
+    background:
+        radial-gradient(130% 90% at 100% 0%, rgba(16, 185, 129, 0.07) 0%, rgba(16, 185, 129, 0) 55%),
+        linear-gradient(180deg, #ffffff 0%, #fbfefd 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 24px;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 12px 32px -12px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+
+/* Ambient corner glow, clipped by the shell */
+.ai-panel-glow {
+    position: absolute;
+    top: -90px;
+    right: -90px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, rgba(16, 185, 129, 0) 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Header identity ── */
+.ai-panel-header {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.ai-panel-id {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.ai-panel-logo {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: grid;
+    place-items: center;
+    font-size: 1.15rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    border-radius: 15px;
+    box-shadow:
+        0 8px 18px -6px rgba(5, 150, 105, 0.45),
+        inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.ai-panel-name h3 {
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.ai-panel-name span {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #64748b;
+}
+
+/* ── Active status badge with breathing dot ── */
+.ai-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #047857;
+    white-space: nowrap;
+}
+
+.ai-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: aiStatusPulse 2.4s ease-out infinite;
+}
+
+@keyframes aiStatusPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+    70%  { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ai-status-dot { animation: none; }
+}
+
+/* ── Refined scroll area (kills the chunky default scrollbar) ── */
+#ai-recommendation-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.35) transparent;
+}
+
+#ai-recommendation-content::-webkit-scrollbar { width: 5px; }
+
+#ai-recommendation-content::-webkit-scrollbar-track { background: transparent; }
+
+#ai-recommendation-content::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 999px;
+}
+
+#ai-recommendation-content::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
+
+/* ── Report head: soft emerald glass instead of flat tint ── */
+.nlp-report-head {
+    background: linear-gradient(135deg, rgba(236, 253, 245, 0.85) 0%, rgba(240, 253, 244, 0.4) 100%);
+    border: 1px solid rgba(167, 243, 208, 0.6);
+    border-radius: 18px;
+    padding: 15px 17px;
+}
+
+.nlp-report-icon {
+    border-radius: 14px;
+    box-shadow:
+        0 8px 16px -6px rgba(5, 150, 105, 0.45),
+        inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.nlp-report-title { letter-spacing: -0.01em; }
+
+.nlp-report-badge {
+    padding: 5px 13px;
+    border-radius: 999px;
+}
+
+.nlp-report-badge.is-ai {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 6px 14px -4px rgba(5, 150, 105, 0.45);
+}
+
+/* ── Notice: amber glass, gentler presence ── */
+.nlp-notice {
+    background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+    border: 1px solid rgba(253, 230, 138, 0.7);
+    border-radius: 16px;
+}
+
+/* ── Body cards: quieter borders, softer lift ── */
+.clinical-section {
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+}
+
+/* ── Mobile refinement ── */
+@media (max-width: 640px) {
+    .ai-recommendations-panel {
+        padding: 18px 16px 16px;
+        border-radius: 20px;
+        gap: 14px;
+    }
+    .ai-panel-logo {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 13px;
+    }
+    .ai-panel-name h3 { font-size: 0.96rem; }
+    .ai-panel-name span { font-size: 0.68rem; }
+    .ai-status-badge { padding: 5px 11px; font-size: 0.63rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Report body — premium refinements (stat boxes, pills, panels)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Stat boxes: soft inset glass + hover lift */
+.clinical-stat-row .stat-box {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7), 0 1px 2px rgba(15, 23, 42, 0.03);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.clinical-stat-row .stat-box:hover {
+    transform: translateY(-2px);
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.7),
+        0 8px 18px -8px rgba(15, 23, 42, 0.14);
+}
+
+.clinical-stat-row .stat-box .label {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.06em;
+}
+
+.clinical-stat-row .stat-box .value {
+    letter-spacing: -0.01em;
+}
+
+/* Nutrient pills: glassy emerald chips with soft depth */
+.nutrient-pill {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.08) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 999px;
+    padding: 6px 14px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 6px -2px rgba(5, 150, 105, 0.2);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.nutrient-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 5px 12px -4px rgba(5, 150, 105, 0.32);
+}
+
+/* Split panels: softer tinting with matching chip titles */
+.clinical-panel {
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.clinical-panel.is-prioritize {
+    background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 60%);
+    border-color: rgba(187, 247, 208, 0.8);
+}
+
+.clinical-panel.is-restrict {
+    background: linear-gradient(180deg, #fef2f2 0%, #fee2e2 60%);
+    border-color: rgba(254, 202, 202, 0.8);
+}
+
+.clinical-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.84rem;
+    letter-spacing: 0.01em;
+}
+
+.clinical-list li::marker { color: #10b981; font-weight: 700; }
+
+.clinical-panel.is-restrict .clinical-list li::marker { color: #ef4444; }
 

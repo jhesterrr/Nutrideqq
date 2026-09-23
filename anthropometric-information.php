@@ -305,7 +305,7 @@ if (isset($_GET['tab'])) {
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/mobile-style.css">
     <!-- Page-specific premium styles -->
-    <link rel="stylesheet" href="css/anthropometric-premium.css">
+    <link rel="stylesheet" href="css/anthropometric-premium.css?v=2">
     <link rel="stylesheet" href="css/food-exchange.css">
     <style>
         /* Save Meal Plan Button override fix */
@@ -1067,30 +1067,32 @@ if (isset($_GET['tab'])) {
 
                     <div class="clinical-meal-planner-container" style="display: flex; gap: 24px; flex-wrap: wrap;">
                         <!-- LEFT COLUMN: AI Recommendations -->
-                        <div class="ai-recommendations-panel" style="flex: 1 1 350px; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1.5px solid rgba(255, 255, 255, 0.8); border-radius: 24px; padding: 26px; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04); display: flex; flex-direction: column; gap: 20px; min-height: 480px; position: relative; overflow: hidden;">
-                            <div style="position: absolute; top: -100px; right: -100px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%); pointer-events: none;"></div>
-                            
-                            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid rgba(226, 232, 240, 0.8); padding-bottom: 15px; z-index: 1;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16,185,129,0.3);"><i class="fas fa-brain"></i></div>
-                                    <div>
-                                        <h3 style="margin:0; font-family:'Outfit',sans-serif; font-size: 1.05rem; font-weight:800; color:#1e293b;">NutriDeq AI</h3>
-                                        <span style="font-size:0.75rem; color:#64748b; font-weight: 600;">Clinical NLP Insights</span>
+                        <div class="ai-recommendations-panel">
+                            <div class="ai-panel-glow" aria-hidden="true"></div>
+
+                            <div class="ai-panel-header">
+                                <div class="ai-panel-id">
+                                    <div class="ai-panel-logo"><i class="fas fa-brain"></i></div>
+                                    <div class="ai-panel-name">
+                                        <h3>NutriDeq AI</h3>
+                                        <span>Clinical NLP Insights</span>
                                     </div>
                                 </div>
-                                <span class="ai-status-badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; font-size: 0.7rem; padding: 4px 12px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 5px;"><span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite;"></span> Active</span>
+                                <span class="ai-status-badge"><span class="ai-status-dot"></span> Active</span>
                             </div>
 
                             <div id="ai-recommendation-content" style="flex: 1; overflow-y: auto; max-height: 480px; font-size: 0.85rem; line-height: 1.6; color: #334155; position: relative; z-index: 1; padding-right: 5px;">
-                                <div style="text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                                    <div class="ai-pulse-icon" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(16, 185, 129, 0.08); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.5rem;"><i class="fas fa-stethoscope"></i></div>
-                                    <div style="font-family:'Outfit',sans-serif; font-size:0.95rem; font-weight:700; color:#1e293b;">Awaiting Assessment</div>
-                                    <p style="color:#64748b; margin: 0; font-size:0.8rem; max-width: 250px; line-height: 1.5;">Generate intelligent clinical guidelines based on client metrics and health profiles.</p>
+                                <div class="nlp-empty">
+                                    <div class="nlp-empty-icon"><i class="fas fa-stethoscope"></i></div>
+                                    <div class="nlp-empty-title">Awaiting Assessment</div>
+                                    <p class="nlp-empty-text">Generate intelligent clinical guidelines based on client metrics and health profiles.</p>
                                 </div>
                             </div>
 
-                            <button id="generateAiRecommendationBtn" onclick="generateAiRecommendation()" style="width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; font-family:'Outfit',sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(15,23,42,0.15); transition: all 0.3s; z-index: 1;">
-                                <i class="fas fa-sparkles" style="color: #10b981;"></i> Generate Clinical Guidance
+                            <button id="generateAiRecommendationBtn" type="button" class="ai-generate-btn" onclick="generateAiRecommendation()" aria-label="Generate clinical guidance for the selected client">
+                                <span class="ai-generate-btn__icon" aria-hidden="true"><i class="fas fa-wand-magic-sparkles"></i></span>
+                                <span class="ai-generate-btn__label">Generate Clinical Guidance</span>
+                                <span class="ai-generate-btn__chevron" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
                             </button>
                         </div>
 
@@ -1191,9 +1193,6 @@ if (isset($_GET['tab'])) {
                     transform: translateY(-2px);
                     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
                     border-color: #cbd5e1 !important;
-                }
-                .ai-loader-glow {
-                    animation: spin 1s linear infinite, pulseGlow 2s infinite;
                 }
             `;
             document.head.appendChild(plannerStyles);
@@ -1396,56 +1395,189 @@ if (isset($_GET['tab'])) {
                 if (fatDisplay) fatDisplay.textContent = `${totalFat.toFixed(1)}g`;
             }
 
+            // ── Clinical NLP Insights: states, sanitizer & report shell ──
+            const NLP_STATUS_MESSAGES = [
+                'Reading anthropometric profile…',
+                'Cross-referencing symptom–nutrient mapping…',
+                'Composing clinical guidance…',
+                'Polishing the report layout…'
+            ];
+            let nlpStatusTimer = null;
+
+            function nlpEscape(value) {
+                const text = (value === null || value === undefined) ? '' : String(value);
+                return text.replace(/[&<>"']/g, ch => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                }[ch]));
+            }
+
+            // Mirrors includes/ClinicalReportSanitizer.php: even a stale or bypassed
+            // endpoint can never leak <style>/<script> or greyed-out inline colors.
+            function nlpSanitizeHtml(html) {
+                const denied = ['color', 'background', 'background-color', 'background-image', 'background-clip',
+                    '-webkit-background-clip', '-webkit-text-fill-color', '-webkit-text-stroke', 'opacity', 'filter',
+                    'backdrop-filter', 'text-shadow', 'box-shadow', 'visibility', 'mix-blend-mode', 'background-blend-mode'];
+                const template = document.createElement('template');
+                template.innerHTML = (html === null || html === undefined) ? '' : String(html);
+                template.content.querySelectorAll('script,style,link,meta,iframe,object,embed,svg,noscript,title,html,head')
+                    .forEach(node => node.remove());
+                template.content.querySelectorAll('font').forEach(node => node.replaceWith(...node.childNodes));
+                template.content.querySelectorAll('*').forEach(el => {
+                    Array.from(el.attributes).forEach(attr => {
+                        const name = attr.name.toLowerCase();
+                        const value = (attr.value || '').trim();
+                        if (name.indexOf('on') === 0) { el.removeAttribute(attr.name); return; }
+                        if (name === 'style') {
+                            const kept = value.split(';').map(decl => decl.trim()).filter(decl => {
+                                const colon = decl.indexOf(':');
+                                if (colon < 0) return false;
+                                const prop = decl.slice(0, colon).trim().toLowerCase();
+                                const val = decl.slice(colon + 1).trim();
+                                if (!prop || !val) return false;
+                                if (denied.indexOf(prop) !== -1) return false;
+                                if (prop === 'position' && /fixed|sticky/i.test(val)) return false;
+                                if (/url\(/i.test(val)) return false;
+                                return true;
+                            }).join('; ');
+                            if (kept) el.setAttribute('style', kept); else el.removeAttribute('style');
+                            return;
+                        }
+                        if ((name === 'href' || name === 'src') && /^javascript:/i.test(value)) { el.removeAttribute(attr.name); return; }
+                        if (name === 'bgcolor' || name === 'text' || name === 'color') el.removeAttribute(attr.name);
+                    });
+                });
+                let safe = template.innerHTML.trim();
+                if (safe && safe.indexOf('clinical-report-wrap') === -1) {
+                    safe = "<div class='clinical-report-wrap'>" + safe + '</div>';
+                }
+                return safe;
+            }
+
+            function nlpLoadingState() {
+                return `
+                    <div class="nlp-loading">
+                        <div class="nlp-loader-ring"></div>
+                        <div class="nlp-loader-title">Analyzing client biomarkers</div>
+                        <p class="nlp-loader-status" id="nlpLoaderStatus" aria-live="polite">${NLP_STATUS_MESSAGES[0]}</p>
+                        <div class="nlp-skeleton" aria-hidden="true">
+                            <div class="nlp-sk nlp-sk-head"></div>
+                            <div class="nlp-sk nlp-sk-line"></div>
+                            <div class="nlp-sk nlp-sk-line short"></div>
+                            <div class="nlp-sk-chips"><i></i><i></i><i></i></div>
+                            <div class="nlp-sk nlp-sk-line"></div>
+                            <div class="nlp-sk nlp-sk-line short"></div>
+                        </div>
+                    </div>`;
+            }
+
+            function nlpErrorState(title, message) {
+                return `
+                    <div class="nlp-error">
+                        <div class="nlp-error-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                        <div class="nlp-error-title">${nlpEscape(title)}</div>
+                        <p class="nlp-error-msg">${nlpEscape(message)}</p>
+                        <button type="button" class="nlp-retry-btn" onclick="generateAiRecommendation()">
+                            <i class="fas fa-rotate-right"></i> Try Again
+                        </button>
+                    </div>`;
+            }
+
+            function nlpReportShell(html, source, clientName) {
+                const isAi = source !== 'fallback';
+                const badge = isAi
+                    ? '<span class="nlp-report-badge is-ai"><i class="fas fa-wand-sparkles"></i> AI Generated</span>'
+                    : '<span class="nlp-report-badge is-rules"><i class="fas fa-shield-halved"></i> Rules Engine</span>';
+                const stamp = new Date().toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="nlp-report">
+                        <div class="nlp-report-head">
+                            <div class="nlp-report-icon"><i class="fas fa-file-medical"></i></div>
+                            <div class="nlp-report-heading">
+                                <div class="nlp-report-title">Clinical Guidance Report</div>
+                                <div class="nlp-report-sub">${nlpEscape(clientName)} · ${nlpEscape(stamp)}</div>
+                            </div>
+                            ${badge}
+                        </div>
+                        <div class="nlp-notice">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <span><b>NON-THERAPEUTIC NOTICE:</b> This AI-generated guidance is for educational insight only. It is not a substitute for professional medical or nutritional diagnosis. All recommendations must be reviewed and validated by a qualified Registered Dietitian before implementation.</span>
+                        </div>
+                        <div class="ai-report-container">${html}</div>
+                        <div class="nlp-report-foot">
+                            <span><i class="fas fa-database"></i> Based on BMI, anthropometry, health conditions, restrictions &amp; goals</span>
+                            <button type="button" class="nlp-regen-btn" onclick="generateAiRecommendation()">
+                                <i class="fas fa-rotate-right"></i> Regenerate
+                            </button>
+                        </div>
+                    </div>`;
+            }
+
             // Trigger AI Clinical Recommendation NLP Insights
             function generateAiRecommendation() {
                 const clientId = <?php echo $selected_client ? (int)$selected_client['id'] : 'null'; ?>;
+                const clientName = <?= json_encode($selected_client['name'] ?? 'Selected Client') ?>;
+                const container = document.getElementById('ai-recommendation-content');
+                const btn = document.getElementById('generateAiRecommendationBtn');
+                if (!container) return;
+
                 if (!clientId) {
-                    alert('Error: Please select a client first.');
+                    container.innerHTML = nlpErrorState('No Client Selected', 'Choose a client from the selector above first, then generate the clinical guidance.');
                     return;
                 }
 
-                const container = document.getElementById('ai-recommendation-content');
-                if (!container) return;
+                if (btn) {
+                    btn.disabled = true;
+                    btn.classList.add('is-loading');
+                    if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+                    btn.setAttribute('aria-busy', 'true');
+                    btn.innerHTML = '<span class="ai-generate-btn__icon" aria-hidden="true"><i class="fas fa-circle-notch fa-spin"></i></span>'
+                        + '<span class="ai-generate-btn__label">Generating…</span>';
+                }
 
-                // Show dynamic glowing/pulsing state loader
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                        <div class="ai-loader-glow" style="width: 56px; height: 56px; border-radius: 50%; border: 4px solid rgba(16, 185, 129, 0.15); border-top-color: #10b981; animation: spin 1s linear infinite;"></div>
-                        <div style="font-family:'Outfit',sans-serif; font-size: 0.9rem; font-weight: 800; color: #1e293b;">Analyzing Client Biomarkers...</div>
-                        <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 250px; line-height: 1.5;">Our NLP intelligence engine is examining clinical thresholds, historical statistics, and metabolic guidelines...</p>
-                    </div>
-                `;
+                container.innerHTML = nlpLoadingState();
+                container.scrollTop = 0;
 
-                fetch(BASE_URL + 'handlers/generate_ai_recommendation.php?client_id=' + clientId)
-                    .then(r => r.json())
+                if (nlpStatusTimer) clearInterval(nlpStatusTimer);
+                let statusStep = 0;
+                nlpStatusTimer = setInterval(() => {
+                    statusStep = (statusStep + 1) % NLP_STATUS_MESSAGES.length;
+                    const statusEl = document.getElementById('nlpLoaderStatus');
+                    if (statusEl) statusEl.textContent = NLP_STATUS_MESSAGES[statusStep];
+                }, 1600);
+
+                fetch(BASE_URL + 'handlers/generate_ai_recommendation.php?client_id=' + encodeURIComponent(clientId))
+                    .then(r => r.json().catch(() => { throw new Error('The server returned an invalid response (HTTP ' + r.status + '). Please try again.'); }))
                     .then(res => {
-                        if (res.success && res.recommendation) {
-                            const reportDiv = document.createElement('div');
-                            reportDiv.className = 'ai-report-container';
-                            reportDiv.style.animation = 'fadeIn 0.4s ease-out';
-                            reportDiv.style.fontFamily = "'Outfit', sans-serif";
-                            reportDiv.innerHTML = res.recommendation;
-                            container.innerHTML = '';
-                            container.appendChild(reportDiv);
+                        if (res && res.success && res.recommendation) {
+                            const safeHtml = nlpSanitizeHtml(res.recommendation);
+                            if (!safeHtml) {
+                                container.innerHTML = nlpErrorState('Empty Analysis', 'The engine returned an empty report. Please try again in a moment.');
+                                return;
+                            }
+                            container.innerHTML = nlpReportShell(safeHtml, res.source || 'ai', clientName);
+                            container.scrollTop = 0;
                         } else {
-                            container.innerHTML = `
-                                <div style="text-align: center; padding: 40px 20px; color: #ef4444; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                                    <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem;"></i>
-                                    <div style="font-weight: 700; font-size:0.9rem;">Analysis Timeout</div>
-                                    <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 260px; line-height: 1.5;">${res.message || res.error || 'The clinical engine could not gather sufficient client telemetry.'}</p>
-                                </div>
-                            `;
+                            container.innerHTML = nlpErrorState(
+                                'Analysis Unavailable',
+                                (res && (res.message || res.error)) || 'The clinical engine could not gather sufficient client telemetry.'
+                            );
                         }
                     })
                     .catch(err => {
                         console.error('Error triggering clinical NLP engine:', err);
-                        container.innerHTML = `
-                            <div style="text-align: center; padding: 40px 20px; color: #ef4444; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                                <i class="fas fa-exclamation-triangle" style="font-size: 1.8rem;"></i>
-                                <div style="font-weight: 700; font-size:0.9rem;">Intelligence Pipeline Offline</div>
-                                <p style="color: #64748b; margin: 0; font-size: 0.78rem; max-width: 260px; line-height: 1.5;">${err.message || 'Failed to reach clinical recommendations server. Please verify your connection.'}</p>
-                            </div>
-                        `;
+                        container.innerHTML = nlpErrorState(
+                            'Intelligence Pipeline Offline',
+                            (err && err.message) || 'Failed to reach the clinical recommendations server. Please verify your connection.'
+                        );
+                    })
+                    .finally(() => {
+                        if (nlpStatusTimer) { clearInterval(nlpStatusTimer); nlpStatusTimer = null; }
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.classList.remove('is-loading');
+                            btn.removeAttribute('aria-busy');
+                            if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+                        }
                     });
             }
 
