@@ -10,12 +10,14 @@ ISO/IEC 25010 accuracy analysis).
 
 | Artifact | Location | Versioning |
 |---|---|---|
-| Mapping table (citable data) | `legacy-php/config/symptom_nutrient_mapping.json` | `version` + `released` + `changelog` in the file itself |
-| Mapper (code) | `legacy-php/includes/SymptomMapper.php` | Reads whatever mapping version is in `config/` |
-| Gold corpus | `legacy-php/dev-tools/gold_set.php` | `corpus_version` in the file (v3.0.0, 113 cases) |
-| Harness | `legacy-php/dev-tools/test_ai.php` | `HARNESS_VERSION` constant (v2.1.0) |
+| Mapping table (citable data) | `config/symptom_nutrient_mapping.json` | `version` + `released` + `changelog` in the file itself (v1.3.0) |
+| Mapper (code) | `includes/SymptomMapper.php` | Reads whatever mapping version is in `config/`; v1.3 matcher = negation-aware + longest-match precedence |
+| Text-speak normalizer | `includes/TextNormalizer.php` | Deterministic 3-layer canonicalization (registry → fuzzy skeleton → phonetic); runs BEFORE the prompt and the resolver |
+| Gold corpus | `dev-tools/gold_set.php` | `corpus_version` in the file (v4.0.0, 125 cases incl. TXT-SPK) |
+| Harness | `dev-tools/test_ai.php` | `HARNESS_VERSION` constant (v2.1.0) |
 | Extraction prompt | `NutriDeqAI::buildExtractionPrompt()` in `api/ai_service.php` | Fingerprinted via sha256 (`prompt_hash`) in every report and persisted run |
-| Run persistence | `nlp_eval_runs` table | `php legacy-php/migrations/apply.php 003_nlp_eval_audit.sql` |
+| Run persistence | `nlp_eval_runs` table | `php migrations/apply.php 003_nlp_eval_audit.sql` |
+| NLP scope | `handlers/send_message_ajax.php` | Client messages ONLY — `sender_type` is derived server-side from the session role; dietitian messages never reach the engine |
 
 Rule: **change behavior → bump a version.** New keywords/columns = mapping
 patch/minor bump with a changelog line. New/changed gold cases = corpus minor

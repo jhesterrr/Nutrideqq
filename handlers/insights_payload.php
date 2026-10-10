@@ -6,20 +6,35 @@
 // can re-render the card exactly like the server-side PHP does.
 
 if (!function_exists('nd_build_insights_payload')) {
-    function nd_build_insights_payload($pdo, int $client_user_id, int $limit = 5): ?array
+    function nd_build_insights_payload($pdo, int $client_user_id, int $limit = 20): ?array
     {
         $live = SymptomLifecycle::getActiveInsights($pdo, $client_user_id, $limit);
 
+        // Lowercased keys; a class nutrient may carry a qualifier
+        // ("Potassium, K", "Fiber, total dietary") so we match by prefix.
         $iconMap = [
-            'iron' => '🩸', 'Iron' => '🩸',
-            'b12' => '💉', 'B12' => '💉', 'B-12' => '💉',
-            'potassium' => '🍌', 'Potassium' => '🍌',
-            'magnesium' => '🔮', 'Magnesium' => '🔮',
-            'calcium' => '🥛', 'Calcium' => '🥛',
-            'vitamin d' => '☀️', 'Vitamin D' => '☀️',
-            'zinc' => '🔩', 'Zinc' => '🔩',
-            'vitamin c' => '🍊', 'Vitamin C' => '🍊',
+            'iron' => '🩸',
+            'b12' => '💉', 'b-12' => '💉',
+            'potassium' => '🍌',
+            'magnesium' => '🔮',
+            'calcium' => '🥛',
+            'vitamin d' => '☀️',
+            'zinc' => '🔩',
+            'vitamin c' => '🍊',
+            'sodium' => '🧂',
+            'fiber' => '🌾',
+            'protein' => '🥚',
+            'selenium' => '🥜',
+            'iodine' => '🌊',
+            'folate' => '🥬',
         ];
+        $nutrientIcon = static function (string $n) use ($iconMap): string {
+            $key = strtolower(trim($n));
+            foreach ($iconMap as $needle => $icon) {
+                if (strpos($key, $needle) !== false) return $icon;
+            }
+            return '⚛️';
+        };
 
         $items = [];
         foreach ($live['symptoms'] as $row) {
@@ -28,7 +43,7 @@ if (!function_exists('nd_build_insights_payload')) {
             foreach (explode(',', (string)$row['nutrient']) as $n) {
                 $n = trim($n);
                 if ($n === '') continue;
-                $nutrients[] = ['icon' => $iconMap[$n] ?? '⚛️', 'name' => $n];
+                $nutrients[] = ['icon' => $nutrientIcon($n), 'name' => $n];
             }
             $items[] = [
                 'keyword'      => $row['symptom_keyword'],

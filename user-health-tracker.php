@@ -521,18 +521,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                                     <?php echo htmlspecialchars($food['calories'] ?? '0'); ?><small style="font-size: 0.6em; opacity: 0.6; margin-left: 2px;">kcal</small>
                                                 </div>
                                                 <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px;">
-                                                    <?php if ($food['meal_type'] === 'custom'): ?>
-                                                        <button class="btn-dash-action" style="padding: 8px 16px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 600; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); cursor: pointer;" onclick="showConsumeModal(<?php echo (int) $food['id']; ?>, '<?php echo htmlspecialchars(addslashes($food['food_name'])); ?>')">
-                                                            <i class="fas fa-check"></i> Consume
-                                                        </button>
-                                                    <?php else: ?>
-                                                        <button class="btn-dash-action" style="padding: 6px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; cursor: pointer;" onclick="editFoodEntry(<?php echo (int) $food['id']; ?>)">
-                                                            <i class="fas fa-edit" style="font-size: 0.8rem; color: #64748b;"></i>
-                                                        </button>
-                                                        <button class="btn-dash-action" style="padding: 6px; border-radius: 8px; background: #fff1f2; border: 1px solid #ffe4e6; color: #f43f5e; cursor: pointer;" onclick="deleteFoodEntry(<?php echo (int) $food['id']; ?>)">
-                                                            <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
-                                                        </button>
-                                                    <?php endif; ?>
+                                                    <button class="btn-dash-action" style="padding: 8px 16px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 600; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); cursor: pointer;" onclick="showConsumeModal(<?php echo (int) $food['id']; ?>, <?php echo htmlspecialchars(json_encode($food['food_name']), ENT_QUOTES, 'UTF-8'); ?>)" title="Add this food to My Diary">
+                                                        <i class="fas fa-check"></i> Check
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -970,7 +961,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     .then(data => {
                         if(data.success) {
                             closeConsumeModal();
-                            location.reload();
+                            window.location.href = 'user-diary.php';
                         } else {
                             alert('Error: ' + data.message);
                             btn.innerHTML = originalHTML;

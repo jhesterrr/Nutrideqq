@@ -163,10 +163,10 @@ class ChatController {
     // The card must mirror what the client is saying RIGHT NOW: new symptoms
     // detected by the NLP engine appear, resolved ones ("my fatigue is gone")
     // disappear — on BOTH the client and dietitian views, without a reload.
-    applyInsights(insights) {
+    applyInsights(insights, options = {}) {
         if (!insights || typeof window.ndRenderWellnessInsights !== 'function') return;
         try {
-            window.ndRenderWellnessInsights(insights);
+            window.ndRenderWellnessInsights(insights, options);
         } catch (e) {
             console.error('Wellness insights render failed:', e);
         }
@@ -421,6 +421,12 @@ class ChatController {
         this.clearReply();
         this.onTypingStop();
 
+        // Show a local symptom preview immediately; the server response below
+        // reconciles it with the persisted NLP/lifecycle state.
+        if (typeof window.ndPreviewWellnessMessage === 'function' && text) {
+            window.ndPreviewWellnessMessage(text);
+        }
+
         try {
             const baseUrl = (typeof BASE_URL !== 'undefined') ? BASE_URL : '';
             const res = await fetch(`${baseUrl}handlers/send_message_ajax.php`, { method: 'POST', body: formData });
@@ -437,7 +443,17 @@ class ChatController {
                 this.scrollToBottom(true);
                 // Server analyzed this message: refresh the insights card
                 // immediately from the authoritative response payload.
-                if (data.insights) this.applyInsights(data.insights);
+                if (data.insights) {
+                    this.applyInsights(data.insights, {
+                        immediate: true,
+                        force: true,
+                        newSymptoms: data.nlp?.symptoms || []
+                    });
+                } else {
+                    // Recover from a partial send response by asking the
+                    // authoritative messages endpoint for the current state.
+                    await this.fetchMessages();
+                }
             } else {
                 alert("Failed to send: " + (data.error || "Unknown server error"));
             }

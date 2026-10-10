@@ -3559,4 +3559,438 @@ textarea:focus {
 
 @media (prefers-reduced-motion: reduce) {
     .ci-badge-updated { animation: none; }
+    .ci-alert-pill,
+    .ci-alert-pill::before,
+    .ci-alert-icon::after,
+    .ci-alert-chevron,
+    .ci-alert-pill.is-pulsing::after,
+    .ci-alert-entrance,
+    .ci-card-exit,
+    .ci-pill-enter,
+    .ci-pill-exit,
+    .ci-body-exit,
+    .clinical-indicators-card.ci-expanded .ci-card-body,
+    .clinical-indicators-card.ci-expanded .ci-indicator-card,
+    .clinical-indicators-card.ci-collapsed .ci-collapsed-summary {
+        animation: none !important;
+    }
+    .ci-alert-pill,
+    .ci-hide-btn { transition: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   WELLNESS INSIGHTS — HIDDEN-FIRST ALERT PILL
+   The card never pops open over the conversation on its own. New NLP
+   detections surface a compact alert pill instead; tapping it reveals
+   the card. A hide button tucks the card away again.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Insight bar (detection notification, docked to the conversation box) ──
+   Full-width bar aligned with the Wellness Insights card below it, with a
+   gentle breathing glow, a light sweep, a radar-ping icon and a bobbing
+   chevron — alive at rest, springy on show/hide. */
+.ci-alert-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: auto;
+    margin: 12px 24px 10px;
+    padding: 10px 14px 10px 10px;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 15px;
+    background: linear-gradient(120deg, rgba(236, 253, 245, 0.95) 0%, rgba(240, 253, 250, 0.9) 55%, rgba(236, 253, 245, 0.95) 100%);
+    backdrop-filter: blur(10px) saturate(1.15);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    color: #065f46;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.25;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+    box-shadow:
+        0 1px 2px rgba(6, 95, 70, 0.06),
+        0 6px 20px -6px rgba(16, 185, 129, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    animation: ciBarGlow 3.8s ease-in-out infinite;
+}
+.ci-alert-pill:hover {
+    transform: translateY(-1px);
+    border-color: rgba(16, 185, 129, 0.45);
+    box-shadow:
+        0 2px 4px rgba(6, 95, 70, 0.06),
+        0 10px 28px -6px rgba(16, 185, 129, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.ci-alert-pill:active { transform: translateY(0) scale(0.995); }
+.ci-alert-pill:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* Light sweep — one pass every few seconds, very subtle */
+.ci-alert-pill::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    left: -45%;
+    width: 36%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transform: skewX(-18deg);
+    animation: ciSweep 4.6s ease-in-out infinite;
+    animation-delay: 1.2s;
+    z-index: 1;
+    pointer-events: none;
+}
+@keyframes ciSweep {
+    0%   { left: -45%; }
+    32%  { left: 130%; }
+    100% { left: 130%; }
+}
+
+/* Staff view: violet accent to match the staff card theme */
+.ci-alert-pill:not(.ci-user-pill) {
+    border-color: rgba(139, 92, 246, 0.28);
+    background: linear-gradient(120deg, rgba(245, 243, 255, 0.95) 0%, rgba(250, 250, 255, 0.9) 55%, rgba(245, 243, 255, 0.95) 100%);
+    color: #5b21b6;
+    box-shadow:
+        0 1px 2px rgba(91, 33, 182, 0.06),
+        0 6px 20px -6px rgba(139, 92, 246, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.ci-alert-pill:not(.ci-user-pill):hover {
+    border-color: rgba(139, 92, 246, 0.45);
+    box-shadow:
+        0 2px 4px rgba(91, 33, 182, 0.06),
+        0 10px 28px -6px rgba(139, 92, 246, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.ci-alert-pill:not(.ci-user-pill)::before {
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+}
+
+@keyframes ciBarGlow {
+    0%, 100% {
+        box-shadow: 0 1px 2px rgba(6, 95, 70, 0.06), 0 6px 20px -6px rgba(16, 185, 129, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    50% {
+        box-shadow: 0 1px 2px rgba(6, 95, 70, 0.06), 0 8px 26px -6px rgba(16, 185, 129, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+}
+
+.ci-alert-icon {
+    position: relative;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #fff;
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 8px rgba(5, 150, 105, 0.35);
+    flex-shrink: 0;
+}
+/* Radar ping — slow attention loop behind the icon */
+.ci-alert-icon::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 13px;
+    border: 2px solid rgba(16, 185, 129, 0.4);
+    animation: ciIconPing 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    pointer-events: none;
+}
+@keyframes ciIconPing {
+    0%   { transform: scale(1); opacity: 0.7; }
+    70%  { transform: scale(1.28); opacity: 0; }
+    100% { transform: scale(1.28); opacity: 0; }
+}
+.ci-alert-pill:not(.ci-user-pill) .ci-alert-icon {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 8px rgba(124, 58, 237, 0.35);
+}
+.ci-alert-pill:not(.ci-user-pill) .ci-alert-icon::after {
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.ci-alert-copy {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.ci-alert-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 23px;
+    height: 23px;
+    padding: 0 7px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+    flex-shrink: 0;
+}
+.ci-alert-pill:not(.ci-user-pill) .ci-alert-count {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35);
+}
+/* Count pop — plays when the number changes (new detection / resolution) */
+.ci-alert-count.ci-count-pop {
+    animation: ciCountPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes ciCountPop {
+    50% { transform: scale(1.3); }
+}
+.ci-alert-text {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ci-alert-chevron {
+    position: relative;
+    z-index: 2;
+    margin-left: auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    animation: ciChevronBob 2.4s ease-in-out infinite;
+}
+.ci-alert-pill:not(.ci-user-pill) .ci-alert-chevron {
+    background: rgba(139, 92, 246, 0.12);
+}
+@keyframes ciChevronBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(2px); }
+}
+
+/* Pulse ring — plays ONLY when something new was detected */
+.ci-alert-pill.is-pulsing::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 15px;
+    border: 2px solid rgba(16, 185, 129, 0.55);
+    animation: ciAlertRing 1.5s ease-out 2;
+    pointer-events: none;
+    z-index: 3;
+}
+.ci-alert-pill:not(.ci-user-pill).is-pulsing::after {
+    border-color: rgba(139, 92, 246, 0.55);
+}
+@keyframes ciAlertRing {
+    0%   { transform: scale(0.985); opacity: 0.9; }
+    100% { transform: scale(1.03); opacity: 0; }
+}
+
+/* ── Hide button (in the card header, next to Expand) ── */
+.ci-hide-btn {
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(100, 116, 139, 0.2);
+    border-radius: 10px;
+    background: rgba(248, 250, 252, 0.85);
+    color: #64748b;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    flex-shrink: 0;
+}
+.ci-hide-btn:hover {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #fff;
+    transform: translateY(-1px);
+}
+.ci-hide-btn:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* ── Motion system ─────────────────────────────────────────────────────
+   All movement is transform/opacity only (GPU-composited — smooth on
+   mid-range phones). Entrance animations on the expand/collapse states
+   restart automatically when display flips (display:none subtrees don't
+   animate; becoming rendered starts them), so pure CSS drives those.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Reveal (pill → card): spring rise-in with a soft overshoot */
+.ci-alert-entrance {
+    animation: ciReveal 0.48s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+@keyframes ciReveal {
+    from { opacity: 0; transform: translateY(-12px) scale(0.975); }
+    70%  { opacity: 1; }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Hide (card → pill): quick settle-down */
+.ci-card-exit {
+    animation: ciCardOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes ciCardOut {
+    to { opacity: 0; transform: translateY(-10px) scale(0.98); }
+}
+
+/* Insight bar show: drops in with a blur-to-sharp spring */
+.ci-pill-enter {
+    animation: ciBarIn 0.6s cubic-bezier(0.22, 1.35, 0.36, 1);
+}
+@keyframes ciBarIn {
+    from { opacity: 0; transform: translateY(-16px) scale(0.96); filter: blur(3px); }
+    55%  { opacity: 1; filter: blur(0); }
+    78%  { transform: translateY(2px) scale(1.004); }
+    to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+/* Insight bar hide: lifts away, soft blur-out */
+.ci-pill-exit {
+    animation: ciBarOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes ciBarOut {
+    from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    to   { opacity: 0; transform: translateY(-12px) scale(0.97); filter: blur(2px); }
+}
+
+/* Expand: body rises in, indicator cards cascade after it */
+.clinical-indicators-card.ci-expanded .ci-card-body {
+    animation: ciBodyIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes ciBodyIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.995); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.clinical-indicators-card.ci-expanded .ci-indicator-card {
+    animation: ciItemIn 0.36s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+.clinical-indicators-card.ci-expanded .ci-indicator-card:nth-child(1) { animation-delay: 0.04s; }
+.clinical-indicators-card.ci-expanded .ci-indicator-card:nth-child(2) { animation-delay: 0.09s; }
+.clinical-indicators-card.ci-expanded .ci-indicator-card:nth-child(3) { animation-delay: 0.14s; }
+.clinical-indicators-card.ci-expanded .ci-indicator-card:nth-child(4) { animation-delay: 0.19s; }
+.clinical-indicators-card.ci-expanded .ci-indicator-card:nth-child(5) { animation-delay: 0.24s; }
+.clinical-indicators-card.ci-expanded .ci-indicator-card:nth-child(n+6) { animation-delay: 0.28s; }
+@keyframes ciItemIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Collapse: summary bar springs up as the body tucks away (exit is JS-driven) */
+.clinical-indicators-card.ci-collapsed .ci-collapsed-summary {
+    animation: ciSummaryIn 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+@keyframes ciSummaryIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Collapse exit: applied by the toggle JS just before the class swap */
+.ci-body-exit {
+    animation: ciBodyOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes ciBodyOut {
+    to { opacity: 0; transform: translateY(-8px) scale(0.99); }
+}
+
+/* Chevron rotates with the state instead of teleporting */
+.ci-toggle-btn i,
+.ci-alert-chevron i {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ci-toggle-btn.is-open i { transform: rotate(-180deg); }
+
+/* Press feedback: buttons dip slightly on activation */
+.ci-toggle-btn:active,
+.ci-hide-btn:active {
+    transform: scale(0.92);
+}
+.ci-toggle-btn,
+.ci-hide-btn {
+    will-change: transform;
+}
+
+/* ── Mobile refinement ── */
+@media (max-width: 640px) {
+    /* Match the card's mobile margins (8px 10px 6px) so the bar docks
+       flush with the conversation box edges. */
+    .ci-alert-pill {
+        margin: 8px 10px 6px;
+        font-size: 0.8rem;
+        padding: 9px 12px 9px 9px;
+        gap: 10px;
+        border-radius: 13px;
+    }
+    .ci-alert-icon { width: 28px; height: 28px; font-size: 0.72rem; }
+    .ci-alert-count { min-width: 21px; height: 21px; font-size: 0.75rem; }
+    .ci-alert-chevron { width: 24px; height: 24px; }
+    .ci-hide-btn { width: 32px; height: 32px; }
+}
+
+/* Small phones: comfortable thumb targets, bar always fits */
+@media (max-width: 480px) {
+    .ci-alert-pill {
+        padding: 9px 11px 9px 9px;
+        gap: 9px;
+    }
+    .ci-alert-text { font-size: 0.78rem; }
+    .ci-alert-icon { width: 27px; height: 27px; border-radius: 9px; }
+    .ci-alert-icon::after { border-radius: 12px; }
+    .ci-hide-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+    }
+    .ci-toggle-btn {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    .ci-collapsed-summary {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    /* Softer cascade on small screens: distance reads larger */
+    .clinical-indicators-card.ci-expanded .ci-indicator-card {
+        animation-duration: 0.28s;
+    }
+    /* Fewer ambient loops on cheap hardware: ping + bob only */
+    .ci-alert-pill::before { animation: none; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ci-alert-pill.is-pulsing::after,
+    .ci-alert-entrance,
+    .ci-card-exit,
+    .ci-pill-enter,
+    .ci-pill-exit,
+    .ci-body-exit,
+    .clinical-indicators-card.ci-expanded .ci-card-body,
+    .clinical-indicators-card.ci-expanded .ci-indicator-card,
+    .clinical-indicators-card.ci-collapsed .ci-collapsed-summary {
+        animation: none !important;
+    }
+    .ci-alert-pill,
+    .ci-hide-btn { transition: none; }
 }

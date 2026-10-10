@@ -18,7 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tracking_id = $_POST['tracking_id'] ?? null;
     $meal_type = $_POST['meal_type'] ?? null; // Breakfast, Lunch, Dinner, Snack
 
-    if (!$tracking_id || !$meal_type) {
+    $allowed_meal_types = ['Breakfast', 'AM Snack', 'Lunch', 'PM Snack', 'Dinner', 'Snack'];
+
+    if (!$tracking_id || !in_array($meal_type, $allowed_meal_types, true)) {
         echo json_encode(['success' => false, 'message' => 'Missing required data']);
         exit();
     }
@@ -28,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo = $database->getConnection();
 
         // Check if the tracking entry exists and belongs to the user
-        $stmt = $pdo->prepare("SELECT * FROM food_tracking WHERE id = ?");
-        $stmt->execute([$tracking_id]);
+        $stmt = $pdo->prepare("SELECT * FROM food_tracking WHERE id = ? AND user_id = ?");
+        $stmt->execute([$tracking_id, $user_id]);
         $entry = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$entry) {
@@ -40,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Technically, a regular user might only have a client_user_id link if we're deeply strict, 
         // but since `user_health_tracker.php` ensures the user is seeing their records, 
         // we'll proceed with moving it to the logs.
-        $target_user_id = $entry['user_id']; 
+        $target_user_id = $user_id;
 
         // Start Transaction
         $pdo->beginTransaction();

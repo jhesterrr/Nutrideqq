@@ -120,12 +120,13 @@ function callGroqLive($message)
     $data = [
         'model' => 'openai/gpt-oss-20b',
         'messages' => [
-            ['role' => 'system', 'content' => 'You are a clinical NLP engine. Always respond with valid JSON only. No markdown. No explanation.'],
+            ['role' => 'system', 'content' => 'You are a clinical NLP engine. Always respond with valid JSON only. No markdown. No explanation. Do not output your reasoning.'],
             ['role' => 'user', 'content' => NutriDeqAI::buildExtractionPrompt($message)],
         ],
         'temperature' => 0.1,
-        'max_tokens' => 256,
-        'response_format' => ['type' => 'json_object'],
+        'reasoning_effort' => 'low',
+        // Mirrors the production extraction request.
+        'max_tokens' => 2048,
     ];
     $ch = curl_init('https://api.groq.com/openai/v1/chat/completions');
     curl_setopt_array($ch, [
@@ -144,8 +145,24 @@ function callGroqLive($message)
 
 function getNlpResponse($case, $useLive)
 {
-    if ($useLive) return callGroqLive($case['message']);
-    return ['symptoms' => $case['mock_symptoms'] ?? []];
+    $message = $case['message'];
+    // Production canonicalizes text-speak before the model sees it — the
+    // harness must evaluate the exact production path.
+    if (class_exists('TextNormalizer')) {
+        require_once __DIR__ . '/../includes/TextNormalizer.php';
+        $message = TextNormalizer::normalize($message);
+    }
+    if ($useLive) return callGroqLive($message);
+
+    // Mock mode: replay the curated LLM outputs (mock_symptoms) verbatim,
+    // then apply production's negation guard so the evaluated pipeline is
+    // the exact production one (extraction + v1.3 message-level filtering).
+    $symptoms = $case['mock_symptoms'] ?? [];
+    $filtered = array_values(array_filter($symptoms, function ($s) use ($message) {
+        [, $cid] = SymptomMapper::mapWithClass($s);
+        return $cid === null || !SymptomMapper::classIsNegatedInMessage($message, $cid);
+    }));
+    return ['symptoms' => $filtered];
 }
 
 // Deterministic fingerprint of the exact prompt under test (audit/citation).
@@ -187,7 +204,9 @@ foreach ($GOLD_SET as $case) {
 
     $predictedClasses = [];
     foreach (($nlp['symptoms'] ?? []) as $symptom) {
-        [$nutrient, $classId] = SymptomMapper::mapWithClass($symptom);
+        // New schema: objects {label, evidence, ...}; accept plain strings too.
+        $label = is_array($symptom) ? ($symptom['label'] ?? $symptom['symptom'] ?? '') : $symptom;
+        [$nutrient, $classId] = SymptomMapper::mapWithClass($label);
         if ($classId !== null && !in_array($classId, $predictedClasses, true)) {
             $predictedClasses[] = $classId;
         }

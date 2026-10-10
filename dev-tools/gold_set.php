@@ -24,12 +24,12 @@
 //    (see dev-tools/EVAL_RUNBOOK.md, "Corpus governance").
 
 return [
-    'corpus_version' => '3.0.0',
-    'updated' => '2026-09-22',
-    'languages' => ['EN', 'TL', 'BIS'],
-    'notes' => 'Positives verified against the full v1.2.0 keyword table to avoid substring collisions. Distractor cases marked "limitation" intentionally exercise negation handling (a known limitation of substring matching) and are expected to fail in mock mode.',
+    'corpus_version' => '5.0.0',
+    'updated' => '2026-10-10',
+    'languages' => ['EN', 'TL', 'BIS', 'TXT-SPK'],
+    'notes' => 'v5 adds canonical-dedup and punctuation/human-phrasing cases (mapping v1.5.0: synonym collapse to one label per class). v4 added Filipino text-speak/shortcut cases (TXT-SPK). All run through TextNormalizer first, exactly like production.',
     'known_limitations' => [
-        'Substring matching cannot handle negation ("no headache", "hindi napagod"). Three limitation cases document this; a negation-aware matcher (v1.3) should clear them.',
+        'v1.3.0 matcher resolves the former negation limitation: message-level negation cues ("no headache", "hindi na ako napagod", "wala nang lagnat") now suppress keyword matches, both in the deterministic matcher and as a production guard on LLM extraction output. No active limitations as of corpus v4.0.0 / mapping v1.3.0.',
     ],
 
     'cases' => [
@@ -139,6 +139,24 @@ return [
         ['message' => 'Nahilo ko ganina ug kapoy pa jud', 'lang' => 'BIS', 'expected' => ['SC-DIZZY', 'SC-FATIGUE'], 'mock_symptoms' => ['nahilo', 'kapoy']],
         ['message' => 'Sakit ug ulo ug naay hangin sa tiyan', 'lang' => 'BIS', 'expected' => ['SC-HEADACHE', 'SC-BLOAT'], 'mock_symptoms' => ['sakit ug ulo', 'hangin sa tiyan']],
 
+        // ── Text-speak / shortcut cases (TXT-SPK) ──────────────────────────
+        // These go through TextNormalizer::normalize() first (production path).
+        // mock_symptoms list what a compliant model would extract AFTER
+        // normalization. Evaluated live, the Groq prompt receives the same
+        // normalized text the production pipeline sends.
+        ['message' => 'mskit chan q grabe', 'lang' => 'TXT-SPK', 'expected' => ['SC-BLOAT'], 'mock_symptoms' => ['masakit tiyan ko'], 'note' => 'canonicalizes to "masakit tiyan ko" — stomach-area pain → closest class is bloating (no dedicated generic stomach class in v1.2.0)'],
+        ['message' => 'pgd n q tlga', 'lang' => 'TXT-SPK', 'expected' => ['SC-FATIGUE'], 'mock_symptoms' => ['pagod na ko talaga']],
+        ['message' => 'wl lkas aq simula pa khpon', 'lang' => 'TXT-SPK', 'expected' => ['SC-FATIGUE'], 'mock_symptoms' => ['walang lakas ako']],
+        ['message' => 'hlo q kpg tmtayo agad', 'lang' => 'TXT-SPK', 'expected' => ['SC-DIZZY'], 'mock_symptoms' => ['hilo']],
+        ['message' => 'plkt n nman bnti q', 'lang' => 'TXT-SPK', 'expected' => ['SC-CRAMP'], 'mock_symptoms' => ['pulikat']],
+        ['message' => 'sska q grbe amoy ng ulam', 'lang' => 'TXT-SPK', 'expected' => ['SC-NAUSEA'], 'mock_symptoms' => ['susuka']],
+        ['message' => 'kbg n nman tyan q', 'lang' => 'TXT-SPK', 'expected' => ['SC-BLOAT'], 'mock_symptoms' => ['kabag']],
+        ['message' => 'ang skt ng ulo q simula khpon', 'lang' => 'TXT-SPK', 'expected' => ['SC-HEADACHE'], 'mock_symptoms' => ['sakit ng ulo']],
+        ['message' => 'pgd n q taz plkt p ang bnti q', 'lang' => 'TXT-SPK', 'expected' => ['SC-FATIGUE', 'SC-CRAMP'], 'mock_symptoms' => ['pagod', 'pulikat']],
+        ['message' => 'gising buong gbi, sobrng pgd n q', 'lang' => 'TXT-SPK', 'expected' => ['SC-FATIGUE'], 'mock_symptoms' => ['pagod']],
+        ['message' => 'okay n q, wla n skt chan q', 'lang' => 'TXT-SPK-neg', 'expected' => [], 'mock_symptoms' => [], 'note' => 'resolution phrasing — must NOT create a symptom'],
+        ['message' => 'salamat doc, feeling bt n q', 'lang' => 'TXT-SPK-neg', 'expected' => [], 'mock_symptoms' => []],
+
         // ── Negative cases — neutral, must map to nothing (12) ─────────────
         ['message' => 'I had a great workout today', 'lang' => 'EN-neg', 'expected' => [], 'mock_symptoms' => []],
         ['message' => 'I enjoyed my lunch and feel satisfied', 'lang' => 'EN-neg', 'expected' => [], 'mock_symptoms' => []],
@@ -167,5 +185,22 @@ return [
         ['message' => 'I feel strong after a full night of rest', 'lang' => 'EN-distr', 'expected' => [], 'mock_symptoms' => []],
         ['message' => 'Wala moy hilanat? Bugnaw ra kaayo ang panahon diri', 'lang' => 'BIS-distr', 'expected' => [], 'mock_symptoms' => []],
         ['message' => 'Dako na kaayo ang progress sa akong diet this month', 'lang' => 'BIS-distr', 'expected' => [], 'mock_symptoms' => []],
+
+        // ── Corpus v5.0.0 — canonical dedup, punctuation, human phrasing ────
+        // Deterministic (offline) expectations computed from TextNormalizer +
+        // SymptomMapper::matchText; live expectations from the canonicalizing
+        // prompt. Exercises: repeated-letter collapse, punctuation-glued
+        // shortcuts, and richer English human phrasing.
+        ['message' => 'sobranggg pgd n q', 'lang' => 'TXT-SPK', 'expected' => ['SC-FATIGUE'], 'mock_symptoms' => ['fatigue'], 'note' => 'repeated-letter collapse: sobranggg -> sobrang'],
+        ['message' => 'plkt plkt bnti q kpg gbi', 'lang' => 'TXT-SPK', 'expected' => ['SC-CRAMP'], 'mock_symptoms' => ['muscle cramps'], 'note' => 'expanded function words kpg/gbi/bnti'],
+        ['message' => 'hlo n nman aq kpg tmtayo', 'lang' => 'TXT-SPK', 'expected' => ['SC-DIZZY'], 'mock_symptoms' => ['dizziness']],
+        ['message' => 'ang skt ng ulo q, 3 araw na', 'lang' => 'TXT-SPK', 'expected' => ['SC-HEADACHE'], 'mock_symptoms' => ['headache'], 'note' => 'punctuation no longer blocks shortcut expansion'],
+        ['message' => 'sska n q sa amoy ng pagkain', 'lang' => 'TXT-SPK', 'expected' => ['SC-NAUSEA'], 'mock_symptoms' => ['nausea']],
+        ['message' => 'my head is pounding, migraine again', 'lang' => 'EN', 'expected' => ['SC-HEADACHE'], 'mock_symptoms' => ['headache']],
+        ['message' => 'i feel drained and weak all day', 'lang' => 'EN', 'expected' => ['SC-FATIGUE'], 'mock_symptoms' => ['fatigue']],
+        // Resolution phrasing must NOT create a symptom (and must close one).
+        ['message' => 'wla n skt chan q, ok n q', 'lang' => 'TXT-SPK-neg', 'expected' => [], 'mock_symptoms' => [], 'note' => 'negation scope after normalization'],
+        ['message' => 'hnd na aq pgd, slmt doc', 'lang' => 'TXT-SPK-neg', 'expected' => [], 'mock_symptoms' => []],
+        ['message' => 'wala nang lagnat, ok na ako', 'lang' => 'TXT-SPK-neg', 'expected' => [], 'mock_symptoms' => []],
     ],
 ];

@@ -318,6 +318,203 @@ if (!defined('NUTRIDEQ_KB_LOADED')) {
                 ],
                 'when_to_ask' => 'If you catch more than 5 colds per year, or infections take longer than 10 days to heal — dietitian can strengthen your immune system with simple local foods.'
             ],
+
+            // ─── Canonical wellness classes (v1.5.0) ─────────────────
+            'dizziness' => [
+                'icon' => '🌀',
+                'category' => 'Circulation',
+                'short_desc' => 'Lightheadedness, spinning, or feeling faint — often tied to hydration, skipped meals, and low sodium.',
+                'full_desc' => 'Feeling dizzy or like the room is spinning usually means your brain briefly got less blood flow. Common nutrition-related causes: dehydration, a sudden drop in blood sugar from skipped meals, standing up too fast (orthostatic), and low sodium or iron status. Food timing and fluids fix most everyday cases.',
+                'recommended' => [
+                    'Drink one glass of water right after waking and sip throughout the day — dehydration is the #1 everyday cause of dizziness.',
+                    'Never skip breakfast; go no longer than 5 hours without eating so blood sugar stays steady (try rice + egg + tomato).',
+                    'Stand up slowly: sit at the edge of the bed for a few seconds before standing.',
+                    'If you sweat a lot or work in the heat, replace salt with sabaw (soup) or a pinch of salt in water plus a banana.',
+                ],
+                'when_to_ask' => 'Dizziness with fainting, chest pain, or one-sided weakness is urgent — seek care now. Persistent dizziness should be reviewed by your dietitian and doctor.'
+            ],
+            'fever' => [
+                'icon' => '🌡️',
+                'category' => 'Immune',
+                'short_desc' => 'Raised body temperature — focus on fluids and easy-to-digest nourishment while you recover.',
+                'full_desc' => 'Fever is your body fighting an infection. The goal is not to "starve a fever" — it is to keep fluids and energy coming in so your immune system has fuel. Dehydration and low protein intake slow recovery. This insight is educational; fever can signal infection that needs medical care.',
+                'recommended' => [
+                    'Sip water, sabaw (soup), or oral rehydration fluid often — small sips every few minutes if solid food is hard.',
+                    'Eat soft, easy foods: lugaw (rice porridge), arroz caldo with ginger, or bread with egg when you feel ready.',
+                    'Skip heavy fried and very oily meals until the fever breaks.',
+                    'Rest and keep the room cool; log how long the fever lasts.',
+                ],
+                'when_to_ask' => 'Fever above 38.5°C lasting more than 2–3 days, or with stiff neck, rash, or confusion — see a doctor right away.'
+            ],
+            'cough' => [
+                'icon' => '🫁',
+                'category' => 'Respiratory',
+                'short_desc' => 'Ongoing cough — hydration, warm fluids, and vitamin C support comfort and recovery.',
+                'full_desc' => 'A cough is your airway clearing irritants or infection. Keeping fluids up thins mucus; warm drinks and vitamin C foods soothe the throat, while smoke and very cold drinks make it worse. Persistent cough needs medical review to rule out infection or asthma.',
+                'recommended' => [
+                    'Drink warm water or salabat (ginger tea) with calamansi and honey through the day to soothe the throat.',
+                    'Eat vitamin C–rich foods: dalandan, guava, calamansi, or mango.',
+                    'Avoid smoke, very cold drinks, and iced desserts while coughing.',
+                    'Rest your voice and sleep propped up slightly if night cough is worse.',
+                ],
+                'when_to_ask' => 'Cough lasting more than 2–3 weeks, coughing blood, or with breathing difficulty — see a doctor; your dietitian can then support recovery nutrition.'
+            ],
+            'sore throat' => [
+                'icon' => '🗣️',
+                'category' => 'Respiratory',
+                'short_desc' => 'Painful or scratchy throat — warm soothing fluids and soft foods help until it heals.',
+                'full_desc' => 'A sore throat is often viral and settles in a few days. Warm fluids and soft, non-acidic foods keep you hydrated and comfortable. Very spicy, sour, or crunchy foods can scrape and irritate it further.',
+                'recommended' => [
+                    'Drink warm salabat (ginger tea) or warm water with honey and calamansi in small sips.',
+                    'Choose soft foods: lugaw, arroz caldo, mashed saging na saba, or soft eggs.',
+                    'Avoid very spicy, very sour (plain calamansi shots), and crunchy fried food for now.',
+                    'Gargle warm salt water to ease pain.',
+                ],
+                'when_to_ask' => 'Sore throat with high fever, drooling, or trouble swallowing/breathing — seek care promptly.'
+            ],
+            'chest pain' => [
+                'icon' => '🫀',
+                'category' => 'Cardiovascular',
+                'short_desc' => 'Pain or pressure in the chest — this needs prompt medical review, not diet changes alone.',
+                'full_desc' => 'Chest pain can come from muscle strain, acid reflux, or the heart. Because heart-related causes are dangerous, this insight always recommends prompt medical evaluation. Nutrition matters afterward for heart-healthy eating, but it is not a first-line fix for acute chest pain.',
+                'recommended' => [
+                    'Do not wait it out — have this checked by a doctor as soon as possible.',
+                    'While waiting, avoid heavy meals and lying flat right after eating if it feels like reflux.',
+                    'Note what triggers it (exertion, meals, position) to help your clinician.',
+                    'After medical clearance, a heart-healthy diet (less salt/fried food, more fish and vegetables) can help.',
+                ],
+                'when_to_ask' => 'Chest pain that is crushing, radiates to the arm/jaw, or comes with sweating or shortness of breath is an emergency — call for help immediately.'
+            ],
+            'shortness of breath' => [
+                'icon' => '🫁',
+                'category' => 'Respiratory',
+                'short_desc' => 'Difficulty breathing — a red-flag symptom that needs prompt medical attention.',
+                'full_desc' => 'Breathlessness can come from infection, asthma, anemia, or heart issues. It should be medically evaluated. Nutrition support (iron status, overall fueling) is relevant for chronic patterns but does not replace urgent care.',
+                'recommended' => [
+                    'Sit upright and stay calm; use any prescribed inhaler as directed.',
+                    'Have it evaluated promptly — do not rely on diet changes to resolve it.',
+                    'If it is linked to anemia, iron-rich foods (liver, dilis, monggo) with vitamin C help once medically cleared.',
+                    'Avoid smoke and strong fumes.',
+                ],
+                'when_to_ask' => 'Severe breathlessness, chest pain, or bluish lips is an emergency — seek help immediately.'
+            ],
+            'palpitations' => [
+                'icon' => '💓',
+                'category' => 'Cardiovascular',
+                'short_desc' => 'A racing, pounding, or fluttering heartbeat — reduce stimulants and check with a clinician.',
+                'full_desc' => 'Palpitations can be triggered by too much caffeine, skipped meals (low blood sugar), dehydration, stress, or thyroid/electrolyte issues. Cutting stimulants and stabilizing meals often helps, but new or persistent palpitations need medical review.',
+                'recommended' => [
+                    'Limit coffee, energy drinks, and strong tea — cap at one morning cup or switch to salabat.',
+                    'Eat regular meals so blood sugar does not dip (which triggers adrenaline and a racing heart).',
+                    'Drink enough water, and include potassium foods (banana, kamote) if cleared by your clinician.',
+                    'Log episodes: timing, caffeine, stress, and activity.',
+                ],
+                'when_to_ask' => 'Palpitations with fainting, chest pain, or breathlessness — seek care promptly; discuss persistent episodes with your clinician.'
+            ],
+            'diarrhea' => [
+                'icon' => '🚰',
+                'category' => 'Digestion',
+                'short_desc' => 'Frequent loose stools — priority #1 is replacing fluids and electrolytes.',
+                'full_desc' => 'Diarrhea drains water and salts fast, so dehydration is the main risk. Bland, low-fiber foods rest the gut while oral rehydration replaces lost fluids and electrolytes. Very fatty, spicy, or dairy-heavy foods can prolong it.',
+                'recommended' => [
+                    'Drink oral rehydration solution (or water with a little salt and sugar) in small frequent sips.',
+                    'Eat bland soft foods: lugaw, plain rice, boiled saging na saba, or sabaw ng manok without oil.',
+                    'Avoid very fatty, spicy, and high-fiber foods, and go easy on milk until it settles.',
+                    'Wash hands and food well to avoid spreading it.',
+                ],
+                'when_to_ask' => 'Diarrhea lasting more than 2 days, with blood, high fever, or signs of dehydration (dizzy, very little urine) — seek care promptly.'
+            ],
+            'back pain' => [
+                'icon' => '🩻',
+                'category' => 'Musculoskeletal',
+                'short_desc' => 'Lower or upper back ache — posture, movement, and anti-inflammatory eating help.',
+                'full_desc' => 'Most everyday back pain is muscular or postural. Weight, inactivity, and inflammation play a role; nutrition supports recovery through protein, vitamin D, and anti-inflammatory foods, alongside movement and good posture.',
+                'recommended' => [
+                    'Add protein at every meal (egg, fish, chicken, tokwa) to support muscle repair.',
+                    'Include anti-inflammatory foods: sardines/bangus, ginger (salabat), and colorful vegetables.',
+                    'Take short walking or stretching breaks if you sit long hours.',
+                    'Watch heavy lifting; bend the knees, not the back.',
+                ],
+                'when_to_ask' => 'Back pain with numbness, weakness in the legs, or after an injury — see a doctor.'
+            ],
+            'neck pain' => [
+                'icon' => '🦴',
+                'category' => 'Musculoskeletal',
+                'short_desc' => 'Neck stiffness or ache — often posture and screen-related; hydration and movement help.',
+                'full_desc' => 'Neck pain commonly comes from sustained poor posture (phone/desk), muscle tension, or strain. Movement, posture fixes, hydration, and adequate protein/magnesium support recovery.',
+                'recommended' => [
+                    'Set the screen at eye level and take a stretch break every 30 minutes.',
+                    'Drink enough water — dehydration tightens muscles.',
+                    'Include magnesium foods: peanuts, squash seeds, and leafy greens (kangkong, malunggay).',
+                    'Sleep with a supportive pillow height.',
+                ],
+                'when_to_ask' => 'Neck pain with arm numbness/weakness, fever, or after trauma — see a doctor.'
+            ],
+            'leg pain' => [
+                'icon' => '🦵',
+                'category' => 'Musculoskeletal',
+                'short_desc' => 'Leg ache, heaviness, or cramping — review hydration, electrolytes, and circulation.',
+                'full_desc' => 'Leg discomfort ranges from muscle cramps and post-exercise soreness to circulation issues. Hydration, potassium/magnesium, and gentle movement help muscular causes, but swelling, redness, or one-sided pain can signal a clot and need urgent review.',
+                'recommended' => [
+                    'Hydrate well and include potassium foods: banana, kamote, saba.',
+                    'Stretch calves gently morning and night for cramp-prone legs.',
+                    'Elevate and move your legs regularly if you stand or sit for long periods.',
+                    'Eat protein at meals to support muscle recovery.',
+                ],
+                'when_to_ask' => 'One-sided swelling, warmth, or redness in the leg, or pain after long travel — seek care promptly to rule out a clot.'
+            ],
+            'shoulder pain' => [
+                'icon' => '💪',
+                'category' => 'Musculoskeletal',
+                'short_desc' => 'Shoulder ache or stiffness — often strain or posture; protein and anti-inflammatory foods help.',
+                'full_desc' => 'Shoulder pain is frequently muscular or from repetitive use and posture. Recovery nutrition (protein, omega-3s, vitamin D) supports tissue repair, while rest and targeted movement reduce strain.',
+                'recommended' => [
+                    'Rest the shoulder from the aggravating movement and use gentle range-of-motion stretches.',
+                    'Eat protein each meal and oily fish 2–3× a week (sardines, bangus) for omega-3s.',
+                    'Adjust your chair/desk so the shoulder is not shrugged or rounded.',
+                    'Use warm compress for stiffness, cold for a fresh strain.',
+                ],
+                'when_to_ask' => 'Shoulder pain after a fall, with deformity, or with arm weakness — see a doctor.'
+            ],
+            'tooth pain' => [
+                'icon' => '🦷',
+                'category' => 'Oral',
+                'short_desc' => 'Toothache or gum pain — needs a dentist; diet tips only reduce irritation meanwhile.',
+                'full_desc' => 'Tooth pain almost always needs dental care (cavity, abscess, or gum disease). Nutrition supports oral health long-term (calcium, vitamin D, less sugar) but cannot fix an active tooth problem. Avoid very hot, cold, or sweet foods that trigger pain.',
+                'recommended' => [
+                    'See a dentist promptly — painkillers and diet do not resolve the cause.',
+                    'Avoid very sweet, very hot, or very cold foods that trigger the pain.',
+                    'Rinse with warm salt water and keep the area clean.',
+                    'For prevention: cut sugary drinks/snacks and include calcium (milk, dilis) and vitamin D.',
+                ],
+                'when_to_ask' => 'Tooth pain with facial swelling, fever, or trouble swallowing — seek dental/medical care urgently.'
+            ],
+            'muscle pain' => [
+                'icon' => '💪',
+                'category' => 'Musculoskeletal',
+                'short_desc' => 'Aching muscles or body pain — protein, magnesium, and anti-inflammatory foods aid recovery.',
+                'full_desc' => 'Generalized muscle aches can follow exertion or reflect vitamin D, magnesium, or protein shortfalls, and sometimes infection. Protein rebuilds muscle, magnesium eases tension, and omega-3s calm inflammation.',
+                'recommended' => [
+                    'Protein at every meal to rebuild muscle (egg, fish, chicken, tokwa).',
+                    'Magnesium foods: peanuts, squash seeds, kangkong, malunggay.',
+                    'Oily fish (sardines, bangus) 2–3× a week and colorful produce for anti-inflammatory support.',
+                    'Hydrate and rest; gentle movement beats total inactivity.',
+                ],
+                'when_to_ask' => 'Severe muscle pain with dark urine after exertion, or aches with fever lasting days — seek care.'
+            ],
+            'pain' => [
+                'icon' => '⚠️',
+                'category' => 'General',
+                'short_desc' => 'Reported pain in a specific area — note the location and pattern for your dietitian.',
+                'full_desc' => 'When pain is mentioned without a clear location, it is worth logging where and when it happens. Nutrition can influence inflammatory and muscular pain, but persistent or severe pain needs medical review.',
+                'recommended' => [
+                    'Note the location, timing, and what makes it better or worse.',
+                    'Stay hydrated and keep regular balanced meals.',
+                    'Include anti-inflammatory foods (fish, ginger, colorful vegetables).',
+                    'Share the pattern with your dietitian at your next session.',
+                ],
+                'when_to_ask' => 'Severe, worsening, or unexplained pain — speak with your clinician promptly.'
+            ],
         ];
 
         // Fill in any placeholders with reasonable defaults on first runtime

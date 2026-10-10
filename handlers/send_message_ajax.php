@@ -149,27 +149,48 @@ try {
     }
 
     // --- 5. NLP AI Integration (Passive Monitoring - Non-blocking) ---
+    // SCOPE: CLIENT MESSAGES ONLY. $sender_type is derived server-side from
+    // the session role — dietitian/staff messages NEVER reach the NLP engine,
+    // the symptom lifecycle, or the Wellness Insights card. Insights reflect
+    // what the CLIENT reports, by design.
     $nlp_result = null;
     if ($sender_type === 'client' && !empty($message_text)) {
+        require_once '../includes/SymptomLifecycle.php';
+
+        // The client's ACTIVE symptoms become open-symptom context for the SAME
+        // LLM call, so detection AND resolution happen together in one
+        // round-trip and the model can read whether each is now gone.
+        $activeLabels = [];
+        try {
+            $activeLabels = SymptomLifecycle::activeLabels($pdo, (int)$user_id);
+        } catch (Throwable $ctxEx) {
+            error_log("Active-symptom context skipped: " . $ctxEx->getMessage());
+        }
+
         try {
             if (file_exists('../api/ai_service.php')) {
                 require_once '../api/ai_service.php';
                 if (class_exists('NutriDeqAI')) {
                     $ai = new NutriDeqAI();
-                    $nlp_result = $ai->analyzeMessage($user_id, $new_msg_id, $message_text);
+                    $nlp_result = $ai->analyzeMessage($user_id, $new_msg_id, $message_text, $activeLabels);
                 }
             }
         } catch (Throwable $aiEx) {
             error_log("NutriDeq AI passive analysis skipped: " . $aiEx->getMessage());
         }
 
-        // --- 5b. Symptom lifecycle (real-time resolution) ---
-        // The Wellness Insights card must mirror what the client is saying
-        // RIGHT NOW: new symptoms were just detected above; messages like
-        // "my fatigue is gone" / "hindi na ako pagod" resolve open ones.
+        // --- 5b. Resolution ---
+        // Prefer the model's semantic judgement (it read the whole message).
+        // Fall back to the deterministic resolver ONLY when the LLM produced no
+        // resolutions at all (e.g. it was unavailable) — never override an
+        // explicit "persisting/unmentioned" verdict with keyword guessing.
         try {
-            require_once '../includes/SymptomLifecycle.php';
-            SymptomLifecycle::process($user_id, (int)$new_msg_id, $message_text);
+            $llmResolutions = is_array($nlp_result) ? ($nlp_result['resolutions'] ?? []) : [];
+            if (!empty($llmResolutions)) {
+                SymptomLifecycle::applyResolutions($pdo, (int)$user_id, (int)$new_msg_id, $llmResolutions);
+            } else {
+                SymptomLifecycle::process($user_id, (int)$new_msg_id, $message_text);
+            }
         } catch (Throwable $lifeEx) {
             error_log("SymptomLifecycle skipped: " . $lifeEx->getMessage());
         }

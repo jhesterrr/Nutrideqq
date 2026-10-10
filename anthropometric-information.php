@@ -471,6 +471,14 @@ if (isset($_GET['tab'])) {
             $bmi_class = 'neutral';
             $whr_val   = 'N/A';
             $whr_risk  = 'N/A';
+            $bmi_outcome = [
+                'status' => 'Insufficient data',
+                'tone' => 'neutral',
+                'summary' => 'Add at least three progress recordings to calculate a projected outcome.',
+                'trend' => 'Awaiting trend',
+                'forecast' => [],
+                'compliance' => ['food_logs' => 0, 'symptoms' => 0, 'appointments' => 0]
+            ];
             if ($sc) {
                 if (!empty($sc['weight']) && !empty($sc['height']) && $sc['height'] > 0) {
                     $hm = $sc['height'] / 100;
@@ -502,7 +510,7 @@ if (isset($_GET['tab'])) {
                     $uid = $user_q->fetchColumn();
                     
                     if ($uid) {
-                        $hist_stmt = $pdo->prepare("SELECT bmi, DATE_FORMAT(recorded_at, '%b %d') as date_label FROM client_bmi_history WHERE user_id = ? ORDER BY recorded_at ASC LIMIT 15");
+                        $hist_stmt = $pdo->prepare("SELECT bmi, DATE_FORMAT(recorded_at, '%b %d') as date_label FROM (SELECT bmi, recorded_at FROM client_bmi_history WHERE user_id = ? ORDER BY recorded_at DESC LIMIT 15) recent_history ORDER BY recorded_at ASC");
                         $hist_stmt->execute([$uid]);
                         $bmi_history_data = $hist_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -511,6 +519,44 @@ if (isset($_GET['tab'])) {
                             $pdo->prepare("INSERT INTO client_bmi_history (user_id, weight, height, bmi) VALUES (?, ?, ?, ?)")
                                 ->execute([$uid, $sc['weight'], $sc['height'], $bmi_val]);
                             $bmi_history_data = [['bmi' => $bmi_val, 'date_label' => date('M d')]];
+                        }
+
+                        // Conservative outcome signal: require a real trajectory
+                        // and combine it with observable adherence signals.
+                        if (count($bmi_history_data) >= 3) {
+                            $bmi_values = array_map(static function ($row) { return (float)$row['bmi']; }, $bmi_history_data);
+                            $first_bmi = $bmi_values[0];
+                            $last_bmi = $bmi_values[count($bmi_values) - 1];
+                            $delta = $last_bmi - $first_bmi;
+                            $slope = $delta / max(1, count($bmi_values) - 1);
+                            $food_stmt = $pdo->prepare("SELECT COUNT(*) FROM food_logs WHERE user_id = ? AND log_date >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)");
+                            $food_stmt->execute([$uid]);
+                            $food_log_count = (int)$food_stmt->fetchColumn();
+                            $symptom_stmt = $pdo->prepare("SELECT COUNT(DISTINCT symptom_keyword) FROM ai_extracted_symptoms WHERE user_id = ? AND status = 'active'");
+                            $symptom_stmt->execute([$uid]);
+                            $active_symptoms = (int)$symptom_stmt->fetchColumn();
+                            $appointment_stmt = $pdo->prepare("SELECT COUNT(*) FROM appointments a JOIN clients c ON c.id = a.client_id WHERE c.user_id = ? AND a.status IN ('completed', 'attended') AND a.appointment_date >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)");
+                            $appointment_stmt->execute([$uid]);
+                            $completed_appointments = (int)$appointment_stmt->fetchColumn();
+                            $compliance_points = ($food_log_count >= 5 ? 1 : 0) + ($active_symptoms === 0 ? 1 : 0) + ($completed_appointments > 0 ? 1 : 0);
+                            $goal_favors_loss = in_array($bmi_label, ['Overweight', 'Obese'], true);
+                            $goal_favors_gain = $bmi_label === 'Underweight';
+                            $improving = ($goal_favors_loss && $slope < -0.05) || ($goal_favors_gain && $slope > 0.05) || ($bmi_label === 'Normal' && abs($slope) <= 0.1);
+                            $declining = ($goal_favors_loss && $slope > 0.05) || ($goal_favors_gain && $slope < -0.05) || ($bmi_label === 'Normal' && abs($slope) > 0.25);
+                            $is_at_risk = $declining || $compliance_points === 0;
+                            $tone = $is_at_risk ? 'danger' : ($improving && $compliance_points >= 2 ? 'positive' : 'neutral');
+                            $status = $tone === 'danger' ? 'At Risk' : ($tone === 'positive' ? 'Improving' : 'Monitoring');
+                            $summary = $tone === 'danger' ? 'Recent trajectory or adherence signals suggest the plan needs dietitian review.' : ($tone === 'positive' ? 'The recent trajectory and adherence signals support a positive outlook.' : 'The trend is not yet strong enough for a positive or at-risk classification.');
+                            $forecast = [];
+                            for ($step = 1; $step <= 3; $step++) $forecast[] = round(max(1, $last_bmi + ($slope * $step)), 1);
+                            $bmi_outcome = [
+                                'status' => $status,
+                                'tone' => $tone,
+                                'summary' => $summary,
+                                'trend' => $delta > 0.1 ? 'Rising' : ($delta < -0.1 ? 'Falling' : 'Stable'),
+                                'forecast' => $forecast,
+                                'compliance' => ['food_logs' => $food_log_count, 'symptoms' => $active_symptoms, 'appointments' => $completed_appointments]
+                            ];
                         }
                     }
                 } catch (Exception $e) { error_log('NutriDeq error: ' . $e->getMessage()); }
@@ -878,7 +924,12 @@ if (isset($_GET['tab'])) {
                         <div class="bmi-chart-wrapper">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <h3 style="font-family: 'Outfit'; font-size: 1rem; color: #1e293b; margin: 0; font-weight: 700;"><i class="fas fa-history" style="color: var(--primary); margin-right: 8px;"></i> Progress Statistics</h3>
-                                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">Last 15 recordings</span>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">Last 15 recordings</span>
+                                    <span title="<?= htmlspecialchars($bmi_outcome['summary']) ?>" style="font-size:0.72rem; font-weight:800; padding:5px 9px; border-radius:999px; background:<?= $bmi_outcome['tone'] === 'positive' ? '#dcfce7' : ($bmi_outcome['tone'] === 'danger' ? '#fee2e2' : '#f1f5f9') ?>; color:<?= $bmi_outcome['tone'] === 'positive' ? '#166534' : ($bmi_outcome['tone'] === 'danger' ? '#991b1b' : '#475569') ?>;">
+                                        Projected: <?= htmlspecialchars($bmi_outcome['status']) ?> <?= $bmi_outcome['tone'] === 'positive' ? '↑' : ($bmi_outcome['tone'] === 'danger' ? '↓' : '•') ?>
+                                    </span>
+                                </div>
                             </div>
                             <div style="height: 220px; position: relative;">
                                 <canvas id="bmiHistoryChart"></canvas>
@@ -889,6 +940,10 @@ if (isset($_GET['tab'])) {
                                 </div>
                                 <?php endif; ?>
                             </div>
+                        </div>
+                        <div id="personalizedRecommendationPanel" style="margin-top:18px; padding:16px; border:1px solid #e2e8f0; border-radius:14px; background:#f8fafc;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; color:#1e293b; font-weight:800;"><i class="fas fa-sparkles" style="color:#10b981;"></i> Personalized Nutrition Guidance</div>
+                            <div id="personalizedRecommendationContent" style="font-size:.85rem; color:#64748b;">Checking whether enough patient data is available...</div>
                         </div>
                     </div>
 
@@ -992,16 +1047,23 @@ if (isset($_GET['tab'])) {
                         // Initialize BMI Chart
                         document.addEventListener('DOMContentLoaded', () => {
                             const bmiData = <?= json_encode($bmi_history_data) ?>;
+                            const outcome = <?= json_encode($bmi_outcome) ?>;
                             const ctx = document.getElementById('bmiHistoryChart');
                             
                             if (ctx && bmiData.length > 0) {
                                 const labels = bmiData.map(item => item.date_label);
                                 const data = bmiData.map(item => parseFloat(item.bmi));
+                                const hasForecast = Array.isArray(outcome.forecast) && outcome.forecast.length === 3 && data.length >= 3;
+                                const chartLabels = hasForecast ? labels.concat(['+1', '+2', '+3']) : labels;
+                                const forecastData = hasForecast
+                                    ? Array(data.length - 1).fill(null).concat([data[data.length - 1]], outcome.forecast)
+                                    : [];
+                                const projectionColor = outcome.tone === 'danger' ? '#f97316' : (outcome.tone === 'positive' ? '#059669' : '#64748b');
                                 
                                 new Chart(ctx.getContext('2d'), {
                                      type: 'line',
                                      data: {
-                                         labels: labels,
+                                         labels: chartLabels,
                                          datasets: [{
                                              label: 'BMI',
                                              data: data,
@@ -1015,7 +1077,18 @@ if (isset($_GET['tab'])) {
                                              pointBorderWidth: 2,
                                              pointRadius: 4,
                                              pointHoverRadius: 6
-                                         }]
+                                         }, ...(hasForecast ? [{
+                                             label: 'Projected outcome',
+                                             data: forecastData,
+                                             borderColor: projectionColor,
+                                             backgroundColor: 'transparent',
+                                             borderWidth: 2,
+                                             borderDash: [6, 5],
+                                             tension: 0.4,
+                                             pointRadius: 3,
+                                             pointBackgroundColor: projectionColor,
+                                             spanGaps: false
+                                         }] : [])]
                                      },
                                      options: {
                                          responsive: true,
@@ -1050,6 +1123,29 @@ if (isset($_GET['tab'])) {
                                      }
                                  });
                              }
+
+                            const recommendationPanel = document.getElementById('personalizedRecommendationContent');
+                            const recommendationUser = <?= json_encode((int)($uid ?? 0)) ?>;
+                            const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+                            const renderList = (title, items) => items && items.length
+                                ? `<div style="margin-top:10px;"><strong>${title}</strong><ul style="margin:5px 0 0 18px; padding:0;">${items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul></div>`
+                                : '';
+                            if (recommendationPanel && recommendationUser) {
+                                fetch(`api/get_personalized_recommendations.php?user_id=${recommendationUser}`)
+                                    .then(response => response.json())
+                                    .then(payload => {
+                                        if (!payload.success) throw new Error(payload.message || 'Unable to load guidance');
+                                        if (!payload.ready) {
+                                            recommendationPanel.innerHTML = `<div style="color:#64748b;"><i class="fas fa-hourglass-half"></i> ${escapeHtml(payload.message)}</div>`;
+                                            return;
+                                        }
+                                        const rec = payload.recommendations || {};
+                                        recommendationPanel.innerHTML = `<div style="color:#475569;">Based on ${payload.data_points} patient data points.</div>${renderList('Foods and nutrients to prioritize', rec.eat_more)}${renderList('Limit or review', rec.limit_or_avoid)}${renderList('Clinical context', rec.context)}`;
+                                    })
+                                    .catch(() => {
+                                        recommendationPanel.innerHTML = '<div style="color:#64748b;">Personalized guidance is temporarily unavailable.</div>';
+                                    });
+                            }
                         });
                     </script>
                 </div>

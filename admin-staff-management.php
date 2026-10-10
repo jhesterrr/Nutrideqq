@@ -356,6 +356,12 @@ try {
     <script src="scripts/dashboard.js" defer></script>
     <link rel="stylesheet" href="css/premium-revamp.css">
     <style>
+        /* ───────────────────────────────────────────────
+           Admin Staff Management — Distinctive UI
+           File-folder aesthetic: left color rail, layered
+           paper depth, semantic button tint in base state.
+           ─────────────────────────────────────────────── */
+
         @media (max-width: 768px) {
             .mgmt-hero {
                 flex-direction: column !important;
@@ -372,34 +378,425 @@ try {
             }
             .profile-card-footer {
                 flex-wrap: wrap !important;
-                gap: 8px !important;
-            }
-            .profile-card-footer .card-action.toggle {
-                padding: 8px 10px !important;
-                font-size: 0 !important;
-                min-width: auto !important;
-                flex: 0 !important;
-            }
-            .profile-card-footer .card-action.toggle > i {
-                font-size: 0.95rem !important;
-                margin-right: 0 !important;
-            }
-            .profile-card-footer .inline-form {
-                flex: 0 0 auto !important;
+                gap: 10px !important;
             }
             .profile-card-footer .inline-form:first-child {
-                flex: 1 1 auto !important;
+                flex: 1 1 100% !important;
+                order: -1;
+            }
+            .profile-card-footer .inline-form:first-child .card-action.toggle {
+                width: 100% !important;
+                justify-content: center !important;
             }
         }
         @media (max-width: 480px) {
             .profile-card-footer {
                 justify-content: space-between !important;
             }
-            .profile-card-footer .card-action {
-                width: 40px !important;
-                height: 40px !important;
+            .profile-card-footer .card-action:not(.toggle) {
+                width: 44px !important;
+                height: 44px !important;
                 padding: 0 !important;
                 justify-content: center !important;
+            }
+        }
+
+        /* ── Card shell: file-folder rail + paper depth ── */
+        #staffGrid .profile-card {
+            background: #ffffff;
+            border-radius: 20px 22px 22px 20px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.9) inset,
+                0 0 0 1px rgba(148, 163, 184, 0.08),
+                0 10px 24px -14px rgba(15, 23, 42, 0.18),
+                0 4px 8px -6px rgba(15, 23, 42, 0.08);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            padding-left: 0;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 5px 1fr;
+            grid-template-rows: 1fr auto;
+            grid-template-areas:
+                "rail body"
+                "rail footer";
+        }
+        #staffGrid .profile-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(2, 132, 199, 0.28);
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.9) inset,
+                0 0 0 1px rgba(2, 132, 199, 0.18),
+                0 22px 40px -22px rgba(15, 23, 42, 0.28),
+                0 8px 14px -8px rgba(15, 23, 42, 0.12);
+        }
+
+        /* The colored file-folder rail on the LEFT */
+        #staffGrid .profile-card-accent {
+            grid-area: rail;
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
+            border-radius: 16px 0 0 16px;
+        }
+        #staffGrid .profile-card.role-staff .profile-card-accent {
+            background: linear-gradient(180deg, #0284c7 0%, #38bdf8 55%, #7dd3fc 100%);
+        }
+        #staffGrid .profile-card.status-inactive .profile-card-accent {
+            background: linear-gradient(180deg, #64748b 0%, #94a3b8 60%, #cbd5e1 100%);
+        }
+
+        /* Kill the old generic blob glow — it makes every page look templated */
+        #staffGrid .profile-card::before { display: none; }
+
+        /* ── Card body ── */
+        #staffGrid .profile-card-body {
+            grid-area: body;
+            padding: 22px 22px 18px 20px;
+            background:
+                radial-gradient(120% 70% at 100% -10%, rgba(56,189,248,0.06) 0%, transparent 60%),
+                #ffffff;
+        }
+        #staffGrid .profile-card.status-inactive .profile-card-body {
+            background:
+                radial-gradient(120% 70% at 100% -10%, rgba(148,163,184,0.08) 0%, transparent 60%),
+                #fcfcfd;
+        }
+
+        /* Avatar: shrink slightly, stronger inner shadow so initials pop */
+        #staffGrid .profile-avatar {
+            width: 58px; height: 58px;
+            border-radius: 18px;
+            font-size: 1.28rem;
+            margin-bottom: 12px;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.35) inset,
+                0 -1px 0 rgba(0,0,0,0.12) inset,
+                0 6px 14px -8px rgba(2,132,199,0.45);
+        }
+        #staffGrid .profile-avatar .status-dot {
+            bottom: -2px; right: -2px;
+            width: 14px; height: 14px;
+            border-width: 2.5px;
+        }
+
+        /* Name & ID hierarchy — tighten tracking, distinguish semantically */
+        #staffGrid .profile-name {
+            font-size: 1.12rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: #0f172a;
+            margin-bottom: 3px;
+        }
+        #staffGrid .profile-id {
+            font-family: 'Inter', monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+        #staffGrid .profile-email {
+            font-size: 0.84rem;
+            color: #475569;
+            font-weight: 500;
+            margin-bottom: 14px;
+        }
+        #staffGrid .profile-email i { color: #0ea5e9; }
+
+        /* Badges: sentence case, soft rounded rect, semi-bold (no uppercase/tracking!) */
+        #staffGrid .profile-badges {
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        #staffGrid .profile-badge {
+            padding: 5px 11px;
+            border-radius: 8px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0;
+            border: 1px solid transparent;
+        }
+        #staffGrid .badge-role-staff {
+            background: rgba(14, 165, 233, 0.08);
+            color: #0369a1;
+            border-color: rgba(14, 165, 233, 0.18);
+        }
+        #staffGrid .badge-active {
+            background: rgba(16, 185, 129, 0.09);
+            color: #047857;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        #staffGrid .badge-inactive {
+            background: rgba(148, 163, 184, 0.12);
+            color: #475569;
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        #staffGrid .profile-meta {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        #staffGrid .profile-meta i { color: #94a3b8; font-size: 0.72rem; }
+
+        /* ── Footer & action buttons ── */
+        #staffGrid .profile-card-footer {
+            grid-area: footer;
+            display: flex;
+            gap: 10px;
+            padding: 14px 22px 20px 20px;
+            border-top: 1px solid rgba(148,163,184,0.12);
+            align-items: center;
+            background: linear-gradient(180deg, rgba(248,250,252,0.0) 0%, rgba(248,250,252,0.8) 100%);
+        }
+
+        /* Inline forms: the FIRST form is the flex item (holds the wide toggle);
+           the rest (delete form) use display:contents so their button flows directly. */
+        #staffGrid .profile-card-footer .inline-form:first-child {
+            flex: 1 1 auto;
+            display: block;
+        }
+        #staffGrid .profile-card-footer .inline-form:not(:first-child) {
+            display: contents;
+        }
+        /* The primary toggle button must fill its wrapping form.
+           Explicit width:100% overrides any inherited icon-only sizing from shared css. */
+        #staffGrid .profile-card-footer .inline-form:first-child > .card-action.toggle {
+            width: 100%;
+        }
+
+        /* ALL action buttons: semantic color in BASE state (not only on hover).
+           Users shouldn't have to GUESS what each button does. */
+        #staffGrid .card-action {
+            height: 40px;
+            border-radius: 11px;
+            border: 1.5px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: transform 0.18s ease, box-shadow 0.18s ease,
+                        background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+            outline: none;
+            text-decoration: none;
+        }
+        #staffGrid .card-action:focus-visible {
+            box-shadow: 0 0 0 3px rgba(14,165,233,0.25);
+        }
+
+        /* PRIMARY: Toggle Status — wide, filled, dominant (matches role rail color) */
+        #staffGrid .card-action.toggle {
+            width: auto;
+            min-width: 0;
+            padding: 0 14px;
+            color: #ffffff;
+            background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+            border-color: #0369a1;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.2) inset,
+                0 -1px 0 rgba(0,0,0,0.14) inset,
+                0 6px 14px -8px rgba(2,132,199,0.55);
+            flex: 1 1 auto;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+            justify-content: center;
+            font-size: 0.84rem;
+            letter-spacing: 0.01em;
+        }
+        #staffGrid .card-action.toggle i {
+            margin-right: 0;
+        }
+        #staffGrid .card-action.toggle:hover {
+            transform: translateY(-1.5px);
+            background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
+            border-color: #0284c7;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.22) inset,
+                0 -1px 0 rgba(0,0,0,0.14) inset,
+                0 10px 20px -9px rgba(2,132,199,0.65);
+            color: #ffffff;
+        }
+        #staffGrid .card-action.toggle:active {
+            transform: translateY(0);
+        }
+        #staffGrid .profile-card.status-inactive .card-action.toggle {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            border-color: #059669;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.2) inset,
+                0 -1px 0 rgba(0,0,0,0.14) inset,
+                0 6px 14px -8px rgba(16,185,129,0.55);
+        }
+        #staffGrid .profile-card.status-inactive .card-action.toggle:hover {
+            background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+            border-color: #10b981;
+        }
+
+        /* SECONDARY: Edit — blue-tinted chip (always visible, not only on hover) */
+        #staffGrid .card-action.edit {
+            width: 40px;
+            color: #2563eb;
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+        #staffGrid .card-action.edit:hover {
+            background: #dbeafe;
+            border-color: #60a5fa;
+            color: #1d4ed8;
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 12px -6px rgba(37,99,235,0.4);
+        }
+
+        /* DESTRUCTIVE: Delete — rose-tinted, visually set back, clearly destructive */
+        #staffGrid .card-action.delete {
+            width: 40px;
+            color: #e11d48;
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+        #staffGrid .card-action.delete:hover {
+            background: #ffe4e6;
+            border-color: #fda4af;
+            color: #be123c;
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 12px -6px rgba(225,29,72,0.4);
+        }
+
+        /* ── Delete-history cards: same file-folder treatment, muted palette ── */
+        .deleted-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 16px;
+        }
+        .deleted-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 18px 18px 18px 22px;
+            border: 1px solid rgba(148,163,184,0.18);
+            border-left: 5px solid #94a3b8;
+            box-shadow:
+                0 10px 22px -16px rgba(15,23,42,0.18),
+                0 3px 7px -5px rgba(15,23,42,0.08);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .deleted-card:hover {
+            transform: translateY(-2px);
+            border-left-color: #64748b;
+            box-shadow:
+                0 16px 30px -18px rgba(15,23,42,0.26),
+                0 6px 12px -8px rgba(15,23,42,0.12);
+        }
+        .deleted-avatar {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+            color: #ffffff;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.3) inset,
+                0 -1px 0 rgba(0,0,0,0.1) inset;
+        }
+        .deleted-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0f172a;
+            letter-spacing: -0.01em;
+            margin-bottom: 4px;
+        }
+        .deleted-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.76rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .deleted-by-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px;
+            background: rgba(148,163,184,0.12);
+            border-radius: 999px;
+            color: #475569;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .deleted-by-chip i { color: #94a3b8; font-size: 0.68rem; }
+        .deleted-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .deleted-actions .card-action.restore {
+            width: 38px; height: 38px;
+            color: #047857;
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+        .deleted-actions .card-action.restore:hover {
+            background: #d1fae5;
+            border-color: #6ee7b7;
+            color: #065f46;
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 12px -6px rgba(16,185,129,0.38);
+        }
+        .deleted-actions .card-action.delete {
+            width: 38px; height: 38px;
+            color: #9f1239;
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+        .deleted-actions .card-action.delete:hover:not([disabled]) {
+            background: #ffe4e6;
+            border-color: #fda4af;
+            color: #881337;
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 12px -6px rgba(225,29,72,0.38);
+        }
+        .deleted-actions .card-action.delete[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+        .countdown-chip {
+            font-family: 'Inter', monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.68rem;
+            color: #94a3b8;
+            font-weight: 600;
+            padding: 4px 9px;
+            background: rgba(148,163,184,0.1);
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) {
+            .deleted-card {
+                grid-template-columns: auto 1fr;
+                grid-template-rows: auto auto;
+            }
+            .deleted-actions {
+                grid-column: 1 / -1;
+                justify-content: flex-start;
+                padding-top: 4px;
+                border-top: 1px dashed rgba(148,163,184,0.2);
+                padding-top: 12px;
             }
         }
     </style>

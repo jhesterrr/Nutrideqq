@@ -23,12 +23,6 @@ function getNavigationLinks($user_role, $current_page = '')
                 'text' => 'Internal Messages',
                 'active' => ($current_page === 'admin-internal-messages.php' ? true : null)
             ],
-            'staff-messages.php' => [
-                'href' => 'staff-messages.php',
-                'icon' => 'fas fa-envelope',
-                'text' => 'Staff Messages',
-                'active' => ($current_page === 'staff-messages.php' ? true : null)
-            ],
             'staff-client-diary.php' => [
                 'href' => 'staff-client-diary.php',
                 'icon' => 'fas fa-book-open',

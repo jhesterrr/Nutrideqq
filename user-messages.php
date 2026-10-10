@@ -91,8 +91,11 @@ if ($selected_staff_id) {
     }
 }
 
-// ── Fetch AI Insights for the Logged-In User ──
+// ── Fetch AI Insights for the Logged-In User (Active symptoms only) ──
+// Uses the SAME shared payload builder as the live client renderer, so the
+// server-rendered card and the post-poll JS render can never diverge.
 $ai_data = ['score' => 1, 'flag' => false, 'symptoms' => []];
+$insights = ['symptoms' => [], 'active_count' => 0];
 if (isset($user_id)) {
     try {
         $stmt = $pdo->prepare("SELECT sentiment_score, burnout_flag FROM ai_burnout_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
@@ -102,9 +105,9 @@ if (isset($user_id)) {
             $ai_data['flag']  = (bool)$row['burnout_flag'];
         }
 
-        $stmt = $pdo->prepare("SELECT symptom_keyword, mapped_nutrient, MAX(created_at) AS max_created FROM ai_extracted_symptoms WHERE user_id = ? GROUP BY symptom_keyword, mapped_nutrient ORDER BY max_created DESC LIMIT 5");
-        $stmt->execute([$user_id]);
-        $ai_data['symptoms'] = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        require_once __DIR__ . '/includes/SymptomLifecycle.php';
+        require_once __DIR__ . '/handlers/insights_payload.php';
+        $insights = nd_build_insights_payload($pdo, (int)$user_id) ?: ['symptoms' => [], 'active_count' => 0];
     } catch (Exception $e) {
         error_log('NutriDeq (user-messages AI fetch): ' . $e->getMessage());
     }
@@ -123,7 +126,7 @@ if (isset($user_id)) {
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/sidebar.css">
-    <link rel="stylesheet" href="css/modern-messages.css?v=112">
+    <link rel="stylesheet" href="css/modern-messages.css?v=116">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="css/logout-modal.css">
     <!-- Platform Specific Styles -->
@@ -174,7 +177,7 @@ if (isset($user_id)) {
     <script src="scripts/csrf-fetch.js"></script>
 </head>
 
-<body>
+<body data-ci-view="user">
     <div class="main-layout">
         <?php include 'includes/sidebar.php'; ?>
         <div class="main-content">
@@ -242,38 +245,13 @@ if (isset($user_id)) {
                         </div>
 
                         <!-- User's Wellness Insights (Education Only) -->
-                        <?php if (!empty($ai_data['symptoms'])): ?>
+                        <?php if (!empty($insights['symptoms'])): ?>
                         <?php
-                            $total_syms = count($ai_data['symptoms']);
-                            $nutrientIcons = [
-                                'iron' => '🩸', 'Iron' => '🩸',
-                                'b12' => '💉', 'B12' => '💉', 'B-12' => '💉',
-                                'potassium' => '🍌', 'Potassium' => '🍌',
-                                'magnesium' => '🔮', 'Magnesium' => '🔮',
-                                'calcium' => '🥛', 'Calcium' => '🥛',
-                                'vitamin d' => '☀️', 'Vitamin D' => '☀️',
-                                'zinc' => '🔩', 'Zinc' => '🔩',
-                                'vitamin c' => '🍊', 'Vitamin C' => '🍊',
-                            ];
-                            $prepped = [];
-                            foreach($ai_data['symptoms'] as $sym) {
-                                $kb = nd_lookup_symptom($sym['symptom_keyword']);
-                                $nutrients = explode(',', $sym['mapped_nutrient'] ?? '');
-                                $nutrientTags = [];
-                                foreach ($nutrients as $n) {
-                                    $n = trim($n);
-                                    if (empty($n)) continue;
-                                    $icon = $nutrientIcons[$n] ?? '⚛️';
-                                    $nutrientTags[] = ['icon' => $icon, 'name' => htmlspecialchars($n)];
-                                }
-                                $prepped[] = [
-                                    'sym' => $sym,
-                                    'kb'  => $kb,
-                                    'nutrientTags' => $nutrientTags,
-                                ];
-                            }
+                            // Rendered from the shared payload: canonical labels,
+                            // one row per clinical class, KB already resolved.
+                            $total_syms = (int)($insights['active_count'] ?: count($insights['symptoms']));
                         ?>
-                        <div class="clinical-indicators-card ci-user ci-collapsed" id="userIndicatorsCard" role="region" aria-label="My wellness insights">
+                        <div class="clinical-indicators-card ci-user ci-collapsed" id="userIndicatorsCard" role="region" aria-label="My wellness insights" style="display: none;">
                             <div class="ci-card-header ci-user-header">
                                 <div class="ci-card-title">
                                     <div class="ci-icon-badge">
@@ -296,28 +274,26 @@ if (isset($user_id)) {
                                 </div>
                             </div>
                             <div class="ci-card-body" id="userCiCardBody">
-                                <?php foreach($prepped as $p):
-                                    $sym = $p['sym']; $kb = $p['kb']; $nutrientTags = $p['nutrientTags'];
-                                ?>
-                                    <div class="ci-indicator-card ci-indicator-rich" 
-                                         title="Seen: <?= htmlspecialchars($sym['max_created']) ?>">
+                                <?php foreach($insights['symptoms'] as $it): ?>
+                                    <div class="ci-indicator-card ci-indicator-rich"
+                                         title="Seen: <?= htmlspecialchars($it['last_seen']) ?><?= ($it['occurrences'] ?? 1) > 1 ? ' · mentioned ' . (int)$it['occurrences'] . '×' : '' ?>">
                                         <div class="ci-indicator-top">
                                             <div class="ci-symptom-row">
-                                                <span class="ci-symptom-icon"><?= $kb['icon'] ?></span>
+                                                <span class="ci-symptom-icon"><?= $it['icon'] ?></span>
                                                 <div class="ci-symptom-info">
-                                                    <span class="ci-symptom-name"><?= htmlspecialchars(ucfirst($sym['symptom_keyword'])) ?></span>
-                                                    <span class="ci-symptom-cat"><?= htmlspecialchars($kb['category']) ?></span>
+                                                    <span class="ci-symptom-name"><?= htmlspecialchars($it['keyword']) ?></span>
+                                                    <span class="ci-symptom-cat"><?= htmlspecialchars($it['category']) ?></span>
                                                 </div>
                                             </div>
-                                            <?php if (!empty($nutrientTags)): ?>
+                                            <?php if (!empty($it['nutrients'])): ?>
                                                 <div class="ci-arrow-divider">
                                                     <i class="fas fa-arrow-right"></i>
                                                 </div>
                                                 <div class="ci-nutrient-row">
-                                                    <?php foreach ($nutrientTags as $nt): ?>
+                                                    <?php foreach ($it['nutrients'] as $nt): ?>
                                                         <span class="ci-nutrient-tag">
                                                             <span class="ci-nutrient-icon"><?= $nt['icon'] ?></span>
-                                                            <span class="ci-nutrient-name"><?= $nt['name'] ?></span>
+                                                            <span class="ci-nutrient-name"><?= htmlspecialchars($nt['name']) ?></span>
                                                         </span>
                                                     <?php endforeach; ?>
                                                 </div>
@@ -325,7 +301,7 @@ if (isset($user_id)) {
                                         </div>
                                         <div class="ci-indicator-short">
                                             <i class="fas fa-info-circle ci-detail-icon"></i>
-                                            <span><?= htmlspecialchars($kb['short_desc']) ?></span>
+                                            <span><?= htmlspecialchars($it['short_desc']) ?></span>
                                         </div>
                                         <details class="ci-details">
                                             <summary class="ci-details-summary">
@@ -335,19 +311,19 @@ if (isset($user_id)) {
                                             <div class="ci-details-body">
                                                 <div class="ci-section">
                                                     <div class="ci-section-label"><i class="fas fa-book-open"></i> What this could mean</div>
-                                                    <div class="ci-section-text"><?= htmlspecialchars($kb['full_desc']) ?></div>
+                                                    <div class="ci-section-text"><?= htmlspecialchars($it['full_desc']) ?></div>
                                                 </div>
                                                 <div class="ci-section">
                                                     <div class="ci-section-label"><i class="fas fa-seedling"></i> Simple steps to try at home</div>
                                                     <ul class="ci-action-list">
-                                                        <?php foreach($kb['recommended'] as $rec): ?>
+                                                        <?php foreach($it['recommended'] as $rec): ?>
                                                             <li><span class="ci-bullet">✓</span><?= htmlspecialchars($rec) ?></li>
                                                         <?php endforeach; ?>
                                                     </ul>
                                                 </div>
                                                 <div class="ci-section ci-cta">
                                                     <div class="ci-section-label"><i class="fas fa-user-md"></i> When to talk to your dietitian</div>
-                                                    <div class="ci-section-text"><?= htmlspecialchars($kb['when_to_ask']) ?></div>
+                                                    <div class="ci-section-text"><?= htmlspecialchars($it['when_to_ask']) ?></div>
                                                 </div>
                                             </div>
                                         </details>
@@ -360,10 +336,10 @@ if (isset($user_id)) {
                                     <span><?= $total_syms ?> personal wellness <?= $total_syms === 1 ? 'insight' : 'insights' ?> — Expand for guidance</span>
                                 </div>
                                 <div class="ci-summary-chips">
-                                    <?php foreach(array_slice($prepped, 0, 5) as $p): ?>
+                                    <?php foreach(array_slice($insights['symptoms'], 0, 5) as $it): ?>
                                         <span class="ci-summary-chip">
-                                            <span><?= $p['kb']['icon'] ?></span>
-                                            <span><?= htmlspecialchars(ucfirst($p['sym']['symptom_keyword'])) ?></span>
+                                            <span><?= $it['icon'] ?></span>
+                                            <span><?= htmlspecialchars($it['keyword']) ?></span>
                                         </span>
                                     <?php endforeach; ?>
                                     <?php if ($total_syms > 5): ?>
@@ -373,7 +349,7 @@ if (isset($user_id)) {
                             </div>
                         </div>
                         <!-- Non-therapeutic reminder (user view) -->
-                        <div class="user-insight-disclaimer">
+                        <div class="user-insight-disclaimer" style="display: none;">
                             <i class="fas fa-shield-halved"></i>
                             <div><b>NOT MEDICAL ADVICE.</b> These AI-generated insights are for awareness &amp; education only. Always confirm with your dietitian before making changes.</div>
                         </div>
@@ -428,8 +404,8 @@ if (isset($user_id)) {
 
             <?php if ($selected_staff_id): ?>
                 <script>const BASE_URL = '';</script>
-                <script src="scripts/wellness-insights.js?v=100"></script>
-                <script src="scripts/chat-controller.js?v=103"></script>
+                <script src="scripts/wellness-insights.js?v=114"></script>
+                <script src="scripts/chat-controller.js?v=107"></script>
                 <script>
                     (function() {
                         const initChat = () => {
@@ -454,34 +430,53 @@ if (isset($user_id)) {
     </div>
 
     <script>
-        // ── Collapse/Expand User Wellness Insights Card ──
+        // ── Collapse/Expand User Wellness Insights Card (fluid) ──
+        // Collapse fades the body out BEFORE the class swap so the summary
+        // bar's entrance animation can play; expand relies on the CSS
+        // entrance animations that start when the body becomes rendered.
         function toggleUserIndicators() {
             const card   = document.getElementById('userIndicatorsCard');
             const btn    = document.getElementById('userCiToggleBtn');
+            const body   = document.getElementById('userCiCardBody');
             if (!card) return;
 
+            const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const isCollapsing = card.classList.contains('ci-expanded');
             const icon   = btn ? btn.querySelector('i') : null;
             const label  = btn ? btn.querySelector('.ci-toggle-label') : null;
 
-            if (isCollapsing) {
-                card.classList.remove('ci-expanded');
-                card.classList.add('ci-collapsed');
-                if (btn) {
-                    btn.setAttribute('aria-expanded', 'false');
-                    btn.title = 'Expand for details';
+            const swap = () => {
+                if (isCollapsing) {
+                    card.classList.remove('ci-expanded');
+                    card.classList.add('ci-collapsed');
+                    if (btn) {
+                        btn.setAttribute('aria-expanded', 'false');
+                        btn.title = 'Expand for details';
+                        btn.classList.remove('is-open'); // chevron rotates back
+                    }
+                    if (icon) icon.className = 'fas fa-chevron-down';
+                    if (label) label.textContent = 'Expand';
+                } else {
+                    card.classList.remove('ci-collapsed');
+                    card.classList.add('ci-expanded');
+                    if (btn) {
+                        btn.setAttribute('aria-expanded', 'true');
+                        btn.title = 'Minimize to focus on chat';
+                        btn.classList.add('is-open'); // chevron rotates 180°
+                    }
+                    if (icon) icon.className = 'fas fa-chevron-up';
+                    if (label) label.textContent = 'Collapse';
                 }
-                if (icon) icon.className = 'fas fa-chevron-down';
-                if (label) label.textContent = 'Expand';
+                if (body) body.classList.remove('ci-body-exit');
+            };
+
+            if (isCollapsing && !reduced && body) {
+                body.classList.remove('ci-body-exit');
+                void body.offsetWidth;
+                body.classList.add('ci-body-exit');
+                setTimeout(swap, 170); // matches .ci-body-exit duration
             } else {
-                card.classList.remove('ci-collapsed');
-                card.classList.add('ci-expanded');
-                if (btn) {
-                    btn.setAttribute('aria-expanded', 'true');
-                    btn.title = 'Minimize to focus on chat';
-                }
-                if (icon) icon.className = 'fas fa-chevron-up';
-                if (label) label.textContent = 'Collapse';
+                swap();
             }
         }
     </script>

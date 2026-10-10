@@ -279,9 +279,14 @@ try {
             ]
         ];
         $messages = $sample_messages;
-    }
-
-    echo json_encode(['success' => true, 'messages' => $messages, 'insights' => $insights]);
+    }        // $insights is only populated for client-subject conversations; other
+        // contexts (e.g. staff↔staff sample thread) have none. Omit the key
+        // instead of emitting an undefined-variable warning into the JSON body
+        // (a warning here corrupts the payload and the client's JSON.parse
+        // throws "Unexpected token '<'" on every poll).
+        $payload = ['success' => true, 'messages' => $messages];
+        if (isset($insights)) $payload['insights'] = $insights;
+        echo json_encode($payload);
     exit;
 
 } catch (Throwable $e) {
